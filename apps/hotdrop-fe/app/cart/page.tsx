@@ -180,7 +180,7 @@ function CartContent() {
             }
             return null;
           })()}
-          <div className="bg-white w-full dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-orange-200 dark:border-gray-700">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-orange-200 dark:border-gray-700">
             <h2 className="text-xl font-bold text-orange-500 mb-4">Your Items</h2>
             <div className="flex flex-col gap-6">
               {cart.map((item) => (
@@ -211,7 +211,7 @@ function CartContent() {
 
       {/* Coupon Card - rectangle with heading and SVG */}
       {cart.length > 0 && (
-        <div className="w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-orange-200 dark:border-gray-700 flex flex-col gap-2">
+        <div className="w-[20rem] md:w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8 border border-orange-200 dark:border-gray-700 flex flex-col gap-2">
           <div className="flex items-center mb-2 justify-between w-full">
             <div className="flex items-center">
               <svg viewBox="0 -0.5 25 25" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" className="w-7 h-7 mr-2 text-black dark:text-white">
@@ -224,17 +224,17 @@ function CartContent() {
                   <path d="M15.218 9.28101L9.78101 14.719" stroke="#ffffff" strokeWidth={1.5} strokeLinecap="round"></path>
                 </g>
               </svg>
-              <h2 className="text-xl font-bold text-orange-500">Offers:</h2>
-              <span className="text-orange-600 font-semibold text-base ml-2 hidden sm:inline">Enjoy the meal with less price 🌶️</span>
+              <h2 className="text-xl font-bold text-orange-500">Offers</h2>
+              <span className="text-orange-600 font-semibold text-base ml-2 hidden sm:inline">:Enjoy the meal with less price 🌶️</span>
             </div>
           </div>
-          <div className="flex items-center w-full  gap-4">
+          <div className="flex items-center md:w-full">
             <input
               type="text"
               value={couponInput}
               onChange={e => setCouponInput(e.target.value)}
               placeholder="Apply coupon "
-              className="flex-1 px-3 py-2 rounded-lg border border-orange-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-900 dark:text-white"
+              className="flex-1 -ml-2 md:ml-1 px-3 py-2 rounded-lg border border-orange-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-900 dark:text-white"
             />
             <div className="flex-1 flex justify-end">
               <button
