@@ -234,7 +234,7 @@ function CartContent() {
               value={couponInput}
               onChange={e => setCouponInput(e.target.value)}
               placeholder="Apply coupon "
-              className="flex-1 -ml-2 md:ml-1 px-3 py-2 rounded-lg border border-orange-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-900 dark:text-white"
+              className="-ml-2 md:ml-1 px-3 py-2 rounded-lg border border-orange-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400 dark:bg-gray-900 dark:text-white max-w-[10rem] sm:max-w-full"
             />
             <div className="flex-1 flex justify-end">
               <button
