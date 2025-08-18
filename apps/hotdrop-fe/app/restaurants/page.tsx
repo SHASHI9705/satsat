@@ -168,7 +168,12 @@ export default function RestaurantsPage() {
                 </div>
                 {/* Name, Avg Time & Rating Row */}
                 <div className="flex items-center justify-between w-full mb-0 gap-2 px-3 max-w-full overflow-hidden py-3">
-                  <div className="font-semibold text-lg text-gray-800 dark:text-gray-100 truncate text-left max-w-[50%]">{rest.shopname}</div>
+                  <div className="flex flex-col min-w-0 max-w-[50%] text-left">
+                    <span className="font-semibold text-lg text-gray-800 dark:text-gray-100 truncate">{rest.shopname}</span>
+                    {rest.shopAddress && (
+                      <span className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{rest.shopAddress}</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {/* Avg Time Label */}
                     <span className="bg-orange-100 dark:bg-gray-700 text-orange-600 dark:text-orange-300 text-xs font-semibold rounded-full px-2 py-0.5 mr-1 whitespace-nowrap">{idx % 2 === 0 ? "10-20 min" : "25-30 min"}</span>

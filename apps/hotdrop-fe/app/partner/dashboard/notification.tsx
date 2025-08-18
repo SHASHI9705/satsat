@@ -138,7 +138,7 @@ export default function NotificationSection() {
                   : /^\d+min$/.test(order.status) ? `Ready in ${order.status.replace('min', '')} min`
                   : order.status
                 }</span>
-                <div className="text-xs text-gray-500 dark:text-gray-300 mt-1 truncate">Items: {order.items}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-300 mt-1 ">Items: {order.items}</div>
                 <div className="text-xs text-gray-400 dark:text-gray-300">Placed: {new Date(order.dateTime).toLocaleString()}</div>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:gap-2 w-full sm:w-auto">

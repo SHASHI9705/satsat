@@ -17,6 +17,7 @@ interface Partner {
   image?: string;
   rating?: number;
   ratingsCount?: number;
+  shopAddress?: string;
   items: Item[];
 }
 
@@ -141,8 +142,13 @@ function OrdersContent() {
                   />
                   <div className="flex flex-col justify-between h-[35%] w-full p-3">
                     <div className="flex items-center justify-between w-full mb-1">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{partner.name}</h3>
-                      <div className="flex items-center">
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{partner.name}</h3>
+                        {partner.shopAddress && (
+                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{partner.shopAddress}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center ml-2">
                         <span className="text-yellow-400 dark:text-yellow-300 text-lg mr-1">★</span>
                         <span className="text-base font-semibold text-gray-800 dark:text-gray-200">{partner.rating || "4.5"}</span>
                       </div>

@@ -24,6 +24,7 @@ export const getAllPartnersWithItems = async (req: Request, res: Response): Prom
       include: {
         items: true,
         shopimage: true,
+        verification: true,
       },
     });
     const result = partners.map((partner: any) => ({
@@ -32,6 +33,7 @@ export const getAllPartnersWithItems = async (req: Request, res: Response): Prom
       image: partner.shopimage?.url || "/logo.png",
       rating: 4.5,
       ratingsCount: partner.items.length,
+      shopAddress: partner.verification?.shopAddress || "",
       items: partner.items.map((item: any) => ({
         name: item.name,
         price: item.price,

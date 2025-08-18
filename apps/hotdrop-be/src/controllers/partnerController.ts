@@ -12,9 +12,14 @@ import { PutObjectCommand } from "@aws-sdk/client-s3";
 export const getAllPartners = async (req: Request, res: Response): Promise<void> => {
   try {
     const partners = await prismaClient.partner.findMany({
-      include: { shopimage: true, items: true }
+      include: { shopimage: true, items: true, verification: true }
     });
-    res.status(200).json({ partners });
+    // Add shopAddress directly to each partner object, keep all other fields unchanged
+    const partnersWithAddress = partners.map((partner: any) => ({
+      ...partner,
+      shopAddress: partner.verification?.shopAddress || ""
+    }));
+    res.status(200).json({ partners: partnersWithAddress });
   } catch (e) {
     res.status(500).json({ error: "Failed to fetch partners", details: String(e) });
   }
