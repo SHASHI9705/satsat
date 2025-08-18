@@ -6,8 +6,8 @@ self.addEventListener('push', function(event) {
   const title = data.title || 'HotDrop Notification';
   const options = {
     body: data.body || 'You have a new notification.',
-    icon: '/logo.png',
-    badge: '/logo.png',
+    icon: '/final192.png',
+    badge: '/final192.png',
     data: data.url ? { url: data.url } : {},
   };
   event.waitUntil(self.registration.showNotification(title, options));
