@@ -39,7 +39,7 @@ export default function OrdersPage() {
         {/* Centered logo and heading */}
         <div className="flex items-center gap-3 mx-auto">
           
-        <h1 className="text-xl md:text-3xl font-bold text-orange-500 dark:text-orange-500 drop-shadow-sm whitespace-nowrap">HotDrop Orders</h1>
+        <h1 className="text-xl md:text-3xl font-bold text-orange-500 dark:text-orange-500 drop-shadow-sm whitespace-nowrap">Nearby Shops</h1>
         </div>
         {/* Home Button (right) */}
         <button
@@ -138,23 +138,38 @@ function OrdersContent() {
                     src={partner.image && partner.image !== '/logo.png' ? partner.image.startsWith('http') ? partner.image : `${process.env.NEXT_PUBLIC_BACKEND_API}${partner.image}` : '/logo.png'}
                     alt="Shop Logo"
                     className="w-full"
-                    style={{ height: '65%', objectFit: 'cover' }}
+                    style={{ height: '70%', objectFit: 'cover' }}
                   />
-                  <div className="flex flex-col justify-between h-[35%] w-full p-3">
-                    <div className="flex items-center justify-between w-full mb-1">
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 truncate">{partner.name}</h3>
-                        {partner.shopAddress && (
-                          <span className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">{partner.shopAddress}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center ml-2">
+                  <div className="flex flex-col justify-between h-[30%] w-full p-3">
+                    {/* Top Row: Name + Rating */}
+                    <div className="flex items-center justify-between w-full">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        {partner.name}
+                      </h3>
+
+                      <div className="flex items-center">
                         <span className="text-yellow-400 dark:text-yellow-300 text-lg mr-1">★</span>
-                        <span className="text-base font-semibold text-gray-800 dark:text-gray-200">{partner.rating || "4.5"}</span>
+                        <span className="text-base font-semibold text-gray-800 dark:text-gray-200">
+                          {partner.rating || "4.5"}
+                        </span>
                       </div>
                     </div>
-                    <span className="text-orange-500 dark:text-orange-300 font-medium text-sm">Special: {specialItem?.name}</span>
+
+                    {/* Bottom Row: Address + Special Item */}
+                    <div className="flex items-center justify-between w-full">
+                      {partner.shopAddress && (
+                        <span className="text-xs text-gray-500 dark:text-gray-400 truncate mr-2">
+                          {partner.shopAddress}
+                        </span>
+                      )}
+                      {specialItem?.name && (
+                        <span className="text-orange-500 dark:text-orange-300 font-medium text-xs">
+                          Special: {specialItem.name}
+                        </span>
+                      )}
+                    </div>
                   </div>
+
                 </a>
               );
             })}

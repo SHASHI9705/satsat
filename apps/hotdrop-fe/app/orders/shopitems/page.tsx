@@ -205,7 +205,12 @@ function ShopItemsContent() {
                   <div className="flex flex-col flex-1">
                     <div className="flex flex-row items-center justify-between">
                       <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-1 truncate">{item.name}</h3>
-                      <span className="text-base sm:text-lg text-orange-500 dark:text-orange-300 font-semibold ml-2">₹{item.price}</span>
+                      <div>
+                        <span className="text-gray-400 font-medium text-base line-through dark:text-gray-500">
+                        ₹{Math.round(item.price * 1.15)}
+                        </span>
+                        <span className="text-base sm:text-lg text-orange-500 dark:text-orange-300 font-semibold ml-2">₹{item.price}</span>
+                      </div>
                     </div>
                     <div className="flex flex-row items-center mt-1">
                       <span className={`text-xs sm:text-sm font-medium ${isAvailable(item) ? 'text-green-600 dark:text-green-400' : 'text-red-400 dark:text-red-300'}`}>{isAvailable(item) ? 'Available' : 'Out of Stock'}</span>

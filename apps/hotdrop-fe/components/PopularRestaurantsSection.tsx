@@ -115,18 +115,17 @@ export default function PopularRestaurantsSection() {
 			<div className="w-full" style={{height: '150px'}}>
 			  <img src={card.item.image || "/pizza.png"} alt={card.item.name} className="w-full h-full object-cover" style={{minHeight: 120, maxHeight: 150}} />
 			</div>
-			{/* Name, Price & Rating Row */}
+			{/* Name & Price Row (no rating) */}
 			<div className="flex items-center justify-between w-full mb-0 gap-2 px-3 max-w-full overflow-hidden" style={{ minHeight: 0, paddingBottom: 0 }}>
-			  <div className="font-semibold text-lg text-gray-800 truncate text-left max-w-[50%] dark:text-orange-200">{card.item.name}</div>
-			  <div className="flex items-center gap-4 flex-shrink-0 max-w-[48%]">
-				<div className="text-gray-700 font-medium text-base whitespace-nowrap dark:text-orange-200">₹{card.item.price}</div>
-				<div className="flex items-center gap-1 text-orange-500 text-sm whitespace-nowrap dark:text-orange-300">
-				  <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" className="w-4 h-4">
-					<path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
-				  </svg>
-				  <span>4.5</span>
+				<div className="font-semibold text-lg text-gray-800 truncate text-left max-w-[50%] dark:text-orange-200">{card.item.name}</div>
+				<div className="flex items-center gap-2">
+					<span className="text-gray-400 font-medium text-base line-through dark:text-gray-500">
+						₹{Math.round(card.item.price * 1.15)}
+					</span>
+					<span className="text-gray-700 font-medium text-base whitespace-nowrap dark:text-orange-200">
+						₹{card.item.price}
+					</span>
 				</div>
-			  </div>
 			</div>
 			{/* Add to Cart Button */}
 			<button

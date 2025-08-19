@@ -104,14 +104,13 @@ export default function FavouritesPage() {
                   {/* Name, Price & Rating Row */}
                   <div className="flex items-center justify-between w-full mb-0 gap-2 px-3 max-w-full overflow-hidden" style={{ minHeight: 0, paddingBottom: 0 }}>
                     <div className="font-semibold text-lg text-gray-800 dark:text-gray-100 truncate text-left max-w-[50%]">{fav.item.name}</div>
-                    <div className="flex items-center gap-4 flex-shrink-0 max-w-[48%]">
-                      <div className="text-gray-700 dark:text-gray-100 font-medium text-base whitespace-nowrap">₹{fav.item.price}</div>
-                      <div className="flex items-center gap-1 text-orange-500 dark:text-orange-300 text-sm whitespace-nowrap">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" className="w-4 h-4">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.38 2.455a1 1 0 00-.364 1.118l1.287 3.966c.3.922-.755 1.688-1.54 1.118l-3.38-2.454a1 1 0 00-1.175 0l-3.38 2.454c-.784.57-1.838-.196-1.54-1.118l1.287-3.966a1 1 0 00-.364-1.118L2.05 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
-                        </svg>
-                        <span>4.5</span>
-                      </div>
+                    <div className="flex items-center gap-2 flex-shrink-0 max-w-[48%]">
+                      <span className="text-gray-400 font-medium text-base line-through dark:text-gray-500">
+                        ₹{Math.round(fav.item.price * 1.15)}
+                      </span>
+                      <span className="text-gray-700 dark:text-gray-100 font-medium text-base whitespace-nowrap">
+                        ₹{fav.item.price}
+                      </span>
                     </div>
                   </div>
                   {/* Add to Cart Button */}

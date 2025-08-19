@@ -189,7 +189,14 @@ function CartContent() {
                       {/* Shop name above item name */}
                       <div className="text-xs font-semibold text-orange-400 mb-1">{item.shopName || "Unknown Shop"}</div>
                       <div className="font-bold text-lg text-gray-800 dark:text-gray-100">{item.name}</div>
-                      <div className="text-orange-500 dark:text-orange-300 font-semibold text-base">₹{item.price}</div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-400 font-medium text-base line-through dark:text-gray-500">
+                          ₹{Math.round(item.price * 1.15)}
+                        </span>
+                        <span className="text-orange-500 dark:text-orange-300 font-semibold text-base">
+                          ₹{item.price}
+                        </span>
+                      </div>
                     </div>
                   </div>
                   {/* Controls Row: plus, minus, price, remove */}
@@ -258,7 +265,10 @@ function CartContent() {
         <div className="flex flex-col gap-2 w-full md:w-auto">
           <div className="flex items-center justify-between w-full">
             <span className="text-gray-700 dark:text-gray-100 font-semibold">Subtotal</span>
-            <span className="text-gray-800 dark:text-gray-100 font-bold">₹{total}</span>
+            <span className="flex items-center gap-2">
+              <span className="text-gray-400 font-medium line-through text-base dark:text-gray-500">₹{Math.round(total * 1.15)}</span>
+              <span className="text-gray-800 dark:text-gray-100 font-bold">₹{total}</span>
+            </span>
           </div>
           <div className="flex items-center justify-between w-full">
             <span className="text-gray-700 dark:text-gray-100 font-semibold">GST (3%)</span>
@@ -273,7 +283,7 @@ function CartContent() {
             <div className="flex items-center gap-3">
               {discountPercent && (
                 <span className="text-lg text-gray-500 line-through">
-                  ₹{(total + total * 0.03).toFixed(2)}
+                  ₹{(Math.round(total * 1.15) + total * 0.03).toFixed(2)}
                 </span>
               )}
               <span className="text-xl font-bold text-orange-500 dark:text-orange-300">

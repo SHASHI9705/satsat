@@ -38,9 +38,14 @@ function ItemCard({ item, cart, updateCart }: { item: Item, cart: Record<string,
         <span className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 text-orange-500 dark:text-orange-300 font-bold text-xs sm:text-sm rounded-full px-3 py-1 shadow max-w-[70%] truncate border border-orange-100 dark:border-gray-700">
           {item.name}
         </span>
-        {/* Price top-right */}
-        <span className="absolute top-2 right-2 bg-orange-100 dark:bg-gray-700 text-orange-600 dark:text-orange-300 font-semibold text-xs sm:text-sm rounded-full px-3 py-1 shadow border border-orange-200 dark:border-gray-700">
-          ₹{item.price}
+        {/* Price top-right with strikethrough price */}
+        <span className="absolute top-2 right-2 flex items-center gap-2">
+          <span className="bg-orange-100 dark:bg-gray-700 text-black dark:text-white font-semibold text-xs sm:text-sm rounded-full px-3 py-1 shadow border border-orange-200 dark:border-gray-700 line-through">
+            ₹{Math.round(item.price * 1.15)}
+          </span>
+          <span className="bg-orange-100 dark:bg-gray-700 text-orange-600 dark:text-orange-300 font-semibold text-xs sm:text-sm rounded-full px-3 py-1 shadow border border-orange-200 dark:border-gray-700">
+            ₹{item.price}
+          </span>
         </span>
       </div>
       {/* Row below image: available (left), plus/minus (right) */}
