@@ -78,7 +78,7 @@ export default function PhoneFooter() {
     <footer className="fixed bottom-0 left-0 right-0 z-50 md:hidden bg-white dark:bg-gray-900 border-t border-orange-200 dark:border-gray-700 flex justify-between items-center px-6 py-2 shadow-lg">
       {/* Home Tab */}
       <button
-        className={`flex-1 flex flex-col items-center justify-center text-orange-500 dark:text-orange-300 focus:outline-none`}
+        className={`flex-1 flex flex-col items-center justify-center text-black dark:text-white focus:outline-none`}
         onClick={() => handleSelect("home", "/")}
         aria-label="Home"
       >
@@ -90,7 +90,7 @@ export default function PhoneFooter() {
       </button>
       {/* Restaurants Tab */}
       <button
-        className={`flex-1 flex flex-col items-center justify-center text-orange-500 dark:text-orange-300 focus:outline-none`}
+        className={`flex-1 flex flex-col items-center justify-center text-black dark:text-white focus:outline-none`}
         onClick={() => handleSelect("restaurants", "/restaurants")}
         aria-label="Restaurants"
       >
@@ -102,7 +102,7 @@ export default function PhoneFooter() {
       </button>
       {/* Favourites Tab */}
       <button
-        className={`flex-1 flex flex-col items-center justify-center text-orange-500 dark:text-orange-300 focus:outline-none relative`}
+        className={`flex-1 flex flex-col items-center justify-center text-black dark:text-white focus:outline-none relative`}
         onClick={() => handleSelect("favourites", "/favourites")}
         aria-label="Favourites"
       >
@@ -119,7 +119,7 @@ export default function PhoneFooter() {
       </button>
       {/* Cart Tab */}
       <button
-        className={`flex-1 flex flex-col items-center justify-center text-orange-500 dark:text-orange-300 focus:outline-none relative`}
+        className={`flex-1 flex flex-col items-center justify-center text-black dark:text-white focus:outline-none relative`}
         onClick={() => handleSelect("cart", "/cart")}
         aria-label="Cart"
       >

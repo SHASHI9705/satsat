@@ -21,7 +21,7 @@ export default function SettingsPage() {
   const [exportSuccess, setExportSuccess] = useState("");
   // Notification toggles state (fix hydration)
   const [orderUpdatesEnabled, setOrderUpdatesEnabled] = useState(true);
-  const [promoUpdatesEnabled, setPromoUpdatesEnabled] = useState(false);
+  const [promoUpdatesEnabled, setPromoUpdatesEnabled] = useState(true);
   const [smsNotificationsEnabled, setSmsNotificationsEnabled] = useState(false);
 
   // Subscribe/unsubscribe user to push notifications for order updates
@@ -121,6 +121,7 @@ export default function SettingsPage() {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('hotdrop_promo_updates');
       if (stored !== null) setPromoUpdatesEnabled(stored === 'true');
+      else setPromoUpdatesEnabled(true);
     }
   }, []);
   useEffect(() => {

@@ -163,7 +163,7 @@ export default function TeamPage() {
                     />
                   </motion.div>
                   <div className="absolute -bottom-2 -right-2 bg-gradient-to-r from-red-500 to-orange-500 text-white w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
-                    {index === 0 ? 'CTO' : 'CEO'}
+                    {index === 0 ? 'CEO' : 'CTO'}
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold text-gray-800 mb-2 dark:text-orange-100">{member.name}</h3>
