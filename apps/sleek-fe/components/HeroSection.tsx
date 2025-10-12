@@ -90,17 +90,6 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
 
   return (
     <section className="relative py-16 lg:py-24 overflow-hidden bg-white">
-          {/* Simplified cat image segment */}
-          {/* <div className="relative w-full">
-            <div
-              className="w-full bg-cover bg-center bg-no-repeat cat-segment"
-              style={{ backgroundImage: `url(${catImage})` }}
-              aria-hidden
-            >
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(234,223,198,0.6)]" />
-            </div>
-          </div> */}
-          {/* Background decorations removed to show a clean white hero background */}
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">

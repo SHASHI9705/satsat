@@ -114,7 +114,6 @@ function AppContent() {
     <div className="min-h-screen bg-background background-catty">
       <Header 
         notificationCount={3}
-        messageCount={2}
       />
 
     <main>

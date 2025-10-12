@@ -19,7 +19,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
   const { user, signOutUser } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur-lg supports-[backdrop-filter]:bg-white/90 shadow-sm">
+    <header className="sticky py-2 top-0 z-50 w-full backdrop-blur-lg supports-[backdrop-filter]:bg-white ">
       <div className="container mx-auto px-4">
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}
@@ -90,11 +90,9 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                 </div>
               ) : (
                 <>
+                  
                   <Link href="/signin">
-                    <Button variant="ghost" className="font-semibold hover:bg-gray-100 transition-all duration-200">Sign in</Button>
-                  </Link>
-                  <Link href="/signup">
-                    <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">Sign up</Button>
+                    <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">Login</Button>
                   </Link>
                 </>
               )}
