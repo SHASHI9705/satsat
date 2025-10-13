@@ -1,0 +1,17 @@
+# Tell GitHub Linguist to ignore built/static HTML & CSS files
+*.html linguist-detectable=false
+*.css linguist-detectable=false
+public/* linguist-detectable=false
+dist/* linguist-detectable=false
+build/* linguist-detectable=false
+.next/* linguist-detectable=false
+out/* linguist-detectable=false
+docs/* linguist-detectable=false
+
+# Ensure TS and TSX are correctly counted
+*.ts linguist-language=TypeScript
+*.tsx linguist-language=TypeScript
+
+# Optional: mark auto-generated code as not counted
+*.min.js linguist-generated=true
+*.map linguist-generated=true
