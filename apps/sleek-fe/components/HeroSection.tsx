@@ -5,9 +5,7 @@ import { Badge } from './ui/badge';
 import { Search, TrendingUp, Users, Shield } from 'lucide-react';
 // import catImage from '../cat.png';
 
-const quickCategories = [
-  'Electronics', 'Textbooks', 'Furniture', 'Fashion', 'Software', 'Tutoring'
-];
+
 
 const stats: { label: string; value: string; icon: React.ComponentType<any>; }[] = [];
 
@@ -89,7 +87,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
   };
 
   return (
-    <section className="relative py-16 lg:py-24 overflow-hidden bg-white">
+    <section className="relative py-16 lg:py-16 overflow-hidden bg-white">
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -113,7 +111,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
 
           {/* Search Bar */}
           <div className="max-w-2xl mx-auto">
-                <div className="flex gap-3 p-2 bg-brand-soft rounded-2xl shadow-lg border">
+                <div className="flex gap-1 p-2 bg-brand-soft rounded-2xl shadow-lg border">
               <div className="flex-1 relative">
                 <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
                 <Input
@@ -136,42 +134,6 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
             </div>
           </div>
 
-          {/* Quick Categories */}
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Popular categories:</p>
-            <div className="flex flex-wrap justify-center gap-2">
-              {quickCategories.map((category) => (
-                <Button
-                  key={category}
-                  variant="outline"
-                  className="rounded-full hover:bg-brand-soft hover:text-primary hover:border-primary/20"
-                  onClick={() => onCategorySelect(category.toLowerCase())}
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-8 pt-8 max-w-2xl mx-auto">
-            {stats.map((stat, index) => {
-              const IconComponent = stat.icon;
-              return (
-                <div key={index} className="text-center space-y-2">
-                    <div className="flex justify-center">
-                    <div className="p-3 bg-brand rounded-xl">
-                      <IconComponent className="w-6 h-6 text-foreground" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <div className="text-sm text-muted-foreground">{stat.label}</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </div>
     </section>
