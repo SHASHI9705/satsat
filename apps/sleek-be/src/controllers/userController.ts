@@ -1,73 +1,70 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import  { bcrypt } from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { OAuth2Client } from 'google-auth-library';
 
 const prisma = new PrismaClient();
 const googleClient = new OAuth2Client("YOUR_GOOGLE_CLIENT_ID");
 
 // Create a new user manually
-export const createUser = async (req: Request, res: Response) => {
-    const { name, email, password } = req.body;
+export const createUser = async (req: Request, res: Response): Promise<void> => {
+    const { name, email, password, phone, address, token } = req.body;
 
     try {
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(password, 10);
+        if (token) {
+            // Google Signup
+            const ticket = await googleClient.verifyIdToken({
+                idToken: token,
+                audience: "YOUR_GOOGLE_CLIENT_ID",
+            });
 
-        // Create the user in the database
-        const user = await prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-            },
-        });
+            const payload = ticket.getPayload();
 
-        res.status(201).json({ message: 'User created successfully', user });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Error creating user', error });
-    }
-};
+            if (!payload) {
+                res.status(400).json({ message: 'Invalid Google token' });
+                return;
+            }
 
-// Google Signup
-export const googleSignup = async (req: Request, res: Response) => {
-    const { token } = req.body;
+            const googleName = payload.name || 'Default Name';
+            const googleEmail = payload.email || 'default@example.com';
+            const googleId = payload.sub;
 
-    try {
-        // Verify the Google token
-        const ticket = await googleClient.verifyIdToken({
-            idToken: token,
-            audience: "YOUR_GOOGLE_CLIENT_ID",
-        });
+            let user = await prisma.user.findUnique({
+                where: { email: googleEmail },
+            });
 
-        const payload = ticket.getPayload();
+            if (!user) {
+                user = await prisma.user.create({
+                    data: {
+                        name: googleName,
+                        email: googleEmail,
+                        googleId,
+                        phone: '', // Default value for phone
+                        address: '', // Default value for address
+                        password: 'google-oauth', // Default value for password
+                    },
+                });
+            }
 
-        if (!payload) {
-            return res.status(400).json({ message: 'Invalid Google token' });
-        }
+            res.status(200).json({ message: 'Google signup successful', user });
+        } else {
+            // Manual Signup
+            const hashedPassword = await bcrypt.hash(password, 10);
 
-        const { name, email, sub: googleId } = payload;
-
-        // Check if the user already exists
-        let user = await prisma.user.findUnique({
-            where: { email },
-        });
-
-        if (!user) {
-            // Create the user if they don't exist
-            user = await prisma.user.create({
+            const user = await prisma.user.create({
                 data: {
                     name,
                     email,
-                    googleId,
+                    password: hashedPassword,
+                    phone,
+                    address,
                 },
             });
-        }
 
-        res.status(200).json({ message: 'Google signup successful', user });
+            res.status(201).json({ message: 'User created successfully', user });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Error during Google signup', error });
+        res.status(500).json({ message: 'Error creating user', error });
     }
 };
