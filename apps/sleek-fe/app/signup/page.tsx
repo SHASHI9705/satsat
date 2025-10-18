@@ -18,16 +18,50 @@ type FormValues = {
 export default function SignUpPage({ onBack }: { onBack?: () => void }) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
 
-  const { signUp } = useAuth();
   const { signInWithGoogle } = useAuth();
 
   const onSubmit = async (data: FormValues) => {
     try {
-      await signUp(data.email, data.password);
-      alert('Account created — demo flow');
-    } catch (err: any) {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        alert('Account created successfully');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Sign up failed');
+      }
+    } catch (err) {
       console.error(err);
-      alert(err?.message || 'Sign up failed');
+      alert('An error occurred while signing up');
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const token = await signInWithGoogle(); // Assuming this returns the Google token
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+
+      if (response.ok) {
+        alert('Google signup successful');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Google signup failed');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred during Google signup');
     }
   };
 
@@ -37,14 +71,13 @@ export default function SignUpPage({ onBack }: { onBack?: () => void }) {
         <div className="mb-4 text-center">
           <Badge className="badge-brand text-black px-4 py-2">Create account</Badge>
           <h2 className="text-2xl font-bold mt-2">Sign up to SleekRoad</h2>
-          
         </div>
 
         <div className="">
           <Button
             variant="outline"
             className="w-full flex items-center justify-center bg-gray-50 hover:bg-gray-100 hover:scale-105 transition-transform border border-gray-300"
-            onClick={() => signInWithGoogle()}
+            onClick={handleGoogleSignup}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
