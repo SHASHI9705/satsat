@@ -87,7 +87,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
   };
 
   return (
-    <section className="relative py-16 lg:py-16 overflow-hidden bg-white">
+    <section className="relative py-12 lg:py-12 overflow-hidden bg-white">
 
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
@@ -98,10 +98,8 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
             </Badge><br></br>
 
             <h1 className="text-4xl lg:text-7xl font-charlsworth leading-tight mt-4">
-              SleekRoad <br></br>Buy • Sell • Connect
-              <span className="block hero-subtitle font-charlsworth text-base lg:text-lg mt-2">
-                {/* A curated local marketplace for students and campus communities */}
-              </span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-700">SleekRoad</span> <br></br>
+              <span className="text-black">Buy • Connect • Sell</span>
             </h1>
 
             <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mt-4">

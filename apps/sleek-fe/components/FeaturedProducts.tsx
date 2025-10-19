@@ -256,10 +256,11 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 							Join thousands of students earning money by selling items they no
 							longer need.
 						</p>
-						<Button className="gap-2 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600">
+						<a href="/dashboard">
+						<Button className="gap-2 bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700">
 							List Your First Item
 							<ChevronRight className="w-4 h-4" />
-						</Button>
+						</Button></a>
 					</div>
 				</div>
 			</div>
