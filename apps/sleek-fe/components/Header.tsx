@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { useAuth } from '../firebase/AuthProvider';
 import { 
   Search, 
-  Bell, 
   Plus, 
   Menu,
   ShoppingBag,
@@ -16,7 +15,7 @@ import {
 
 export function Header({ notificationCount = 0 }: { notificationCount?: number; }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, signOutUser } = useAuth();
+  const { user } = useAuth();
 
   return (
     <header className="sticky py-2 top-0 z-50 w-full backdrop-blur-lg supports-[backdrop-filter]:bg-white ">
@@ -61,36 +60,14 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
             </Link>
 
             <div className="hidden sm:flex items-center gap-3">
-              <Link href="/notifications">
-                <Button variant="ghost" size="icon" aria-label="Notifications" className="relative hover:bg-gray-100 rounded-xl transition-all duration-200">
-                  <Bell className="w-5 h-5" />
-                  {notificationCount > 0 && (
-                    <Badge 
-                      variant="destructive" 
-                      className="absolute -top-1 -right-1 w-5 h-5 text-xs rounded-full p-0 flex items-center justify-center animate-pulse"
-                    >
-                      {notificationCount}
-                    </Badge>
-                  )}
-                </Button>
-              </Link>
-
               {user ? (
                 <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer">
-                    <Avatar className="w-9 h-9 border-2 border-gray-200">
-                      {user.photoURL ? <AvatarImage src={user.photoURL} alt="avatar" /> : <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">{user.email?.charAt(0).toUpperCase()}</AvatarFallback>}
-                    </Avatar>
-                    <div className="hidden md:block text-sm">
-                      <div className="font-semibold text-gray-900">{user.displayName || user.email?.split('@')[0]}</div>
-                      <div className="text-xs text-gray-500">Student Account</div>
-                    </div>
-                  </div>
-                  <Button variant="ghost" onClick={() => signOutUser()} className="hover:bg-red-50 hover:text-red-600 transition-all duration-200">Sign out</Button>
+                  <Avatar className="w-9 h-9 border border-black">
+                    {user.photoURL ? <AvatarImage src={user.photoURL} alt="avatar" /> : <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">{user.email?.charAt(0).toUpperCase()}</AvatarFallback>}
+                  </Avatar>
                 </div>
               ) : (
                 <>
-                  
                   <Link href="/signin">
                     <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">Login</Button>
                   </Link>

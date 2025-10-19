@@ -1,9 +1,11 @@
 import express from 'express';
 import userRoutes from './routes/userRoutes';
+import corsMiddleware from './middleware/corsMiddleware';
 
 const app: express.Express = express();
 
 // Middleware
+app.use(corsMiddleware);
 app.use(express.json());
 
 // Routes

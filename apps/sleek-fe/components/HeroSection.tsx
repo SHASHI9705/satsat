@@ -94,7 +94,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
           {/* Main Heading */}
           <div className="space-y-4">
             <Badge className="badge-brand text-black px-4 py-2 text-sm font-medium">
-              Community Marketplace
+              Campus Marketplace
             </Badge><br></br>
 
             <h1 className="text-4xl lg:text-7xl font-charlsworth leading-tight mt-4">

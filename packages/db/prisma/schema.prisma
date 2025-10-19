@@ -8,14 +8,20 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  phone     String
-  address   String
-  googleId  String?  // Added field for Google signup
+  id       Int     @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  password String?
+  phone    String? // Made optional
+  address  String?
+  googleId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model TestTable {
+  id   Int    @id @default(autoincrement())
+  name String
+}
+
 

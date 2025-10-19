@@ -3,6 +3,7 @@ import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Flame, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 const featuredProducts = [
 	{
@@ -171,11 +172,13 @@ interface FeaturedProductsProps {
 }
 
 export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProps) {
+	const [selectedCategory, setSelectedCategory] = useState('All Categories');
+
 	return (
 		<section className="py-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
 			<div className="container mx-auto px-4">
 				{/* Section Header */}
-				<div className="flex items-center justify-between mb-8">
+				<div className="flex items-center justify-between mb-2">
 					<div className="flex items-center gap-3">
 						<div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
 							<Flame className="w-6 h-6 text-white" />
@@ -187,14 +190,15 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 							</p>
 						</div>
 					</div>
+					<a href="/allitems">
 					<Button variant="outline" className="gap-2 group">
 						View All
 						<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-					</Button>
+					</Button></a>
 				</div>
 
 				{/* Categories Line */}
-				<div className="flex gap-3 overflow-x-auto pb-4 justify-center">
+				<div className="flex py-2 gap-3 overflow-x-auto pb-4 justify-center">
 					{[
 						'All Categories',
 						'Clothes',
@@ -207,8 +211,9 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 					].map((category, index) => (
 						<button
 							key={index}
+							onClick={() => setSelectedCategory(category)}
 							className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap ${
-								index === 0
+								selectedCategory === category
 									? 'bg-gradient-to-r from-[var(--brand-1)] to-[rgba(166,124,82,0.2)] text-[var(--brand-3)]'
 									: 'bg-gray-100 text-black'
 							} hover:bg-gradient-to-r hover:from-[var(--brand-1)] hover:to-[rgba(166,124,82,0.2)] hover:text-[var(--brand-3)] transition`}
@@ -219,24 +224,25 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 				</div>
 
 				{/* Products Grid */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
 					{featuredProducts.map((product) => (
-						<React.Fragment key={product.id}>
+						<div key={product.id} className="mb-4">
 							<ProductCard
 								product={product}
 								onFavorite={onFavorite}
 								onMessage={onMessage}
 							/>
-						</React.Fragment>
+						</div>
 					))}
 				</div>
 
 				<div className="width-100% mt-6 items-center justify-center flex">
 					<div className="">
+						<a href="/allitems">
 						<Button variant="outline" className="gap-2 group">
 							View All
 							<ChevronRight className=" w-4 h-4 group-hover:translate-x-1 transition-transform" />
-						</Button>
+						</Button></a>
 					</div>
 				</div>
 
