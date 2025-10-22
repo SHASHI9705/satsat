@@ -1,6 +1,12 @@
 import express from 'express';
 import userRoutes from './routes/userRoutes';
 import corsMiddleware from './middleware/corsMiddleware';
+import itemRoutes from './routes/itemRoutes';
+import dotenv from 'dotenv';
+const path = require('path');
+
+dotenv.config(); 
+
 
 const app: express.Express = express();
 
@@ -10,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api', userRoutes);
+app.use('/api/item', itemRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

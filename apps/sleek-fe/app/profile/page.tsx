@@ -81,6 +81,32 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/delete`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email: user?.email }),
+        });
+
+        if (response.ok) {
+          alert('Your account has been deleted successfully.');
+          logout();
+          router.push('/');
+        } else {
+          console.error('Failed to delete account');
+          alert('Failed to delete your account. Please try again later.');
+        }
+      } catch (error) {
+        console.error('Error deleting account:', error);
+        alert('An error occurred while deleting your account. Please try again later.');
+      }
+    }
+  };
+
   return (
     <section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
       <div className="container mx-auto px-4 max-w-4xl">
@@ -240,7 +266,10 @@ export default function ProfilePage() {
           </div>
 
           {/* Option: Delete Account */}
-          <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-900 p-4 rounded-md shadow-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800">
+          <div
+            className="flex items-center justify-between bg-gray-100 dark:bg-gray-900 p-4 rounded-md shadow-md cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-800"
+            onClick={handleDeleteAccount}
+          >
             <div className="flex items-center gap-4">
               <Trash2 className="w-6 h-6 text-gray-700 dark:text-gray-300" />
               <span className="text-lg text-gray-700 dark:text-gray-300">Delete Account</span>

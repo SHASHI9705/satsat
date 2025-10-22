@@ -8,7 +8,7 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
+  id       Int     @id @default(autoincrement()) // Reverted back to Int
   name     String
   email    String   @unique
   password String?
@@ -17,11 +17,28 @@ model User {
   googleId String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  items    Item[] // Relation to the Item model
 }
 
 model TestTable {
   id   Int    @id @default(autoincrement())
   name String
 }
+
+model Item {
+  id             Int      @id @default(autoincrement())
+  name           String
+  images         String[] @db.VarChar(255) // Array of up to 3 image URLs
+  category       String
+  actualPrice    Float
+  discountedPrice Float
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  sold           Boolean  @default(false)
+}
+
+// Ensure the User model exists and is linked to the Item model
 
 

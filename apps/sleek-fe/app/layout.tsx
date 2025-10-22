@@ -19,6 +19,10 @@ export default function RootLayout({
   return (
     <AuthProvider>
       <html lang="en">
+        <head>
+          <title>SleekRoad</title>
+          <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+        </head>
         <body>{children}</body>
       </html>
     </AuthProvider>

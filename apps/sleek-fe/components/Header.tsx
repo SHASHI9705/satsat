@@ -45,10 +45,10 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
       <div className="container mx-auto px-4">
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-gray-900 to-gray-700 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">SR</span>
+              <div className="w-10 h-10">
+                <img src="/logo.svg" alt="SleekRoad Logo" className="w-full h-full object-contain border rounded border-black" />
               </div>
               <span className="brand-title text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
                 SleekRoad
@@ -82,7 +82,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
               </Button>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-4">
               {user ? (
                 <div className="relative dropdown-container">
                   <Avatar

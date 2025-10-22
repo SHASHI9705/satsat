@@ -107,3 +107,24 @@ export const updateUserDetails = async (req: Request, res: Response): Promise<vo
         res.status(500).json({ message: 'Error updating user details', error });
     }
 };
+
+// Delete user account
+export const deleteUserAccount = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+    }
+
+    try {
+        await prisma.user.delete({
+            where: { email },
+        });
+
+        res.status(200).json({ message: 'User account deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting user account:', error);
+        res.status(500).json({ message: 'Error deleting user account', error });
+    }
+};

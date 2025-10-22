@@ -5,51 +5,109 @@ import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
 import { Plus, TrendingUp, Package, IndianRupee, Home, ShoppingBag, X } from 'lucide-react';
 import { Input } from '../../components/ui/input';
+import { useAuth } from '../../firebase/AuthProvider';
 
 export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Retrieve products from local storage on initial render
-      const storedProducts = localStorage.getItem('dashboardProducts');
-      if (storedProducts) {
-        setProducts(JSON.parse(storedProducts));
+    const fetchItems = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/fetch`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('API Response:', data); // Log the API response
+          if (data && Array.isArray(data.items)) {
+            setProducts(data.items);
+          } else {
+            console.error('Fetched items are not an array or undefined:', data.items);
+            setProducts([]); // Set to an empty array if the response is invalid
+          }
+        } else {
+          console.error('Failed to fetch items');
+          setProducts([]); // Set to an empty array on fetch failure
+        }
+      } catch (error) {
+        console.error('Error fetching items:', error);
+        setProducts([]); // Set to an empty array on error
       }
-    }
+    };
+
+    fetchItems();
   }, []);
 
   const toggleModal = () => {
     setIsModalOpen((prev) => !prev);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
-    const newProduct = {
-      id: Date.now(),
-      name: formData.get('name'),
-      category: formData.get('category'),
-      actualPrice: formData.get('actualPrice'),
-      discountedPrice: formData.get('discountedPrice'),
-      photos: formData.getAll('photos')
-    };
 
-    const updatedProducts = [...products, newProduct];
-    setProducts(updatedProducts);
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('dashboardProducts', JSON.stringify(updatedProducts));
+    // Append userId to the FormData
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user && user.id) {
+      formData.append('userId', user.id);
+    } else {
+      console.error('User details not found in local storage');
     }
 
-    toggleModal();
+    const actualPriceValue = formData.get('actualPrice');
+    const discountedPriceValue = formData.get('discountedPrice');
+
+    const actualPrice = actualPriceValue && typeof actualPriceValue === 'string' ? parseFloat(actualPriceValue) : 0;
+    const discountedPrice = discountedPriceValue && typeof discountedPriceValue === 'string' ? parseFloat(discountedPriceValue) : 0;
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        console.error('Failed to create item');
+        alert('Failed to create item. Please try again.');
+        return;
+      }
+
+      const data = await response.json();
+      console.log('Item created successfully:', data);
+      setProducts((prev) => [...prev, data.item]);
+      toggleModal();
+    } catch (error) {
+      console.error('Error creating item:', error);
+      alert('An error occurred while creating the item. Please try again.');
+    }
   };
 
-  const handleMarkAsSold = (id) => {
-    // Placeholder function for marking a product as sold
-    console.log(`Marking product with id ${id} as sold`);
+  const handleMarkAsSold = async (id) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/update-sold-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, sold: true }),
+      });
+
+      if (response.ok) {
+        const updatedItem = await response.json();
+        setProducts((prev) =>
+          prev.map((product) =>
+            product.id === id ? { ...product, sold: updatedItem.item.sold } : product
+          )
+        );
+      } else {
+        console.error('Failed to update sold status');
+        alert('Failed to mark item as sold. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating sold status:', error);
+      alert('An error occurred while marking the item as sold. Please try again.');
+    }
   };
 
   return (
@@ -145,7 +203,7 @@ export default function DashboardPage() {
                   <label className="block text-sm font-medium mb-1">Upload Photos</label>
                   <input
                     type="file"
-                    name="photos"
+                    name="images" // Changed from 'photos' to 'images'
                     accept="image/*"
                     multiple
                     className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
@@ -193,53 +251,49 @@ export default function DashboardPage() {
 
         {/* Display Products as Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <div key={product.id} className="bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
-                  <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-md">{product.category}</span>
-                </div>
-                <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-                  <p>Actual Price: ₹{product.actualPrice}</p>
-                  <p>Discounted Price: ₹{product.discountedPrice}</p>
-                </div>
-                <div className="flex gap-3 overflow-x-auto">
-                  {product.photos.map((photo, index) => {
-                    let imageUrl;
-                    try {
-                      imageUrl =
-                        typeof photo === 'string' && photo
-                          ? photo
-                          : typeof photo === 'object' && photo
-                          ? URL.createObjectURL(photo)
-                          : 'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
-                    } catch (error) {
-                      imageUrl = 'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
-                    }
-                    return (
+          {Array.isArray(products) && products.length > 0 ? (
+            products.map((product) => (
+              <div
+                key={product.id}
+                className={`bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between ${
+                  product.sold ? 'opacity-50' : ''
+                }`}
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-xl font-bold text-gray-800">{product.name}</h3>
+                    <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                      {product.category}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                    <p>Actual Price: ₹{product.actualPrice}</p>
+                    <p>Discounted Price: ₹{product.discountedPrice}</p>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto">
+                    {Array.isArray(product.images) && product.images.map((photo, index) => (
                       <img
                         key={index}
-                        src={imageUrl}
+                        src={photo}
                         alt="Product"
                         className="w-24 h-24 object-cover rounded-lg border border-gray-200"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = 'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral';
-                        }}
                       />
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
+                {!product.sold && (
+                  <Button
+                    className="mt-4 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-medium py-2 px-4 rounded-lg"
+                    onClick={() => handleMarkAsSold(product.id)}
+                  >
+                    Mark as Sold
+                  </Button>
+                )}
               </div>
-              <Button
-                className="mt-4 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-medium py-2 px-4 rounded-lg"
-                onClick={() => handleMarkAsSold(product.id)}
-              >
-                Mark as Sold
-              </Button>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-gray-600">No products available.</p>
+          )}
         </div>
       </div>
     </section>
