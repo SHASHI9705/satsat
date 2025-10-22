@@ -53,3 +53,57 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         res.status(500).json({ message: 'Error creating user', error });
     }
 };
+
+// Fetch user details
+export const getUserDetails = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.query;
+
+    if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+    }
+
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email: email as string },
+            select: {
+                name: true,
+                email: true,
+                phone: true,
+                address: true,
+            },
+        });
+
+        if (!user) {
+            res.status(404).json({ message: 'User not found' });
+            return;
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        console.error('Error fetching user details:', error);
+        res.status(500).json({ message: 'Error fetching user details', error });
+    }
+};
+
+// Update user details
+export const updateUserDetails = async (req: Request, res: Response): Promise<void> => {
+    const { email, name, phone, address } = req.body;
+
+    if (!email) {
+        res.status(400).json({ message: 'Email is required' });
+        return;
+    }
+
+    try {
+        const updatedUser = await prisma.user.update({
+            where: { email },
+            data: { name, phone, address },
+        });
+
+        res.status(200).json({ message: 'User details updated successfully', user: updatedUser });
+    } catch (error) {
+        console.error('Error updating user details:', error);
+        res.status(500).json({ message: 'Error updating user details', error });
+    }
+};

@@ -89,7 +89,7 @@ export function ProductCard({ product, onFavorite, onMessage }: ProductCardProps
       <div className="p-4 space-y-2"> {/* Reduced spacing */}
         {/* Title and Category */}
         <div>
-          <h3 className="font-bold truncate text-base line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
+          <h3 className="font-bold truncate text-base line-clamp-2 group-hover:text-green-700 transition-colors leading-snug">
             {product.title}
           </h3>
           <p className="text-xs text-gray-500 mt-0.5 font-medium">{product.category}</p> {/* Adjusted margin */}
