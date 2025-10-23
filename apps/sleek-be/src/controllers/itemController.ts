@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import multer from 'multer';
-import { uploadToS3 } from '../utils/s3Uploader';
+import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
 
 // Extend Express Request type to include files
 declare global {
@@ -21,7 +21,7 @@ const upload = multer({ storage });
 // Update the createItem function to upload files directly to S3
 export const createItem = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, category, actualPrice, discountedPrice, userId } = req.body;
+        const { name, category, actualPrice, discountedPrice, userId, description } = req.body;
 
         // Validate required fields
         if (!name || !category || !actualPrice || !userId) {
@@ -62,6 +62,7 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
                 actualPrice: parseFloat(actualPrice),
                 discountedPrice: parseFloat(discountedPrice),
                 userId: parseInt(userId, 10),
+                description, // Add description field
                 sold: false,
             },
         });
@@ -101,10 +102,155 @@ export const updateItemSoldStatus = async (req: Request, res: Response): Promise
 // Fetch all items
 export const fetchItems = async (req: Request, res: Response): Promise<void> => {
     try {
-        const items = await prisma.item.findMany();
+        const items = await prisma.item.findMany({
+            select: {
+                id: true,
+                name: true,
+                images: true,
+                category: true,
+                actualPrice: true,
+                discountedPrice: true,
+                description: true, // Include description in the response
+                sold: true,
+                createdAt: true,
+                updatedAt: true,
+            },
+        });
         res.status(200).json({ items });
     } catch (error) {
         console.error('Error fetching items:', error);
         res.status(500).json({ message: 'Error fetching items', error });
+    }
+};
+
+// Add deleteItem function
+export const deleteItem = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ message: 'Item ID is required' });
+        return;
+    }
+
+    try {
+        // Find the item to delete
+        const item = await prisma.item.findUnique({
+            where: { id: parseInt(id, 10) },
+        });
+
+        if (!item) {
+            res.status(404).json({ message: 'Item not found' });
+            return;
+        }
+
+        // Delete images from S3
+        if (item.images && Array.isArray(item.images)) {
+            for (const imageUrl of item.images) {
+                const fileKey = imageUrl.split('/').pop(); // Extract file key from URL
+                if (fileKey) {
+                    await deleteFromS3(fileKey);
+                }
+            }
+        }
+
+        // Delete the item from the database
+        await prisma.item.delete({
+            where: { id: parseInt(id, 10) },
+        });
+
+        res.status(200).json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting item:', error);
+        res.status(500).json({ message: 'Error deleting item', error });
+    }
+};
+
+// Add fetchAllItems function
+export const fetchAllItems = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const items = await prisma.item.findMany({
+            include: {
+                user: {
+                    select: {
+                        name: true, // Include only the user's name
+                    },
+                },
+            },
+        });
+        res.status(200).json({ items });
+    } catch (error) {
+        console.error('Error fetching all items:', error);
+        res.status(500).json({ message: 'Error fetching all items', error });
+    }
+};
+
+// Add fetchItemById function
+export const fetchItemById = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ message: 'Item ID is required' });
+        return;
+    }
+
+    try {
+        const item = await prisma.item.findUnique({
+            where: { id: parseInt(id, 10) },
+            include: {
+                user: {
+                    select: {
+                        name: true,
+                    },
+                },
+            },
+        });
+
+        if (!item) {
+            res.status(404).json({ message: 'Item not found' });
+            return;
+        }
+
+        // Fetch related products (example logic, adjust as needed)
+        const relatedProducts = await prisma.item.findMany({
+            where: { category: item.category, id: { not: item.id } },
+            take: 4,
+        });
+
+        res.status(200).json({ item, relatedProducts });
+    } catch (error) {
+        console.error('Error fetching item by ID:', error);
+        res.status(500).json({ message: 'Error fetching item by ID', error });
+    }
+};
+
+// Add fetchSellerById function
+export const fetchSellerById = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+
+    if (!id) {
+        res.status(400).json({ message: 'Seller ID is required' });
+        return;
+    }
+
+    try {
+        const seller = await prisma.user.findUnique({
+            where: { id: parseInt(id, 10) },
+            select: {
+                name: true,
+                email: true,
+                phone: true,
+                address: true,
+            },
+        });
+
+        if (!seller) {
+            res.status(404).json({ message: 'Seller not found' });
+            return;
+        }
+
+        res.status(200).json({ seller });
+    } catch (error) {
+        console.error('Error fetching seller details:', error);
+        res.status(500).json({ message: 'Error fetching seller details', error });
     }
 };

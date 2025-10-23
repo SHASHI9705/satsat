@@ -30,9 +30,10 @@ interface ProductCardProps {
   product: Product;
   onFavorite?: (productId: string) => void;
   onMessage?: (productId: string) => void;
+  onViewDetails?: () => void; // Added onViewDetails property
 }
 
-export function ProductCard({ product, onFavorite, onMessage }: ProductCardProps) {
+export function ProductCard({ product, onFavorite, onMessage, onViewDetails }: ProductCardProps) {
   // Added state to track if the product is favorited
   const [isFavorited, setIsFavorited] = useState(false);
   const router = useRouter();
@@ -57,7 +58,7 @@ export function ProductCard({ product, onFavorite, onMessage }: ProductCardProps
   };
 
   const handleViewDetails = () => {
-    router.push('/selecteditem');
+    onViewDetails?.();
   };
 
   return (
@@ -108,15 +109,12 @@ export function ProductCard({ product, onFavorite, onMessage }: ProductCardProps
         {/* Seller Info */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Avatar className="w-5 h-5">
-              <AvatarImage src={product.seller.avatar} />
-              <AvatarFallback className="text-xs">
-                {product.seller.name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-200 text-gray-700 font-bold">
+              {product.seller?.name?.charAt(0).toUpperCase() || '?'}
+            </div>
             <div className="flex items-center gap-1">
-              <span className="text-xs font-medium">{product.seller.name}</span>
-              {product.seller.verified && (
+              <span className="text-xs font-medium">{product.seller?.name || 'Unknown Seller'}</span>
+              {product.seller?.verified && (
                 <Badge variant="secondary" className="text-xs px-1 py-0">
                   ✓
                 </Badge>
@@ -131,9 +129,9 @@ export function ProductCard({ product, onFavorite, onMessage }: ProductCardProps
 
         {/* Action Button */}
         <Button 
-          className="w-full gap-2 py-2" 
+          className="w-full gap-2 py-2 hover:bg-blue-100" 
           variant="outline"
-          onClick={handleViewDetails}
+          onClick={handleViewDetails} // Use the onViewDetails prop
         >
           View Details
         </Button>

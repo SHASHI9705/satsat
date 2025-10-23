@@ -5,7 +5,9 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="font-bold text-xl">S</span>
+              <div className="w-12 h-12 bg-white border border-black flex rounded items-center justify-center">
+                <img src="/logo.svg" alt="SleekRoad Logo" className="w-10 h-10 object-contain" />
+              </div>
               <span className="font-bold text-xl">SleekRoad</span>
             </div>
             <p className="text-gray-400 text-sm">

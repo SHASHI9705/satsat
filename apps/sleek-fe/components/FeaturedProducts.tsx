@@ -3,168 +3,7 @@ import { ProductCard } from './ProductCard';
 import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Flame, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-
-const featuredProducts = [
-	{
-		id: '1',
-		title: 'MacBook Pro 13" M2 - Excellent Condition',
-		price: 899,
-		originalPrice: 1299,
-		image:
-			'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'Sarah Chen',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Main Campus',
-		postedTime: '2h ago',
-		category: 'Electronics',
-		isFavorited: false
-	},
-	{
-		id: '2',
-		title: 'Calculus & Physics Textbook Bundle',
-		price: 120,
-		originalPrice: 400,
-		image:
-			'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Marcus Lee',
-			avatar:
-				'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-			rating: 4.7,
-			verified: true
-		},
-		location: 'North Dorms',
-		postedTime: '5h ago',
-		category: 'Books & Academic',
-		isFavorited: true
-	},
-	{
-		id: '3',
-		title: 'Vintage Band T-Shirt Collection',
-		price: 45,
-		image:
-			'https://images.unsplash.com/photo-1634133118577-d70216e68eae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZmFzaGlvbiUyMGNsb3RoZXN8ZW58MXx8fHwxNzU5NDkwNjIzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Alex Rivera',
-			avatar:
-				'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face',
-			rating: 4.5,
-			verified: false
-		},
-		location: 'South Campus',
-		postedTime: '1d ago',
-		category: 'Fashion & Style',
-		isFavorited: false
-	},
-	{
-		id: '4',
-		title: 'Study Desk with Storage - Perfect for Dorms',
-		price: 85,
-		originalPrice: 150,
-		image:
-			'https://images.unsplash.com/photo-1699831112447-9c8c803f584b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb3JtJTIwZnVybml0dXJlJTIwZGVza3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Emma Watson',
-			avatar:
-				'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-			rating: 4.8,
-			verified: true
-		},
-		location: 'West Hall',
-		postedTime: '1d ago',
-		category: 'Furniture & Living',
-		isFavorited: false
-	},
-	{
-		id: '5',
-		title: 'iPhone 14 Pro - Space Black, 256GB',
-		price: 750,
-		originalPrice: 999,
-		image:
-			'https://images.unsplash.com/photo-1557817683-5cfe3620b05c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwdGVjaG5vbG9neXxlbnwxfHx8fDE3NTk0NzcwNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'David Kim',
-			avatar:
-				'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Engineering Building',
-		postedTime: '3h ago',
-		category: 'Electronics',
-		isFavorited: true
-	},
-	{
-		id: '6',
-		title: 'Math Tutoring - Calculus & Statistics',
-		price: 25,
-		image:
-			'https://images.unsplash.com/photo-1704748082614-8163a88e56b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwc3R1ZGVudHMlMjBzdHVkeWluZ3xlbnwxfHx8fDE3NTk0MTYxNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'New' as const,
-		seller: {
-			name: 'Prof. Julia',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 5.0,
-			verified: true
-		},
-		location: 'Library',
-		postedTime: '4h ago',
-		category: 'Tutoring & Services',
-		isFavorited: false
-	},
-	{
-		id: '7',
-		title: 'MacBook Pro 13" M2 - Excellent Condition',
-		price: 899,
-		originalPrice: 1299,
-		image:
-			'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'Sarah Chen',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Main Campus',
-		postedTime: '2h ago',
-		category: 'Electronics',
-		isFavorited: false
-	},
-	{
-		id: '8',
-		title: 'Calculus & Physics Textbook Bundle',
-		price: 120,
-		originalPrice: 400,
-		image:
-			'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Marcus Lee',
-			avatar:
-				'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-			rating: 4.7,
-			verified: true
-		},
-		location: 'North Dorms',
-		postedTime: '5h ago',
-		category: 'Books & Academic',
-		isFavorited: true
-	}
-];
+import { useState, useEffect } from 'react';
 
 interface FeaturedProductsProps {
 	onFavorite?: (productId: string) => void;
@@ -173,6 +12,54 @@ interface FeaturedProductsProps {
 
 export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProps) {
 	const [selectedCategory, setSelectedCategory] = useState('All Categories');
+	const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+
+	useEffect(() => {
+		const fetchFeaturedProducts = async () => {
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/all`
+				);
+				if (response.ok) {
+					const data = await response.json();
+					if (Array.isArray(data.items)) {
+						const randomItems = data.items
+							.filter((item) => item) // Ensure item is defined
+							.map((item) => ({
+								id: item.id,
+								title: item.name,
+								price: item.discountedPrice,
+								originalPrice: item.actualPrice,
+								image: item.images?.[0] || '/placeholder-image.png', // Fallback image
+								seller: {
+									name: item.user?.name || 'Unknown Seller',
+									rating: (Math.random() * (5 - 4) + 4).toFixed(1), // Random rating between 4 and 5
+									verified: false // Static verified status for now
+								},
+								category: item.category,
+								isFavorited: false // Static favorite status for now
+							}))
+							.sort(() => 0.5 - Math.random())
+							.slice(0, 8); // Get up to 8 random items
+						setFeaturedProducts(randomItems);
+					} else {
+						console.error('API response does not contain a valid items array:', data);
+					}
+				} else {
+					console.error('Failed to fetch featured products');
+				}
+			} catch (error) {
+				console.error('Error fetching featured products:', error);
+			}
+		};
+
+		fetchFeaturedProducts();
+	}, []);
+
+	const filteredProducts =
+		selectedCategory === 'All Categories'
+			? featuredProducts
+			: featuredProducts.filter((product) => product.category === selectedCategory);
 
 	return (
 		<section className="py-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
@@ -191,10 +78,11 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 						</div>
 					</div>
 					<a href="/allitems">
-					<Button variant="outline" className="gap-2 group">
-						View All
-						<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-					</Button></a>
+						<Button variant="outline" className="gap-2 group">
+							View All
+							<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+						</Button>
+					</a>
 				</div>
 
 				{/* Categories Line */}
@@ -225,10 +113,13 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 
 				{/* Products Grid */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-					{featuredProducts.map((product) => (
+					{filteredProducts.map((product) => (
 						<div key={product.id} className="mb-4">
 							<ProductCard
-								product={product}
+								product={{
+									...product,
+									rating: product.rating || 4.5, // Ensure a fallback value for rating
+								}}
 								onFavorite={onFavorite}
 								onMessage={onMessage}
 							/>
@@ -239,10 +130,11 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 				<div className="width-100% mt-6 items-center justify-center flex">
 					<div className="">
 						<a href="/allitems">
-						<Button variant="outline" className="gap-2 group">
-							View All
-							<ChevronRight className=" w-4 h-4 group-hover:translate-x-1 transition-transform" />
-						</Button></a>
+							<Button variant="outline" className="gap-2 group">
+								View All
+								<ChevronRight className=" w-4 h-4 group-hover:translate-x-1 transition-transform" />
+							</Button>
+						</a>
 					</div>
 				</div>
 
@@ -257,10 +149,11 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 							longer need.
 						</p>
 						<a href="/dashboard">
-						<Button className="gap-2 bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700">
-							List Your First Item
-							<ChevronRight className="w-4 h-4" />
-						</Button></a>
+							<Button className="gap-2 bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700">
+								List Your First Item
+								<ChevronRight className="w-4 h-4" />
+							</Button>
+						</a>
 					</div>
 				</div>
 			</div>

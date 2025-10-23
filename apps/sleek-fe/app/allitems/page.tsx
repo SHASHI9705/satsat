@@ -2,221 +2,69 @@
 
 import * as React from 'react';
 import { ProductCard } from '../../components/ProductCard';
-import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
-import { Flame, ChevronRight, Home, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Package } from 'lucide-react';
+import { Home } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
 
-const featuredProducts = [
-	{
-		id: '1',
-		title: 'MacBook Pro 13" M2 - Excellent Condition',
-		price: 899,
-		originalPrice: 1299,
-		image:
-			'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'Sarah Chen',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Main Campus',
-		postedTime: '2h ago',
-		category: 'Electronics',
-		isFavorited: false
-	},
-	{
-		id: '2',
-		title: 'Calculus & Physics Textbook Bundle',
-		price: 120,
-		originalPrice: 400,
-		image:
-			'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Marcus Lee',
-			avatar:
-				'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-			rating: 4.7,
-			verified: true
-		},
-		location: 'North Dorms',
-		postedTime: '5h ago',
-		category: 'Books & Academic',
-		isFavorited: true
-	},
-	{
-		id: '3',
-		title: 'Vintage Band T-Shirt Collection',
-		price: 45,
-		image:
-			'https://images.unsplash.com/photo-1634133118577-d70216e68eae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZmFzaGlvbiUyMGNsb3RoZXN8ZW58MXx8fHwxNzU5NDkwNjIzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Alex Rivera',
-			avatar:
-				'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face',
-			rating: 4.5,
-			verified: false
-		},
-		location: 'South Campus',
-		postedTime: '1d ago',
-		category: 'Fashion & Style',
-		isFavorited: false
-	},
-	{
-		id: '4',
-		title: 'Study Desk with Storage - Perfect for Dorms',
-		price: 85,
-		originalPrice: 150,
-		image:
-			'https://images.unsplash.com/photo-1699831112447-9c8c803f584b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb3JtJTIwZnVybml0dXJlJTIwZGVza3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Emma Watson',
-			avatar:
-				'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-			rating: 4.8,
-			verified: true
-		},
-		location: 'West Hall',
-		postedTime: '1d ago',
-		category: 'Furniture & Living',
-		isFavorited: false
-	},
-	{
-		id: '5',
-		title: 'iPhone 14 Pro - Space Black, 256GB',
-		price: 750,
-		originalPrice: 999,
-		image:
-			'https://images.unsplash.com/photo-1557817683-5cfe3620b05c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxzbWFydHBob25lJTIwdGVjaG5vbG9neXxlbnwxfHx8fDE3NTk0NzcwNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'David Kim',
-			avatar:
-				'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Engineering Building',
-		postedTime: '3h ago',
-		category: 'Electronics',
-		isFavorited: true
-	},
-	{
-		id: '6',
-		title: 'Math Tutoring - Calculus & Statistics',
-		price: 25,
-		image:
-			'https://images.unsplash.com/photo-1704748082614-8163a88e56b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx1bml2ZXJzaXR5JTIwc3R1ZGVudHMlMjBzdHVkeWluZ3xlbnwxfHx8fDE3NTk0MTYxNjd8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'New' as const,
-		seller: {
-			name: 'Prof. Julia',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 5.0,
-			verified: true
-		},
-		location: 'Library',
-		postedTime: '4h ago',
-		category: 'Tutoring & Services',
-		isFavorited: false
-	},
-	{
-		id: '7',
-		title: 'MacBook Pro 13" M2 - Excellent Condition',
-		price: 899,
-		originalPrice: 1299,
-		image:
-			'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New' as const,
-		seller: {
-			name: 'Sarah Chen',
-			avatar:
-				'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Main Campus',
-		postedTime: '2h ago',
-		category: 'Electronics',
-		isFavorited: false
-	},
-	{
-		id: '8',
-		title: 'Calculus & Physics Textbook Bundle',
-		price: 120,
-		originalPrice: 400,
-		image:
-			'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Good' as const,
-		seller: {
-			name: 'Marcus Lee',
-			avatar:
-				'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-			rating: 4.7,
-			verified: true
-		},
-		location: 'North Dorms',
-		postedTime: '5h ago',
-		category: 'Books & Academic',
-		isFavorited: true
-	}
-];
+// Utility function to shuffle an array
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
-interface FeaturedProductsProps {
-	onFavorite?: (productId: string) => void;
-	onMessage?: (productId: string) => void;
-}
-
-export default function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProps) {
-	const [selectedCategory, setSelectedCategory] = useState('All Categories');
-	const [products, setProducts] = useState(featuredProducts);
-	const [page, setPage] = useState(1);
-
-	const getRandomProductFromFeatured = () => {
-		const randomIndex = Math.floor(Math.random() * featuredProducts.length);
-		const randomProduct = featuredProducts[randomIndex];
-		return {
-			...randomProduct,
-			id: (Math.random() * 100000).toFixed(0) // Ensure unique ID for each new product
-		};
-	};
-
-	const loadMoreProducts = () => {
-		const newProducts = Array.from({ length: 4 }, () => getRandomProductFromFeatured());
-		setProducts((prev) => [...prev, ...newProducts]);
-		setPage((prev) => prev + 1);
-	};
+export default function AllItemsPage() {
+	const [products, setProducts] = useState([]);
+	const [selectedCategory, setSelectedCategory] = useState("All Categories");
+	const router = useRouter();
+	const searchParams = useSearchParams(); // Initialize useSearchParams
 
 	useEffect(() => {
-		const handleScroll = () => {
-			if (
-				window.innerHeight + window.scrollY >=
-				document.documentElement.scrollHeight - 100
-			) {
-				loadMoreProducts();
+		const categoryFromQuery = searchParams.get('category'); // Get category from query params
+		if (categoryFromQuery) {
+			setSelectedCategory(categoryFromQuery);
+		}
+	}, [searchParams]); // Re-run when searchParams changes
+
+	useEffect(() => {
+		const fetchItems = async () => {
+			try {
+				const response = await fetch(
+					`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/all`
+				);
+				if (response.ok) {
+					const data = await response.json();
+					const itemsWithRatings = data.items.map((item) => ({
+						...item,
+						rating: (Math.random() * (5 - 4) + 4).toFixed(1), // Generate random rating between 4 and 5
+					}));
+					setProducts(shuffleArray(itemsWithRatings)); // Shuffle items before setting state
+				} else {
+					console.error('Failed to fetch items');
+				}
+			} catch (error) {
+				console.error('Error fetching items:', error);
 			}
 		};
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, []);
 
-	const filterProductsByCategory = (category) => {
-		if (category === 'All Categories') {
-			return featuredProducts;
-		}
-		return featuredProducts.filter((product) => product.category === category);
-	};
+		fetchItems();
+	}, []);
 
 	const handleCategoryClick = (category) => {
 		setSelectedCategory(category);
-		const filteredProducts = filterProductsByCategory(category);
-		setProducts(filteredProducts);
+	};
+
+	const filteredProducts =
+		selectedCategory === "All Categories"
+			? products
+			: products.filter((product) => product.category === selectedCategory);
+
+	// Define handleViewDetails function
+	const handleViewDetails = (productId) => {
+		router.push(`/selecteditem?id=${productId}`);
 	};
 
 	return (
@@ -246,23 +94,14 @@ export default function FeaturedProducts({ onFavorite, onMessage }: FeaturedProd
 
 				{/* Categories Line */}
 				<div className="flex py-2 gap-3 overflow-x-auto pb-4 justify-center">
-					{[
-						'All Categories',
-						'Clothes',
-						'Shoes',
-						'Books',
-						'Tech Products',
-						'Electronics',
-						'Instruments',
-						'Others'
-					].map((category, index) => (
+					{["All Categories", "Clothes", "Shoes", "Books", "Tech Products", "Electronics", "Instruments", "Others"].map((category, index) => (
 						<button
 							key={index}
 							onClick={() => handleCategoryClick(category)}
 							className={`px-4 py-2 rounded-full border text-sm font-medium whitespace-nowrap ${
 								selectedCategory === category
-									? 'bg-gradient-to-r from-[var(--brand-1)] to-[rgba(166,124,82,0.2)] text-[var(--brand-3)]'
-									: 'bg-gray-100 text-black'
+									? "bg-gradient-to-r from-[var(--brand-1)] to-[rgba(166,124,82,0.2)] text-[var(--brand-3)]"
+									: "bg-gray-100 text-black"
 							} hover:bg-gradient-to-r hover:from-[var(--brand-1)] hover:to-[rgba(166,124,82,0.2)] hover:text-[var(--brand-3)] transition`}
 						>
 							{category}
@@ -272,12 +111,27 @@ export default function FeaturedProducts({ onFavorite, onMessage }: FeaturedProd
 
 				{/* Products Grid */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-					{products.map((product) => (
+					{filteredProducts.map((product) => (
 						<div key={product.id} className="mb-4">
 							<ProductCard
-								product={product}
-								onFavorite={onFavorite}
-								onMessage={onMessage}
+								product={{
+									id: product.id,
+									title: product.name,
+									price: product.discountedPrice,
+									originalPrice: product.actualPrice,
+									image: product.images?.[0] || '/placeholder-image.png', // Fallback image
+									condition: 'Good', // Static condition for now
+									seller: {
+										name: product.user?.name || 'Unknown Seller',
+										rating: product.rating,
+										verified: false // Static verified status for now
+									},
+									location: product.category,
+									postedTime: 'Just now', // Static posted time for now
+									category: product.category,
+									isFavorited: false // Static favorite status for now
+								}}
+								onViewDetails={() => handleViewDetails(product.id)} // Pass the handler as a prop
 							/>
 						</div>
 					))}

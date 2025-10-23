@@ -1,125 +1,25 @@
 "use client";
 
 import { Button } from '../../components/ui/button';
-import { Badge } from '../../components/ui/badge';
 import { Star, Package, Home, ArrowLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../../components/ProductCard';
+import { useSearchParams } from 'next/navigation'; // Import useSearchParams
 
 export default function SelectedItemPage() {
-	const item = {
-		title: 'MacBook Pro 13" M2 - Excellent Condition',
-		price: 899,
-		originalPrice: 1299,
-		image:
-			'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		condition: 'Like New',
-		seller: {
-			name: 'Sarah Chen',
-			rating: 4.9,
-			verified: true
-		},
-		location: 'Main Campus',
-		postedTime: '2h ago',
-		category: 'Electronics',
-		description:
-			"This MacBook Pro is in excellent condition and has been used sparingly. It's perfect for students and professionals alike. Comes with the original charger and box."
-	};
+	const searchParams = useSearchParams();
+	const itemId = searchParams.get('id'); // Get the item ID from query parameters
 
+	const [item, setItem] = useState(null);
+	const [relatedProducts, setRelatedProducts] = useState([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
-	const images = [
-		'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-		'https://images.unsplash.com/photo-1634133118577-d70216e68eae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZmFzaGlvbiUyMGNsb3RoZXN8ZW58MXx8fHwxNzU5NDkwNjIzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
-	];
-
-	const relatedProducts = [
-		{
-			id: '1',
-			title: 'MacBook Pro 13" M2 - Excellent Condition',
-			price: 899,
-			originalPrice: 1299,
-			image:
-				'https://images.unsplash.com/photo-1643290369779-c6bec760cf18?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsYXB0b3AlMjBjb21wdXRlciUyMGVsZWN0cm9uaWNzfGVufDF8fHx8MTc1OTQxNjgyMHww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-			condition: 'Like New' as const,
-			seller: {
-				name: 'Sarah Chen',
-				avatar:
-					'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=32&h=32&fit=crop&crop=face',
-				rating: 4.9,
-				verified: true
-			},
-			location: 'Main Campus',
-			postedTime: '2h ago',
-			category: 'Electronics',
-			isFavorited: false
-		},
-		{
-			id: '2',
-			title: 'Calculus & Physics Textbook Bundle',
-			price: 120,
-			originalPrice: 400,
-			image:
-				'https://images.unsplash.com/photo-1633707392225-d883c8cd3e99?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2xsZWdlJTIwdGV4dGJvb2slMjBzdGFja3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-			condition: 'Good' as const,
-			seller: {
-				name: 'Marcus Lee',
-				avatar:
-					'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face',
-				rating: 4.7,
-				verified: true
-			},
-			location: 'North Dorms',
-			postedTime: '5h ago',
-			category: 'Books & Academic',
-			isFavorited: true
-		},
-		{
-			id: '3',
-			title: 'Vintage Band T-Shirt Collection',
-			price: 45,
-			originalPrice: 60,
-			image:
-				'https://images.unsplash.com/photo-1634133118577-d70216e68eae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2aW50YWdlJTIwZmFzaGlvbiUyMGNsb3RoZXN8ZW58MXx8fHwxNzU5NDkwNjIzfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-			condition: 'Good' as const,
-			seller: {
-				name: 'Alex Rivera',
-				avatar:
-					'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=32&h=32&fit=crop&crop=face',
-				rating: 4.5,
-				verified: false
-			},
-			location: 'South Campus',
-			postedTime: '1d ago',
-			category: 'Fashion & Style',
-			isFavorited: false
-		},
-		{
-			id: '4',
-			title: 'Study Desk with Storage - Perfect for Dorms',
-			price: 85,
-			originalPrice: 150,
-			image:
-				'https://images.unsplash.com/photo-1699831112447-9c8c803f584b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkb3JtJTIwZnVybml0dXJlJTIwZGVza3xlbnwxfHx8fDE3NTk0OTA2MjN8MA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral',
-			condition: 'Good' as const,
-			seller: {
-				name: 'Emma Watson',
-				avatar:
-					'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face',
-				rating: 4.8,
-				verified: true
-			},
-			location: 'West Hall',
-			postedTime: '1d ago',
-			category: 'Furniture & Living',
-			isFavorited: false
-		}
-		// Add more products as needed
-	];
+	const images = []; // Removed dummy image URLs
 
 	const [products, setProducts] = useState(relatedProducts);
 	const [page, setPage] = useState(1);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [sellerDetails, setSellerDetails] = useState(null); // State to store seller details
+	const [isFavorited, setIsFavorited] = useState(false); // State to track if the item is favorited
 
 	const getRandomProductFromRelated = () => {
 		const randomIndex = Math.floor(Math.random() * relatedProducts.length);
@@ -174,13 +74,67 @@ export default function SelectedItemPage() {
 		}
 	};
 
-	const handleGetContactDetails = () => {
-		setIsModalOpen(true);
+	const handleGetContactDetails = async () => {
+		try {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/seller/${item.userId}`);
+			if (response.ok) {
+				const data = await response.json();
+				setSellerDetails(data.seller); // Store seller details in state
+				setIsModalOpen(true);
+			} else {
+				console.error('Failed to fetch seller details');
+			}
+		} catch (error) {
+			console.error('Error fetching seller details:', error);
+		}
 	};
 
 	const handleCloseModal = () => {
 		setIsModalOpen(false);
 	};
+
+	useEffect(() => {
+		const fetchItemDetails = async () => {
+			try {
+				const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/${itemId}`);
+				if (response.ok) {
+					const data = await response.json();
+					setItem(data.item);
+					setRelatedProducts(data.relatedProducts || []); // Assuming related products are included
+				} else {
+					console.error('Failed to fetch item details');
+				}
+			} catch (error) {
+				console.error('Error fetching item details:', error);
+			}
+		};
+
+		if (itemId) {
+			fetchItemDetails();
+		}
+	}, [itemId]);
+
+	useEffect(() => {
+		const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+		setIsFavorited(favorites.includes(itemId));
+	}, [itemId]);
+
+	const handleFavoriteClick = () => {
+		const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+		if (favorites.includes(itemId)) {
+			const updatedFavorites = favorites.filter((id) => id !== itemId);
+			localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+			setIsFavorited(false);
+		} else {
+			favorites.push(itemId);
+			localStorage.setItem('favorites', JSON.stringify(favorites));
+			setIsFavorited(true);
+		}
+	};
+
+	if (!item) {
+		return <p>Loading...</p>; // Show a loading state while fetching data
+	}
 
 	return (
 		<section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
@@ -206,36 +160,24 @@ export default function SelectedItemPage() {
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 					{/* Image Section */}
 					<div className="flex justify-center items-center relative">
-						<div
-							className="relative w-full max-w-lg overflow-hidden rounded-lg"
-							onTouchStart={handleTouchStart}
-							onTouchEnd={handleTouchEnd}
-						>
+						<div className="relative w-full max-w-lg overflow-hidden rounded-lg">
 							<img
-								src={images[currentImageIndex]}
-								alt={`Product Image ${currentImageIndex + 1}`}
+								src={item.images?.[0] || '/placeholder-image.png'}
+								alt={item.name}
 								className="rounded-lg shadow-md w-full h-96 object-contain mx-auto"
 							/>
-							<div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-								{images.map((_, index) => (
-									<div
-										key={index}
-										className={`w-3 h-3 rounded-full ${
-											index === currentImageIndex ? 'bg-blue-500' : 'bg-gray-300'
-										}`}
-									></div>
-								))}
-							</div>
 						</div>
 					</div>
 
 					{/* Details Section */}
 					<div>
-						<h1 className="text-4xl font-bold mb-4">{item.title}</h1>
+						<div className="flex items-center gap-2 mb-4">
+							<h1 className="text-4xl font-bold mb-4 line-clamp-2">{item.name}</h1>
+						</div>
 						<p className="text-lg font-semibold text-green-600 mb-2">
-							₹{item.price}
+							₹{item.discountedPrice}
 							<span className="line-through text-gray-500 ml-2">
-								₹{item.originalPrice}
+								₹{item.actualPrice}
 							</span>
 						</p>
 						<p className="text-muted-foreground mb-6">{item.description}</p>
@@ -243,13 +185,9 @@ export default function SelectedItemPage() {
 						<div className="flex items-center gap-2 mb-4">
 							<Star className="w-5 h-5 text-yellow-500" />
 							<span className="text-sm font-medium">
-								{item.seller.rating} ({item.seller.verified ? 'Verified Seller' : 'Unverified'})
+								{item.rating || '4.5'} (Verified Seller)
 							</span>
 						</div>
-
-						<p className="text-sm text-muted-foreground mb-4">
-							Location: {item.location} | Posted: {item.postedTime}
-						</p>
 
 						<div className="flex gap-4">
 							<Button 
@@ -258,7 +196,12 @@ export default function SelectedItemPage() {
 							>
 								Get Contact Details
 							</Button>
-							<Button variant="outline">Add to Favorites</Button>
+							<Button 
+							  className={`border ${isFavorited ? 'bg-red-500 text-white' : 'bg-white text-red-500'} hover:bg-red-100`} 
+							  onClick={handleFavoriteClick}
+							>
+								{isFavorited ? 'Favorited' : 'Add to Favorites'}
+							</Button>
 						</div>
 					</div>
 				</div>
@@ -266,13 +209,11 @@ export default function SelectedItemPage() {
 				{/* Related Products Section */}
 				<div className="mt-12">
 					<div className="flex items-center gap-3 mb-4">
-						<div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
-							<Package className="w-6 h-6 text-white" />
-						</div>
+						<Package className="w-6 h-6 text-gray-700" />
 						<h2 className="text-3xl font-extrabold">More in {item.category}</h2>
 					</div>
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-						{products.map((product) => (
+						{relatedProducts.map((product) => (
 							<div key={product.id} className="mb-4">
 								<ProductCard product={product} />
 							</div>
@@ -282,16 +223,16 @@ export default function SelectedItemPage() {
 			</div>
 
 			{/* Modal for Contact Details */}
-			{isModalOpen && (
+			{isModalOpen && sellerDetails && (
 				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
 					<div className="bg-white rounded-lg shadow-lg p-6 w-96">
 						<h2 className="text-xl font-bold mb-4">Contact Details</h2>
-						<p className="mb-2"><strong>Name:</strong> Sarah Chen</p>
-						<p className="mb-2"><strong>Email:</strong> sarah.chen@example.com</p>
-						<p className="mb-2"><strong>Phone:</strong> +1 234 567 890</p>
-						<p className="mb-4"><strong>Address:</strong> 123 Main Campus, City, Country</p>
+						<p className="mb-2"><strong>Name:</strong> {sellerDetails.name}</p>
+						<p className="mb-2"><strong>Email:</strong> {sellerDetails.email}</p>
+						<p className="mb-2"><strong>Phone:</strong> {sellerDetails.phone}</p>
+						<p className="mb-4"><strong>Address:</strong> {sellerDetails.address}</p>
 						<button
-							onClick={handleCloseModal}
+							onClick={() => setIsModalOpen(false)}
 							className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
 						>
 							Close

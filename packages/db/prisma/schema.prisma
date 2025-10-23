@@ -37,6 +37,7 @@ model Item {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   sold           Boolean  @default(false)
+  description    String? // Optional description field for the item
 }
 
 // Ensure the User model exists and is linked to the Item model

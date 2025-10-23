@@ -33,3 +33,19 @@ export const uploadToS3 = async (file: Express.Multer.File): Promise<string> => 
     throw new Error('Failed to upload file to S3');
   }
 };
+
+// Add deleteFromS3 function
+export const deleteFromS3 = async (fileKey: string): Promise<void> => {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: fileKey,
+  };
+
+  try {
+    await s3.deleteObject(params).promise();
+    console.log(`File deleted successfully: ${fileKey}`);
+  } catch (error) {
+    console.error('Error deleting file from S3:', error);
+    throw new Error('Failed to delete file from S3');
+  }
+};

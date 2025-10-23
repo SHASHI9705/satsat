@@ -6,7 +6,10 @@ import { createItem } from '../controllers/itemController';
 import { updateItemSoldStatus } from '../controllers/itemController';
 import { fetchItems } from '../controllers/itemController';
 import { uploadMiddleware } from '../controllers/itemController';
-
+import { deleteItem } from '../controllers/itemController';
+import { fetchAllItems } from '../controllers/itemController';
+import { fetchItemById } from '../controllers/itemController';
+import { fetchSellerById } from '../controllers/itemController';
 
 const router: Router = express.Router();
 
@@ -23,5 +26,17 @@ router.put('/update-sold-status', updateItemSoldStatus);
 
 // Route to fetch all items
 router.get('/fetch', fetchItems);
+
+// Route to fetch all items
+router.get('/all', fetchAllItems);
+
+// Route to delete an item
+router.delete('/delete/:id', deleteItem);
+
+// Route to fetch an item by its ID
+router.get('/:id', fetchItemById);
+
+// Route to fetch seller details by their ID
+router.get('/seller/:id', fetchSellerById);
 
 export default router;

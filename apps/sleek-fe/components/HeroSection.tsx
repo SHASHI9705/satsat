@@ -3,6 +3,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Search, TrendingUp, Users, Shield } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 // import catImage from '../cat.png';
 
 
@@ -11,6 +12,7 @@ const stats: { label: string; value: string; icon: React.ComponentType<any>; }[]
 
 export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: string) => void; onCategorySelect: (category: string) => void; }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const router = useRouter(); // Initialize useRouter
 
   // deterministic seeded RNG (persisted to localStorage) to keep decorations stable across reloads
   function mulberry32(seed: number) {
@@ -81,8 +83,25 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
   }, []);
 
   const handleSearch = () => {
-    if (searchQuery.trim()) {
-      onSearch(searchQuery);
+    const categories = [
+      'All Categories',
+      'Clothes',
+      'Shoes',
+      'Books',
+      'Tech Products',
+      'Electronics',
+      'Instruments',
+      'Others'
+    ];
+
+    const matchedCategory = categories.find(
+      (category) => category.toLowerCase() === searchQuery.toLowerCase()
+    );
+
+    if (matchedCategory) {
+      router.push(`/allitems?category=${matchedCategory}`);
+    } else {
+      alert('No category found');
     }
   };
 

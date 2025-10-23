@@ -12,11 +12,13 @@ import {
   ShoppingBag,
   Zap
 } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 export function Header({ notificationCount = 0 }: { notificationCount?: number; }) {
   const [searchQuery, setSearchQuery] = useState('');
   const { user } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const router = useRouter(); // Initialize useRouter
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -39,6 +41,29 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
       document.removeEventListener('click', handleClickOutside);
     };
   }, []);
+
+  const handleSearch = () => {
+    const categories = [
+      'All Categories',
+      'Clothes',
+      'Shoes',
+      'Books',
+      'Tech Products',
+      'Electronics',
+      'Instruments',
+      'Others'
+    ];
+
+    const matchedCategory = categories.find(
+      (category) => category.toLowerCase() === searchQuery.toLowerCase()
+    );
+
+    if (matchedCategory) {
+      router.push(`/allitems?category=${matchedCategory}`);
+    } else {
+      alert('No category found');
+    }
+  };
 
   return (
     <header className="sticky py-4 top-0 z-50 w-full backdrop-blur-lg supports-[backdrop-filter]:bg-white ">
@@ -68,6 +93,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                 placeholder="Search electronics, books, furniture, and more..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()} // Trigger search on Enter key
                 className="pl-12 pr-4 h-11 w-full bg-gray-50 border-gray-200 rounded-xl hover:bg-gray-100 focus:bg-white transition-all duration-200 text-base"
               />
             </div>
@@ -142,6 +168,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
               placeholder="Search marketplace..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()} // Trigger search on Enter key
               className="pl-10 w-full"
             />
           </div>
