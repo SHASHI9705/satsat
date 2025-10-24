@@ -1,5 +1,8 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
+import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+
 
 // Firebase config (inlined from user-provided keys)
 const firebaseConfig = {
@@ -14,5 +17,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+let analytics;
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+}
+
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 export const provider = new GoogleAuthProvider();
+export { analytics };
