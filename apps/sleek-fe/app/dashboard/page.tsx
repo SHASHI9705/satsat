@@ -6,6 +6,7 @@ import { Card } from '../../components/ui/card';
 import { Plus, TrendingUp, Package, IndianRupee, Home, ShoppingBag, X } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
+import Loader from '../../components/ui/loader'; // Corrected loader import
 
 // Add Notification component
 const Notification = ({ message, onClose }) => (
@@ -25,6 +26,9 @@ export default function DashboardPage() {
   const [products, setProducts] = useState([]);
   const { user } = useAuth();
   const [notification, setNotification] = useState(null);
+  const [loading, setLoading] = useState({ submit: false, markAsSold: null }); // Add loading state
+  const [totalEarnings, setTotalEarnings] = useState(0); // Initialize total earnings
+  const [totalSales, setTotalSales] = useState(0); // Initialize total sales
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -63,6 +67,7 @@ export default function DashboardPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading((prev) => ({ ...prev, submit: true })); // Set loading for submit
 
     const formData = new FormData(e.target);
 
@@ -100,10 +105,15 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error creating item:', error);
       alert('An error occurred while creating the item. Please try again.');
+    } finally {
+      setLoading((prev) => ({ ...prev, submit: false })); // Reset loading for submit
     }
   };
 
   const handleMarkAsSold = async (id) => {
+    const product = products.find((product) => product.id === id); // Find the product being marked as sold
+    setLoading((prev) => ({ ...prev, markAsSold: id })); // Set loading for mark as sold
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/delete/${id}`, {
         method: 'DELETE',
@@ -111,6 +121,9 @@ export default function DashboardPage() {
 
       if (response.ok) {
         setProducts((prev) => prev.filter((product) => product.id !== id));
+        if (product) {
+          setTotalSales((prev) => prev + 1); // Increment total sales by 1
+        }
         showNotification('Item deleted successfully!');
       } else {
         console.error('Failed to delete item');
@@ -119,8 +132,12 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error deleting item:', error);
       alert('An error occurred while deleting the item. Please try again.');
+    } finally {
+      setLoading((prev) => ({ ...prev, markAsSold: null })); // Reset loading for mark as sold
     }
   };
+
+  const activeListings = products.filter((product) => !product.sold).length; // Calculate active listings dynamically
 
   return (
     <>
@@ -152,7 +169,7 @@ export default function DashboardPage() {
                 <Package className="w-10 h-10 text-orange-500" />
                 <div>
                   <h2 className="text-xl font-bold">Products</h2>
-                  <p className="text-gray-600">24 Active Listings</p>
+                  <p className="text-gray-600">{activeListings} Active Listings</p> {/* Use dynamic count */}
                 </div>
               </div>
             </Card>
@@ -162,7 +179,7 @@ export default function DashboardPage() {
                 <IndianRupee className="w-10 h-10 text-green-500" />
                 <div>
                   <h2 className="text-xl font-bold">Earnings</h2>
-                  <p className="text-gray-600">₹12,450 This Month</p>
+                  <p className="text-gray-600">₹{totalEarnings} This Month</p> {/* Use dynamic earnings */}
                 </div>
               </div>
             </Card>
@@ -172,7 +189,7 @@ export default function DashboardPage() {
                 <TrendingUp className="w-10 h-10 text-blue-500" />
                 <div>
                   <h2 className="text-xl font-bold">Sales</h2>
-                  <p className="text-gray-600">18 Successful Sales</p>
+                  <p className="text-gray-600">{totalSales} Successful Sales</p> {/* Use dynamic sales count */}
                 </div>
               </div>
             </Card>
@@ -264,8 +281,9 @@ export default function DashboardPage() {
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
+                    disabled={loading.submit} // Disable button while loading
                   >
-                    Submit
+                    {loading.submit ? <Loader /> : 'Submit'}
                   </Button>
                 </form>
               </div>
@@ -312,8 +330,9 @@ export default function DashboardPage() {
                     <Button
                       className="mt-4 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-medium py-2 px-4 rounded-lg"
                       onClick={() => handleMarkAsSold(product.id)}
+                      disabled={loading.markAsSold === product.id} // Disable button while loading
                     >
-                      Mark as Sold
+                      {loading.markAsSold === product.id ? <Loader /> : 'Mark as Sold'}
                     </Button>
                   )}
                 </div>

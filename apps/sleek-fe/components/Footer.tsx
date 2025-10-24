@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <div className="w-12 h-12 bg-white border border-black flex items-center justify-center">
+              <div className="w-12 h-12 bg-white rounded border border-black flex items-center justify-center">
                 <img src="/logo.svg" alt="SleekRoad Logo" className="w-10 h-10 object-contain" />
               </div>
               <span className="font-bold text-xl">SleekRoad</span>
@@ -39,16 +39,16 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="hover:text-white cursor-pointer">
-                <Link href="/help">Help Center</Link>
+                <Link href="/comp/help">Help Center</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/safety">Safety Tips</Link>
+                <Link href="/comp/safety">Safety Tips</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/contact">Contact Us</Link>
+                <Link href="/comp/contact">Contact Us</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/report">Report Issue</Link>
+                <Link href="/comp/report">Report Issue</Link>
               </li>
             </ul>
           </div>
@@ -57,16 +57,16 @@ export function Footer() {
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="hover:text-white cursor-pointer">
-                <Link href="/about">About Us</Link>
+                <Link href="/comp/about">About Us</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/privacy">Privacy Policy</Link>
+                <Link href="/comp/privacy">Privacy Policy</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/terms">Terms of Service</Link>
+                <Link href="/comp/terms">Terms of Service</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/careers">Careers</Link>
+                <Link href="/comp/careers">Careers</Link>
               </li>
             </ul>
           </div>

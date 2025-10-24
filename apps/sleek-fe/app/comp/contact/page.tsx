@@ -1,10 +1,10 @@
 "use client"
 
 import React, { useState } from 'react';
-import { Card } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-import { Textarea } from '../../components/ui/textarea';
+import { Card } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { Textarea } from '../../../components/ui/textarea';
 import { Mail } from 'lucide-react';
 
 export default function ContactUsPage({ onBack }: { onBack?: () => void }) {

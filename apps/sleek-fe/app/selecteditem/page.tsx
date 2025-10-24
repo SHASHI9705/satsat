@@ -4,16 +4,20 @@ import { Button } from '../../components/ui/button';
 import { Star, Package, Home, ArrowLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../../components/ProductCard';
-import { useSearchParams } from 'next/navigation'; // Import useSearchParams
+import { useRouter,useSearchParams } from 'next/navigation'; // Import useSearchParams
+
 
 export default function SelectedItemPage() {
 	const searchParams = useSearchParams();
 	const itemId = searchParams.get('id'); // Get the item ID from query parameters
 
+	const router = useRouter();
+	
+
 	const [item, setItem] = useState(null);
 	const [relatedProducts, setRelatedProducts] = useState([]);
 	const [currentImageIndex, setCurrentImageIndex] = useState(0);
-	const images = []; // Removed dummy image URLs
+	const [images, setImages] = useState([]); // Initialize images state
 
 	const [products, setProducts] = useState(relatedProducts);
 	const [page, setPage] = useState(1);
@@ -115,6 +119,12 @@ export default function SelectedItemPage() {
 	}, [itemId]);
 
 	useEffect(() => {
+		if (item?.images) {
+			setImages(item.images); // Populate images after fetching item details
+		}
+	}, [item]);
+
+	useEffect(() => {
 		const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
 		setIsFavorited(favorites.includes(itemId));
 	}, [itemId]);
@@ -135,6 +145,10 @@ export default function SelectedItemPage() {
 	if (!item) {
 		return <p>Loading...</p>; // Show a loading state while fetching data
 	}
+
+	const handleViewDetails = (productId) => {
+		router.push(`/selecteditem?id=${productId}`);
+	};
 
 	return (
 		<section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
@@ -159,13 +173,35 @@ export default function SelectedItemPage() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 					{/* Image Section */}
-					<div className="flex justify-center items-center relative">
-						<div className="relative w-full max-w-lg overflow-hidden rounded-lg">
-							<img
-								src={item.images?.[0] || '/placeholder-image.png'}
-								alt={item.name}
-								className="rounded-lg shadow-md w-full h-96 object-contain mx-auto"
-							/>
+					<div className="flex-verticle justify-center items-center relative">
+						<div
+							className="relative w-full max-w-lg h-96 overflow-hidden rounded-lg"
+							onTouchStart={handleTouchStart} // Attach touch start event
+							onTouchEnd={handleTouchEnd} // Attach touch end event
+						>
+							{images.map((image, index) => (
+								<img
+									key={index}
+									src={image}
+									alt={`${item.name} - ${index + 1}`}
+									className={`absolute inset-0 rounded-lg shadow-md w-full h-96 object-contain transition-opacity duration-300 ${
+										index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+									}`}
+								/>
+							))}
+						</div>
+
+						{/* Move the indicator below the image box */}
+						<div className="flex justify-center mt-4 gap-2"> {/* Added margin-top to separate from the image box */}
+							{images.map((_, index) => (
+								<button
+									key={index}
+									onClick={() => setCurrentImageIndex(index)}
+									className={`w-3 h-3 rounded-full ${
+										index === currentImageIndex ? 'bg-blue-400' : 'bg-gray-400'
+									}`}
+								/>
+							))}
 						</div>
 					</div>
 
@@ -215,7 +251,26 @@ export default function SelectedItemPage() {
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
 						{relatedProducts.map((product) => (
 							<div key={product.id} className="mb-4">
-								<ProductCard product={product} />
+								<ProductCard 
+									product={{
+									id: product.id,
+									title: product.name,
+									price: product.discountedPrice,
+									originalPrice: product.actualPrice,
+									image: product.images?.[0] || '/placeholder-image.png', // Fallback image
+									condition: 'Good', // Static condition for now
+									seller: {
+										name: product.user?.name || 'Unknown Seller',
+										rating: parseFloat((Math.random() * (5 - 4) + 4).toFixed(1)),
+										verified: false // Static verified status for now
+									},
+									location: product.category,
+									postedTime: 'Just now', // Static posted time for now
+									category: product.category,
+									isFavorited: false // Static favorite status for now
+								}}
+								onViewDetails={() => handleViewDetails(product.id)}
+								 />
 							</div>
 						))}
 					</div>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Card } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
-import { Badge } from '../../components/ui/badge';
+import { Card } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
+import { Badge } from '../../../components/ui/badge';
 import { Search, HelpCircle, BookOpen, MessageCircle } from 'lucide-react';
 
 export default function HelpCenterPage({ onBack }: { onBack?: () => void }) {

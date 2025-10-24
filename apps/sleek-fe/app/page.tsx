@@ -50,29 +50,7 @@ const features = [
   }
 ];
 
-const testimonials = [
-  {
-    name: 'Jessica Park',
-    role: 'Computer Science Student',
-    content: 'Sold my old textbooks for next semester\'s tuition. The platform makes it so easy to connect with other students!',
-    rating: 5,
-    avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612e605?w=40&h=40&fit=crop&crop=face'
-  },
-  {
-    name: 'Michael Chen',
-    role: 'Business Major',
-    content: 'Found the perfect desk for my dorm room at half the retail price. Love supporting fellow students!',
-    rating: 5,
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&h=40&fit=crop&crop=face'
-  },
-  {
-    name: 'Amanda Rodriguez',
-    role: 'Engineering Student',
-    content: 'The tutoring marketplace helped me find a great math tutor. My grades improved significantly!',
-    rating: 5,
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&h=40&fit=crop&crop=face'
-  }
-];
+
 
 export default function App() {
   return (

@@ -122,8 +122,10 @@ export function ProductCard({ product, onFavorite, onMessage, onViewDetails }: P
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <span className="text-xs text-muted-foreground">★</span>
-            <span className="text-xs font-medium">{product.seller.rating}</span>
+            <span className="text-xs text-muted-foreground">
+              
+            </span>
+            <span className="text-xs font-medium">{product.seller?.rating ?? 'N/A'} {/* Safely access rating with a fallback */}</span>
           </div>
         </div>
 

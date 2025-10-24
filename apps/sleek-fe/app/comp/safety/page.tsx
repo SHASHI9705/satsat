@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from '../../components/ui/card';
+import { Card } from '../../../components/ui/card';
 import { Shield, CheckCircle, XCircle } from 'lucide-react';
 
 export default function SafetyTipsPage({ onBack }: { onBack?: () => void }) {

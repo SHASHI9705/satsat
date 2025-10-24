@@ -1,15 +1,15 @@
 "use client"
 
 import React, { useState } from 'react';
-import { Card } from '../../components/ui/card';
-import { Input } from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
-import { Textarea } from '../../components/ui/textarea';
-import { Badge } from '../../components/ui/badge';
+import { Card } from '../../../components/ui/card';
+import { Input } from '../../../components/ui/input';
+import { Button } from '../../../components/ui/button';
+import { Textarea } from '../../../components/ui/textarea';
+import { Badge } from '../../../components/ui/badge';
 import { AlertTriangle } from 'lucide-react';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase/firebaseConfig';
-import { useAuth } from '../../firebase/AuthProvider';
+import { db } from '../../../firebase/firebaseConfig';
+import { useAuth } from '../../../firebase/AuthProvider';
 
 export default function ReportIssuePage({ onBack }: { onBack?: () => void }) {
   const [status, setStatus] = useState<'idle'|'sending'|'sent'|'error'>('idle');
