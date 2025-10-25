@@ -4,6 +4,7 @@ import { Button } from './ui/button';
 import { Badge } from './ui/badge';
 import { Flame, ChevronRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useRouter,useSearchParams } from 'next/navigation';
 
 interface FeaturedProductsProps {
 	onFavorite?: (productId: string) => void;
@@ -13,6 +14,8 @@ interface FeaturedProductsProps {
 export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProps) {
 	const [selectedCategory, setSelectedCategory] = useState('All Categories');
 	const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+	const router = useRouter();
+
 
 	useEffect(() => {
 		const fetchFeaturedProducts = async () => {
@@ -60,6 +63,10 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 		selectedCategory === 'All Categories'
 			? featuredProducts
 			: featuredProducts.filter((product) => product.category === selectedCategory);
+
+	const handleViewDetails = (productId) => {
+		router.push(`/selecteditem?id=${productId}`);
+	};
 
 	return (
 		<section className="py-4 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
@@ -120,6 +127,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 									...product,
 									rating: product.rating || 4.5, // Ensure a fallback value for rating
 								}}
+								onViewDetails={() => handleViewDetails(product.id)}
 								onFavorite={onFavorite}
 								onMessage={onMessage}
 							/>

@@ -66,7 +66,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
   };
 
   return (
-    <header className="sticky py-4 top-0 z-50 w-full backdrop-blur-lg supports-[backdrop-filter]:bg-white ">
+    <header className=" w-full sticky py-2 top-0 z-50  backdrop-blur-lg supports-[backdrop-filter]:bg-white/30 ">
       <div className="container mx-auto px-4">
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}

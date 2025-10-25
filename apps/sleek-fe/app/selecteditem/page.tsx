@@ -5,7 +5,7 @@ import { Star, Package, Home, ArrowLeft } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../../components/ProductCard';
 import { useRouter,useSearchParams } from 'next/navigation'; // Import useSearchParams
-
+import Loader from '../../components/Loader';
 
 export default function SelectedItemPage() {
 	const searchParams = useSearchParams();
@@ -24,6 +24,7 @@ export default function SelectedItemPage() {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [sellerDetails, setSellerDetails] = useState(null); // State to store seller details
 	const [isFavorited, setIsFavorited] = useState(false); // State to track if the item is favorited
+	const [isLoading, setIsLoading] = useState(true); // Add loading state
 
 	const getRandomProductFromRelated = () => {
 		const randomIndex = Math.floor(Math.random() * relatedProducts.length);
@@ -110,6 +111,8 @@ export default function SelectedItemPage() {
 				}
 			} catch (error) {
 				console.error('Error fetching item details:', error);
+			} finally {
+				setIsLoading(false); // Stop loader after fetching data
 			}
 		};
 
@@ -141,6 +144,14 @@ export default function SelectedItemPage() {
 			setIsFavorited(true);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<Loader />
+			</div>
+		);
+	}
 
 	if (!item) {
 		return <p>Loading...</p>; // Show a loading state while fetching data

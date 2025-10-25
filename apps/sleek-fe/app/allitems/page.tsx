@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { Package } from 'lucide-react';
 import { Home } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
+import Loader from '../../components/Loader';
 
 // Utility function to shuffle an array
 const shuffleArray = (array) => {
@@ -19,8 +20,17 @@ const shuffleArray = (array) => {
 export default function AllItemsPage() {
 	const [products, setProducts] = useState([]);
 	const [selectedCategory, setSelectedCategory] = useState("All Categories");
+	const [isLoading, setIsLoading] = useState(true); // Add loading state
 	const router = useRouter();
 	const searchParams = useSearchParams(); // Initialize useSearchParams
+
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setIsLoading(false);
+		}, 1000); // Show loader for 1 second
+
+		return () => clearTimeout(timer);
+	}, []);
 
 	useEffect(() => {
 		const categoryFromQuery = searchParams.get('category'); // Get category from query params
@@ -47,11 +57,21 @@ export default function AllItemsPage() {
 				}
 			} catch (error) {
 				console.error('Error fetching items:', error);
+			} finally {
+				setIsLoading(false); // Stop loader after items are fetched
 			}
 		};
 
 		fetchItems();
 	}, []);
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center">
+				<Loader />
+			</div>
+		);
+	}
 
 	const handleCategoryClick = (category) => {
 		setSelectedCategory(category);

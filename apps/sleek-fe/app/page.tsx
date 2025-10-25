@@ -12,6 +12,7 @@ import { AuthProvider, useAuth } from '../firebase/AuthProvider';
 import Link from 'next/link';
 import { Footer } from '../components/Footer';
 import { FeatureCardsCTA } from '../components/FeatureCardsCTA';
+import Loader from '../components/Loader';
 
 import { 
   Shield, 
@@ -50,18 +51,25 @@ const features = [
   }
 ];
 
-
-
 export default function App() {
   return (
-      <AppContent />
+    <AppContent />
   );
 }
 
 function AppContent() {
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const { user } = useAuth();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 1000); // Show loader for 1 second
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Use effect to automatically move to dashboard when user signs in
   useEffect(() => {
@@ -90,36 +98,42 @@ function AppContent() {
     console.log('Message seller for product:', productId);
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background background-catty">
+    <div className="min-h-screen bg-white">
       <Header 
         notificationCount={3}
       />
 
-    <main>
-      {/* Hero Section */}
-      <HeroSection 
-        onSearch={handleSearch}
-        onCategorySelect={handleCategorySelect}
-      />
+      <main>
+        {/* Hero Section */}
+        <HeroSection 
+          onSearch={handleSearch}
+          onCategorySelect={handleCategorySelect}
+        />
 
-      {/* Featured Products */}
-      <FeaturedProducts 
-        onFavorite={handleFavorite}
-        onMessage={handleMessage}
-      />
+        {/* Featured Products */}
+        <FeaturedProducts 
+          onFavorite={handleFavorite}
+          onMessage={handleMessage}
+        />
 
-      {/* Category Grid */}
-      <CategoryGrid onCategorySelect={handleCategorySelect} />
+        {/* Category Grid */}
+        <CategoryGrid onCategorySelect={handleCategorySelect} />
 
-      
+        {/* Feature cards + CTA: only show to unauthenticated users on home */}
+        {!user && <FeatureCardsCTA />}
+      </main>
 
-      {/* Feature cards + CTA: only show to unauthenticated users on home */}
-      {!user && <FeatureCardsCTA />}
-    </main>
-
-    {/* Footer */}
-    <Footer />
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
