@@ -7,6 +7,7 @@ import { Plus, TrendingUp, Package, IndianRupee, Home, ShoppingBag, X } from 'lu
 import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
 import Loader from '../../components/ui/loader'; // Corrected loader import
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 // Add Notification component
 const Notification = ({ message, onClose }) => (
@@ -22,6 +23,7 @@ const Notification = ({ message, onClose }) => (
 );
 
 export default function DashboardPage() {
+  const router = useRouter(); // Initialize router
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const { user } = useAuth();
@@ -57,6 +59,10 @@ export default function DashboardPage() {
   }, []);
 
   const toggleModal = () => {
+    if (!user) {
+      router.push('/signin'); // Redirect to signup page if user is not signed in
+      return;
+    }
     setIsModalOpen((prev) => !prev);
   };
 

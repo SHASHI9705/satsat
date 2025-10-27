@@ -1,11 +1,12 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { useAuth } from "../../firebase/AuthProvider";
+import { useRouter } from 'next/navigation'; // Import useRouter
 
 type FormValues = {
   email: string;
@@ -14,6 +15,8 @@ type FormValues = {
 
 export default function SignInPage({ onBack }: { onBack?: () => void }) {
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>();
+  const router = useRouter(); // Initialize router
+  const [notification, setNotification] = useState<string | null>(null); // Add notification state
 
   const { signIn } = useAuth();
   const { signInWithGoogle } = useAuth();
@@ -21,15 +24,41 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
   const onSubmit = async (data: FormValues) => {
     try {
       await signIn(data.email, data.password);
-      alert("Signed in successfully — demo flow");
+      setNotification('Signed in successfully!'); // Set success notification
+      setTimeout(() => {
+        setNotification(null); // Clear notification after 2 seconds
+        router.push('/'); // Redirect to the homepage
+      }, 2000);
     } catch (err: any) {
       console.error(err);
-      alert(err?.message || "Sign in failed");
+      setNotification(err?.message || 'Sign in failed'); // Set error notification
+      setTimeout(() => setNotification(null), 3000); // Clear notification after 3 seconds
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithGoogle(); // Perform Google sign-in
+      setNotification('Signed in successfully with Google!'); // Set success notification
+      setTimeout(() => {
+        setNotification(null); // Clear notification after 2 seconds
+        router.push('/'); // Redirect to the homepage
+      }, 2000);
+    } catch (err: any) {
+      console.error(err);
+      setNotification(err?.message || 'Google sign-in failed'); // Set error notification
+      setTimeout(() => setNotification(null), 3000); // Clear notification after 3 seconds
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
+      {notification && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+          {notification}
+        </div>
+      )}
+
       <Card className="p-6 max-w-md w-full border border-black">
         <div className="mb-4 text-center">
           <Badge className="badge-brand text-black px-4 py-2">Welcome Back</Badge>
@@ -40,7 +69,7 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
           <Button
             variant="outline"
             className="w-full flex items-center justify-center bg-gray-50 hover:bg-gray-100 hover:scale-105 transition-transform border border-gray-300"
-            onClick={() => signInWithGoogle()}
+            onClick={handleGoogleSignIn} // Updated to use handleGoogleSignIn
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

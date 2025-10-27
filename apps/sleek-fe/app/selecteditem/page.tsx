@@ -6,13 +6,14 @@ import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../../components/ProductCard';
 import { useRouter,useSearchParams } from 'next/navigation'; // Import useSearchParams
 import Loader from '../../components/Loader';
+import { useAuth } from '../../firebase/AuthProvider'; // Import useAuth
 
 export default function SelectedItemPage() {
 	const searchParams = useSearchParams();
 	const itemId = searchParams.get('id'); // Get the item ID from query parameters
 
 	const router = useRouter();
-	
+	const { user } = useAuth(); // Get user from useAuth
 
 	const [item, setItem] = useState(null);
 	const [relatedProducts, setRelatedProducts] = useState([]);
@@ -80,6 +81,11 @@ export default function SelectedItemPage() {
 	};
 
 	const handleGetContactDetails = async () => {
+		if (!user) {
+			router.push('/signin'); // Redirect to signup page if user is not signed in
+			return;
+		}
+
 		try {
 			const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/seller/${item.userId}`);
 			if (response.ok) {

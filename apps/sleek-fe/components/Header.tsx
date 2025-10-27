@@ -13,20 +13,31 @@ import {
   Zap
 } from 'lucide-react';
 import { useRouter } from 'next/navigation'; // Import useRouter
+import { User, BarChart, FileText, Lock, Bug, LogOut } from 'lucide-react';
 
 export function Header({ notificationCount = 0 }: { notificationCount?: number; }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user } = useAuth();
+  const { user, signOutUser } = useAuth(); // Use signOutUser instead of logout
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar visibility
   const router = useRouter(); // Initialize useRouter
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const handleLogout = () => {
-    // Add logout logic here
-    console.log('User logged out');
+  const toggleSidebar = () => {
+    console.log('Toggling sidebar:', !isSidebarOpen); // Debug log for state
+    setIsSidebarOpen((prev) => !prev);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOutUser(); // Call the correct logout method
+      router.push('/'); // Redirect to the homepage after logout
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
   };
 
   const handleClickOutside = (event) => {
@@ -65,8 +76,26 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
     }
   };
 
+  useEffect(() => {
+    const handleClickOutsideSidebar = (event) => {
+      if (
+        isSidebarOpen &&
+        !event.target.closest('.sidebar') &&
+        !event.target.closest('.menu-button')
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutsideSidebar);
+
+    return () => {
+      document.removeEventListener('click', handleClickOutsideSidebar);
+    };
+  }, [isSidebarOpen]);
+
   return (
-    <header className=" w-full sticky py-2 top-0 z-50  backdrop-blur-lg supports-[backdrop-filter]:bg-white/30 ">
+    <header className="w-full sticky py-2 top-0 z-50 backdrop-blur-lg supports-[backdrop-filter]:bg-white/30">
       <div className="container mx-auto px-4">
         <div className="flex h-18 items-center justify-between">
           {/* Logo */}
@@ -86,7 +115,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-6 hidden md:block">
+          <div className="flex-1 max-w-2xl mx-6 hidden md:block"> {/* Hide search bar on small screens */}
             <div className="relative group">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-hover:text-gray-600 transition-colors" />
               <Input
@@ -152,28 +181,87 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
               )}
             </div>
 
-            <Link href="/browse">
-              <Button variant="ghost" size="icon" className="md:hidden" aria-label="Menu">
-                <Menu className="w-5 h-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-
-        {/* Mobile Search */}
-        <div className="pb-4 md:hidden">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search marketplace..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()} // Trigger search on Enter key
-              className="pl-10 w-full"
-            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden bg-green-200"
+              aria-label="Menu"
+              onClick={toggleSidebar} // Open sidebar on click
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
           </div>
         </div>
       </div>
+
+      {/* Sidebar */}
+      {isSidebarOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end ">
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50"
+            onClick={toggleSidebar} // Close sidebar when clicking outside
+          ></div>
+          <div
+            className={`w-64 bg-gradient-to-r from-green-400 to-green-700 h-full shadow-lg transform transition-transform duration-700 will-change-transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} // Added will-change for smoother animation
+          >
+            <div className="p-4 border-b flex flex-col items-center bg-gradient-to-r from-green-400 to-green-700"> {/* Centered content */}
+              {user?.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt="Profile"
+                  className="w-16 h-16 rounded-full border border-black" // Circular profile photo with black border
+                />
+              ) : (
+                <div className="bg-gradient-to-r from-green-400 to-green-700 w-16 h-16 rounded-full border border-black flex items-center justify-center bg-gray-200">
+                  <span className="text-lg font-bold text-gray-600">
+                    {user?.email?.charAt(0).toUpperCase() || 'U'}
+                  </span>
+                </div>
+              )}
+              <h2 className="text-xl font-bold mt-2 ">Menu</h2>
+            </div>
+            <div className="p-4 space-y-2 bg-gradient-to-r from-green-400 to-green-700">
+              <Link href="/profile">
+                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                  <User className="mr-3 w-5 h-5" />
+                  My Profile
+                </div>
+              </Link>
+              <Link href="/dashboard">
+                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                  <BarChart className="mr-3 w-5 h-5" />
+                  Dashboard
+                </div>
+              </Link>
+              <Link href="/terms">
+                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                  <FileText className="mr-3 w-5 h-5" />
+                  Terms
+                </div>
+              </Link>
+              <Link href="/privacy-policy">
+                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                  <Lock className="mr-3 w-5 h-5" />
+                  Privacy Policy
+                </div>
+              </Link>
+              <Link href="/report-issue">
+                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                  <Bug className="mr-3 w-5 h-5" />
+                  Report Issue
+                </div>
+              </Link>
+              <div
+                onClick={handleLogout}
+                className="mb-2 flex items-center px-4 py-3 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-lg shadow-md hover:from-red-600 hover:to-red-800 cursor-pointer font-medium"
+              >
+                <LogOut className="mr-3 w-5 h-5" />
+                Logout
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
