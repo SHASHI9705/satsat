@@ -123,7 +123,7 @@ export function CategoryGrid({ onCategorySelect }: CategoryGridProps) {
   };
 
   return (
-    <section className="py-8 bg-gradient-to-br from-orange-120 to-red-120 dark:from-orange-950/10 dark:to-red-950/10">
+    <section className="hidden sm:block py-8 bg-gradient-to-br from-orange-120 to-red-120 dark:from-orange-950/10 dark:to-red-950/10">
       <div className="container mx-auto px-4">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-2">Browse Categories</h2>

@@ -79,21 +79,21 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 						</div>
 						<div>
 							<h2 className="text-3xl font-bold">Trending Now</h2>
-							<p className="text-muted-foreground">
+							<p className="text-muted-foreground hidden sm:block">
 								Hot picks from the campus community
 							</p>
 						</div>
 					</div>
-					<a href="/allitems">
-						<Button variant="outline" className="gap-2 group">
-							View All
-							<ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-						</Button>
-					</a>
+					<a href="/allitems" className="hidden sm:block">
+                        <Button variant="outline" className="gap-2 group">
+                            View All
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </Button>
+                    </a>
 				</div>
 
 				{/* Categories Line */}
-				<div className="flex py-2 gap-3 overflow-x-auto pb-4 justify-center">
+				<div className="flex py-2 gap-3 overflow-x-auto pb-4 justify-start pl-6">
 					{[
 						'All Categories',
 						'Clothes',
@@ -152,7 +152,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 						<h3 className="text-2xl font-bold mb-2">
 							Ready to start selling?
 						</h3>
-						<p className="text-muted-foreground mb-6">
+						<p className="text-muted-foreground mb-6 hidden sm:block">
 							Join thousands of students earning money by selling items they no
 							longer need.
 						</p>

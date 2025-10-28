@@ -196,7 +196,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
 
       {/* Sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end ">
+        <div className="h-full fixed inset-0 z-50 flex justify-end ">
           <div
             className="fixed inset-0 bg-black bg-opacity-50"
             onClick={toggleSidebar} // Close sidebar when clicking outside
@@ -222,31 +222,31 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
             </div>
             <div className="p-4 space-y-2 bg-gradient-to-r from-green-400 to-green-700">
               <Link href="/profile">
-                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <User className="mr-3 w-5 h-5" />
                   My Profile
                 </div>
               </Link>
               <Link href="/dashboard">
-                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <BarChart className="mr-3 w-5 h-5" />
                   Dashboard
                 </div>
               </Link>
               <Link href="/terms">
-                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <FileText className="mr-3 w-5 h-5" />
                   Terms
                 </div>
               </Link>
               <Link href="/privacy-policy">
-                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <Lock className="mr-3 w-5 h-5" />
                   Privacy Policy
                 </div>
               </Link>
               <Link href="/report-issue">
-                <div className="mb-2 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
+                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <Bug className="mr-3 w-5 h-5" />
                   Report Issue
                 </div>
@@ -258,6 +258,8 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                 <LogOut className="mr-3 w-5 h-5" />
                 Logout
               </div>
+              <div className='h-80'></div>
+              <div className='h-80'></div>
             </div>
           </div>
         </div>

@@ -11,13 +11,19 @@ export function Footer() {
                 <img src="/logo.svg" alt="SleekRoad Logo" className="w-10 h-10 object-contain" />
               </div>
               <span className="font-bold text-xl">SleekRoad</span>
+              <a
+                href="/download"
+                className="ml-4 px-4 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-md hover:from-green-500 hover:to-green-700 transition-all"
+              >
+                Download App
+              </a>
             </div>
-            <p className="text-gray-400 text-sm">
+            <p className="text-gray-400 text-sm hidden sm:block">
               A modern marketplace connecting college students and communities.
             </p>
           </div>
           
-          <div>
+          <div className='hidden sm:block'>
             <h4 className="font-semibold mb-4">Marketplace</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="hover:text-white cursor-pointer">
@@ -35,7 +41,7 @@ export function Footer() {
             </ul>
           </div>
           
-          <div>
+          <div className='hidden sm:block'>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="hover:text-white cursor-pointer">
@@ -53,7 +59,7 @@ export function Footer() {
             </ul>
           </div>
           
-          <div>
+          <div className='hidden sm:block'>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-sm text-gray-400">
               <li className="hover:text-white cursor-pointer">
@@ -73,7 +79,7 @@ export function Footer() {
         </div>
         
         <div className="border-t border-gray-200 mt-8 pt-8 text-center text-sm text-gray-500">
-          <p>&copy; 2024 SleekRoad. All rights reserved. Made for local communities.</p>
+          <p>&copy; 2024 SleekRoad. All rights reserved. <span className='hidden sm:block'>Made for local communities.</span></p>
         </div>
       </div>
     </footer>

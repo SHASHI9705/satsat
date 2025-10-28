@@ -8,6 +8,13 @@ import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
 import Loader from '../../components/ui/loader'; // Corrected loader import
 import { useRouter } from 'next/navigation'; // Import useRouter
+import Razorpay from 'razorpay';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 // Add Notification component
 const Notification = ({ message, onClose }) => (
@@ -71,49 +78,90 @@ export default function DashboardPage() {
     setTimeout(() => setNotification(null), 2000); // Auto-hide after 2 seconds
   };
 
-  const handleSubmit = async (e) => {
+  const loadRazorpayScript = () => {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => reject(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const handlePaymentAndSubmit = async (e) => {
     e.preventDefault();
-    setLoading((prev) => ({ ...prev, submit: true })); // Set loading for submit
+    setLoading((prev) => ({ ...prev, submit: true }));
 
     const formData = new FormData(e.target);
-
-    // Append userId to the FormData
     const user = JSON.parse(localStorage.getItem('user'));
+
     if (user && user.id) {
       formData.append('userId', user.id);
     } else {
       console.error('User details not found in local storage');
+      setLoading((prev) => ({ ...prev, submit: false }));
+      return;
     }
 
-    const actualPriceValue = formData.get('actualPrice');
-    const discountedPriceValue = formData.get('discountedPrice');
+    const isRazorpayLoaded = await loadRazorpayScript();
 
-    const actualPrice = actualPriceValue && typeof actualPriceValue === 'string' ? parseFloat(actualPriceValue) : 0;
-    const discountedPrice = discountedPriceValue && typeof discountedPriceValue === 'string' ? parseFloat(discountedPriceValue) : 0;
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        console.error('Failed to create item');
-        alert('Failed to create item. Please try again.');
-        return;
-      }
-
-      const data = await response.json();
-      console.log('Item created successfully:', data);
-      setProducts((prev) => [...prev, data.item]);
-      toggleModal();
-      showNotification('Item created successfully!');
-    } catch (error) {
-      console.error('Error creating item:', error);
-      alert('An error occurred while creating the item. Please try again.');
-    } finally {
-      setLoading((prev) => ({ ...prev, submit: false })); // Reset loading for submit
+    if (!isRazorpayLoaded) {
+      alert('Failed to load Razorpay. Please try again.');
+      setLoading((prev) => ({ ...prev, submit: false }));
+      return;
     }
+
+    const options = {
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
+      amount: 700, // Amount in paise (7 INR)
+      currency: 'INR',
+      name: 'SleekRoad',
+      description: 'Add Item Fee',
+      handler: async (response) => {
+        try {
+          const paymentId = response.razorpay_payment_id;
+          console.log('Payment successful:', paymentId);
+
+          const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+            method: 'POST',
+            body: formData,
+          });
+
+          if (!createResponse.ok) {
+            console.error('Failed to create item');
+            alert('Failed to create item. Please try again.');
+            return;
+          }
+
+          const data = await createResponse.json();
+          console.log('Item created successfully:', data);
+          setProducts((prev) => [...prev, data.item]);
+          toggleModal();
+          showNotification('Item created successfully!');
+        } catch (error) {
+          console.error('Error creating item:', error);
+          alert('An error occurred while creating the item. Please try again.');
+        } finally {
+          setLoading((prev) => ({ ...prev, submit: false }));
+        }
+      },
+      prefill: {
+        name: user.name,
+        email: user.email,
+      },
+      theme: {
+        color: '#3399cc',
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on('payment.failed', (response) => {
+      console.error('Payment failed:', response.error);
+      alert('Payment failed. Please try again.');
+      setLoading((prev) => ({ ...prev, submit: false }));
+    });
+
+    rzp.open();
   };
 
   const handleMarkAsSold = async (id) => {
@@ -235,7 +283,7 @@ export default function DashboardPage() {
                   <X className="w-5 h-5" />
                 </button>
                 <h2 className="text-xl font-bold mb-4">Add New Product</h2>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handlePaymentAndSubmit}>
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Upload Photos</label>
                     <input
