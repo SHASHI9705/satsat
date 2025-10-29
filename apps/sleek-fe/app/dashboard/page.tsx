@@ -312,6 +312,7 @@ export default function DashboardPage() {
                       <option>Shoes</option>
                       <option>Books</option>
                       <option>Instruments</option>
+                      <option>Tutoring & Services</option>
                       <option>Others</option>
                     </select>
                   </div>

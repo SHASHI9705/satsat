@@ -102,6 +102,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 						'Tech Products',
 						'Electronics',
 						'Instruments',
+						'Tutoring & Services',
 						'Others'
 					].map((category, index) => (
 						<button

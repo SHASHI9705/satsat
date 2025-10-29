@@ -62,6 +62,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
       'Tech Products',
       'Electronics',
       'Instruments',
+      'Tutoring & Services',
       'Others'
     ];
 

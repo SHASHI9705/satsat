@@ -114,7 +114,7 @@ export default function AllItemsPage() {
 
 				{/* Categories Line */}
 				<div className="flex py-2 gap-3 overflow-x-auto pb-4 justify-center">
-					{["All Categories", "Clothes", "Shoes", "Books", "Tech Products", "Electronics", "Instruments", "Others"].map((category, index) => (
+					{["All Categories", "Clothes", "Shoes", "Books", "Tech Products", "Electronics", "Instruments","Tutoring & Services", "Others"].map((category, index) => (
 						<button
 							key={index}
 							onClick={() => handleCategoryClick(category)}

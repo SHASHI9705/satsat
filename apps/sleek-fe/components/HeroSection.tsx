@@ -91,6 +91,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       'Tech Products',
       'Electronics',
       'Instruments',
+      'Tutoring & Services',
       'Others'
     ];
 
