@@ -46,7 +46,7 @@ export function Footer() {
               <span className="font-bold text-xl">SleekRoad</span>
               <button
                 onClick={handleInstallClick}
-                className="ml-4 px-4 py-2 bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-md hover:from-green-500 hover:to-green-700 transition-all"
+                className="ml-4 px-4 py-2 block md:hidden bg-gradient-to-r from-green-400 to-green-600 text-white rounded-lg shadow-md hover:from-green-500 hover:to-green-700 transition-all"
               >
                 Download App
               </button>

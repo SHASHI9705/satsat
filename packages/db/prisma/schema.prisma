@@ -18,6 +18,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   items    Item[] // Relation to the Item model
+  dashboardMetrics DashboardMetrics[] // Relation to the DashboardMetrics model
 }
 
 model TestTable {
@@ -38,6 +39,21 @@ model Item {
   updatedAt      DateTime @updatedAt
   sold           Boolean  @default(false)
   description    String? // Optional description field for the item
+  dashboardMetricsId Int?
+  dashboardMetrics   DashboardMetrics? @relation(fields: [dashboardMetricsId], references: [id])
+}
+
+model DashboardMetrics {
+  id             Int      @id @default(autoincrement())
+  userId         Int      @unique
+  user           User     @relation(fields: [userId], references: [id])
+  activeListings Int      @default(0)
+  totalEarnings  Float    @default(0.0)
+  totalSales     Int      @default(0)
+  newListings    Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  items          Item[]   // Relation to the Item model
 }
 
 // Ensure the User model exists and is linked to the Item model

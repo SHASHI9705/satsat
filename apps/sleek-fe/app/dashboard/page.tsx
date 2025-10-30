@@ -138,6 +138,9 @@ export default function DashboardPage() {
           setProducts((prev) => [...prev, data.item]);
           toggleModal();
           showNotification('Item created successfully!');
+
+          // Increment active listings dynamically
+          setTotalEarnings((prev) => prev + 1);
         } catch (error) {
           console.error('Error creating item:', error);
           alert('An error occurred while creating the item. Please try again.');
@@ -166,26 +169,33 @@ export default function DashboardPage() {
 
   const handleMarkAsSold = async (id) => {
     const product = products.find((product) => product.id === id); // Find the product being marked as sold
+    console.log('Marking as sold:', { id, product }); // Log the payload and product details
     setLoading((prev) => ({ ...prev, markAsSold: id })); // Set loading for mark as sold
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/delete/${id}`, {
-        method: 'DELETE',
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/update-sold-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id, sold: true }),
       });
 
       if (response.ok) {
-        setProducts((prev) => prev.filter((product) => product.id !== id));
+        setProducts((prev) => prev.filter((product) => product.id !== id)); // Remove the item from the products state
+        console.log('Item removed from products state:', id); // Log the removal
         if (product) {
           setTotalSales((prev) => prev + 1); // Increment total sales by 1
+          setTotalEarnings((prev) => prev + product.discountedPrice); // Increment total earnings by the discounted price
         }
-        showNotification('Item deleted successfully!');
+        showNotification('Item marked as sold and removed successfully!');
       } else {
-        console.error('Failed to delete item');
-        alert('Failed to delete item. Please try again.');
+        console.error('Failed to mark item as sold');
+        alert('Failed to mark item as sold. Please try again.');
       }
     } catch (error) {
-      console.error('Error deleting item:', error);
-      alert('An error occurred while deleting the item. Please try again.');
+      console.error('Error marking item as sold:', error);
+      alert('An error occurred while marking the item as sold. Please try again.');
     } finally {
       setLoading((prev) => ({ ...prev, markAsSold: null })); // Reset loading for mark as sold
     }
@@ -203,7 +213,7 @@ export default function DashboardPage() {
               <div className="p-2 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg">
                 <ShoppingBag className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-4xl font-bold text-gray-800 dark:text-gray-100">
+              <h1 className="text-xl sm:text-4xl font-bold text-gray-800 dark:text-gray-100">
                 Seller Dashboard
               </h1>
             </div>
@@ -217,42 +227,42 @@ export default function DashboardPage() {
           </div>
 
           {/* Stats Section */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <Card className="p-6 bg-white shadow-md rounded-lg">
-              <div className="flex items-center gap-4">
-                <Package className="w-10 h-10 text-orange-500" />
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-8">
+            <Card className="p-4 bg-white shadow-md rounded-lg sm:p-4 md:p-3">
+              <div className="flex items-center gap-3">
+                <Package className="w-8 h-8 text-orange-500" />
                 <div>
-                  <h2 className="text-xl font-bold">Products</h2>
+                  <h2 className="sm:text-lg text-md font-bold">Products</h2>
                   <p className="text-gray-600">{activeListings} Active Listings</p> {/* Use dynamic count */}
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6 bg-white shadow-md rounded-lg">
-              <div className="flex items-center gap-4">
-                <IndianRupee className="w-10 h-10 text-green-500" />
+            <Card className="p-4 bg-white shadow-md rounded-lg sm:p-4 md:p-3">
+              <div className="flex items-center gap-3">
+                <IndianRupee className="w-8 h-8 text-green-500" />
                 <div>
-                  <h2 className="text-xl font-bold">Earnings</h2>
+                  <h2 className="text-lg font-bold">Earnings</h2>
                   <p className="text-gray-600">₹{totalEarnings} This Month</p> {/* Use dynamic earnings */}
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6 bg-white shadow-md rounded-lg">
-              <div className="flex items-center gap-4">
-                <TrendingUp className="w-10 h-10 text-blue-500" />
+            <Card className="hidden md:block p-4 bg-white shadow-md rounded-lg sm:p-4 md:p-3">
+              <div className="flex items-center gap-3">
+                <TrendingUp className="w-8 h-8 text-blue-500" />
                 <div>
-                  <h2 className="text-xl font-bold">Sales</h2>
+                  <h2 className="text-lg font-bold">Sales</h2>
                   <p className="text-gray-600">{totalSales} Successful Sales</p> {/* Use dynamic sales count */}
                 </div>
               </div>
             </Card>
 
-            <Card className="p-6 bg-white shadow-md rounded-lg">
-              <div className="flex items-center gap-4">
-                <Plus className="w-10 h-10 text-purple-500" />
+            <Card className="hidden md:block p-4 bg-white shadow-md rounded-lg sm:p-4 md:p-3">
+              <div className="flex items-center gap-3">
+                <Plus className="w-8 h-8 text-purple-500" />
                 <div>
-                  <h2 className="text-xl font-bold">New Listings</h2>
+                  <h2 className="text-lg font-bold">New Listings</h2>
                   <p className="text-gray-600">5 This Week</p>
                 </div>
               </div>
@@ -268,7 +278,7 @@ export default function DashboardPage() {
               Add New Product
             </Button>
             <p className="text-sm text-gray-600 text-center">
-             Remember to mark the item as sold once it’s been sold.
+             Mark the item as sold once it’s been sold.
             </p>
           </div>
 

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, DashboardMetrics } from '@prisma/client';
 import multer from 'multer';
 import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
 
@@ -67,6 +67,22 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
             },
         });
 
+        // Update dashboard metrics
+        await prisma.dashboardMetrics.upsert({
+            where: { userId: parseInt(userId, 10) }, // Use `userId` as the unique identifier
+            update: {
+                activeListings: { increment: 1 },
+                newListings: { increment: 1 },
+            },
+            create: {
+                userId: parseInt(userId, 10), // Ensure `userId` is used for creation
+                activeListings: 1,
+                totalEarnings: 0,
+                totalSales: 0,
+                newListings: 1,
+            },
+        });
+
         res.status(201).json({ message: 'Item created successfully', item: newItem });
     } catch (error) {
         console.error('Error creating item:', error);
@@ -80,21 +96,65 @@ export const uploadMiddleware = upload.array('images', 10); // Allow up to 10 fi
 // Update the 'sold' status of an item
 export const updateItemSoldStatus = async (req: Request, res: Response): Promise<void> => {
     const { id, sold } = req.body;
+    console.log('Received request to update sold status:', { id, sold }); // Log the incoming request
 
     if (typeof id !== 'number' || typeof sold !== 'boolean') {
+        console.error('Invalid input:', { id, sold }); // Log invalid input
         res.status(400).json({ message: 'Invalid input' });
         return;
     }
 
     try {
-        const updatedItem = await prisma.item.update({
+        const item = await prisma.item.findUnique({
             where: { id },
-            data: { sold },
         });
+        console.log('Fetched item:', item); // Log the fetched item
 
-        res.status(200).json({ message: 'Item sold status updated successfully', item: updatedItem });
+        if (!item) {
+            console.error('Item not found:', { id }); // Log item not found
+            res.status(404).json({ message: 'Item not found' });
+            return;
+        }
+
+        if (sold) {
+            const dashboardMetrics = await prisma.dashboardMetrics.upsert({
+                where: { userId: item.userId },
+                update: {
+                    totalEarnings: { increment: item.discountedPrice },
+                    totalSales: { increment: 1 },
+                    activeListings: { decrement: 1 },
+                },
+                create: {
+                    userId: item.userId,
+                    totalEarnings: item.discountedPrice,
+                    totalSales: 1,
+                    activeListings: 0,
+                    newListings: 0,
+                },
+            });
+            console.log('Updated dashboard metrics:', dashboardMetrics); // Log the updated dashboard metrics
+        }
+
+        // Delete images from S3
+        if (item.images && Array.isArray(item.images)) {
+            for (const imageUrl of item.images) {
+                const fileKey = imageUrl.split('/').pop(); // Extract file key from URL
+                if (fileKey) {
+                    await deleteFromS3(fileKey);
+                    console.log(`Deleted image from S3: ${fileKey}`); // Log the deleted image
+                }
+            }
+        }
+
+        // Delete the item from the database
+        await prisma.item.delete({
+            where: { id },
+        });
+        console.log('Deleted item from database:', { id }); // Log the deleted item
+
+        res.status(200).json({ message: 'Item marked as sold and deleted successfully' });
     } catch (error) {
-        console.error('Error updating item sold status:', error);
+        console.error('Error updating item sold status:', error); // Log the error
         res.status(500).json({ message: 'Error updating item sold status', error });
     }
 };
