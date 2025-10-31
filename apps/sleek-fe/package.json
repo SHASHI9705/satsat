@@ -20,6 +20,7 @@
     "firebase": "^12.4.0",
     "lucide-react": "^0.545.0",
     "next": "^15.3.0",
+    "next-sitemap": "^4.2.3",
     "razorpay": "^2.9.6",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
