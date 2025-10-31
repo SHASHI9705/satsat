@@ -7,6 +7,7 @@ import { Package } from 'lucide-react';
 import { Home } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation'; // Import useRouter and useSearchParams
 import Loader from '../../components/Loader';
+import { Suspense } from 'react';
 
 // Utility function to shuffle an array
 const shuffleArray = (array) => {
@@ -17,7 +18,15 @@ const shuffleArray = (array) => {
   return array;
 };
 
-export default function AllItemsPage() {
+export default function AllItemsPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AllItemsPage />
+    </Suspense>
+  );
+}
+
+function AllItemsPage() {
 	const [products, setProducts] = useState([]);
 	const [selectedCategory, setSelectedCategory] = useState("All Categories");
 	const [isLoading, setIsLoading] = useState(true); // Add loading state
