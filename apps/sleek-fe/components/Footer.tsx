@@ -69,25 +69,7 @@ export function Footer() {
                 <Link href="/allitems">Services</Link>
               </li>
               <li className="hover:text-white cursor-pointer">
-                <Link href="/allitems">Tutoring</Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div className='hidden sm:block'>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li className="hover:text-white cursor-pointer">
-                <Link href="/comp/help">Help Center</Link>
-              </li>
-              <li className="hover:text-white cursor-pointer">
-                <Link href="/comp/safety">Safety Tips</Link>
-              </li>
-              <li className="hover:text-white cursor-pointer">
-                <Link href="/comp/contact">Contact Us</Link>
-              </li>
-              <li className="hover:text-white cursor-pointer">
-                <Link href="/comp/report">Report Issue</Link>
+                <Link href="/comp/help">Help & support</Link>
               </li>
             </ul>
           </div>

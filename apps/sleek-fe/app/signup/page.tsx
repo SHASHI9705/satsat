@@ -15,6 +15,7 @@ type FormValues = {
   password: string;
   phone: string;
   address: string;
+  terms: boolean; // Added terms field
 };
 
 export default function SignUpPage({ onBack }: { onBack?: () => void }) {
@@ -175,6 +176,26 @@ export default function SignUpPage({ onBack }: { onBack?: () => void }) {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+          <div className="flex items-center mb-4">
+            <input
+              type="checkbox"
+              id="terms"
+              className="mr-2"
+              {...register('terms', { required: true })}
+            />
+            <label htmlFor="terms" className="text-sm">
+              I agree to the{' '}
+              <a href="/comp/terms" className="text-blue-500 underline">
+                terms and conditions
+              </a>
+            </label>
+          </div>
+          {errors.terms && (
+            <div className="text-sm text-destructive mb-2">
+              You must agree to the terms and conditions to sign up.
+            </div>
+          )}
+
           <div>
             <label className="text-sm block mb-1">Full name</label>
             <Input {...register('name', { required: true })} placeholder="Crazy Kumar" />
