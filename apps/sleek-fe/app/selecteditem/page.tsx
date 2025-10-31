@@ -2,7 +2,7 @@
 
 import { Button } from '../../components/ui/button';
 import { Star, Package, Home, ArrowLeft } from 'lucide-react';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, Suspense } from 'react';
 import { ProductCard } from '../../components/ProductCard';
 import { useRouter,useSearchParams } from 'next/navigation'; // Import useSearchParams
 import Loader from '../../components/Loader';
@@ -313,5 +313,13 @@ export default function SelectedItemPage() {
 				</div>
 			)}
 		</section>
+	);
+}
+
+export function SelectedItemPageWrapper() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<SelectedItemPage />
+		</Suspense>
 	);
 }
