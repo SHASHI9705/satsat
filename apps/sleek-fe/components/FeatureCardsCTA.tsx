@@ -34,7 +34,7 @@ const features = [
 export function FeatureCardsCTA() {
   return (
     <>
-      <section className="py-16 bg-brand-soft">
+      <section className="hidden sm:block py-16 bg-brand-soft">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Why Choose SleekRoad?</h2>
