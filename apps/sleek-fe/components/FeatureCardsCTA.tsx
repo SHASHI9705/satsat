@@ -34,10 +34,10 @@ const features = [
 export function FeatureCardsCTA() {
   return (
     <>
-      <section className="hidden sm:block py-16 bg-brand-soft">
+      <section className="hidden  sm:block py-16 bg-brand-soft">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Why Choose SleekRoad?</h2>
+            <h2 className="text-3xl font-bold mb-4">Why Choose SleekRoad? </h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
               Built for local college students. SleekRoad gives you a modern, safe, and beautiful way
               to buy and sell nearby in the campus with best price.
@@ -79,20 +79,6 @@ export function FeatureCardsCTA() {
               
             </div>
 
-            <div className="hidden sm:block flex items-center justify-center gap-8 mt-8 text-sm opacity-75">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Free to use</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Student verified</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4" />
-                <span>Secure messaging</span>
-              </div>
-            </div>
           </div>
         </div>
       </section>
