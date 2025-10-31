@@ -65,7 +65,7 @@ export function FeatureCardsCTA() {
         <div className="container mx-auto px-4 text-center">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-4xl font-bold mb-4">Ready to Ride with SleekRoad?</h2>
-            <p className="text-xl mb-8 opacity-90">
+            <p className="hidden sm:block text-xl mb-8 opacity-90">
               Start buying and selling in campus with a clean, curated experience.
             </p>
             
@@ -76,15 +76,10 @@ export function FeatureCardsCTA() {
                   Sign Up Now
                 </Button>
               </Link>
-              <Link href="/learnmore">
-                <Button size="lg" variant="ghost" className="bg-white text-foreground px-6 h-12 gap-2 rounded-md">
-                  Learn More
-                  <ArrowRight className="w-5 h-5 text-foreground" />
-                </Button>
-              </Link>
+              
             </div>
 
-            <div className="flex items-center justify-center gap-8 mt-8 text-sm opacity-75">
+            <div className="hidden sm:block flex items-center justify-center gap-8 mt-8 text-sm opacity-75">
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
                 <span>Free to use</span>
