@@ -29,6 +29,30 @@ const Notification = ({ message, onClose }) => (
   </div>
 );
 
+// Add a popup card for users with missing phone number or address
+const MissingInfoPopup = ({ onClose }) => (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white rounded-lg shadow-lg p-6 w-96 relative">
+      <button
+        onClick={onClose}
+        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+      >
+        <X className="w-5 h-5" />
+      </button>
+      <h2 className="text-xl font-bold mb-4">Complete Your Profile</h2>
+      <p className="text-sm text-gray-600 mb-4">
+        To continue, please add your phone number and address to your profile.
+      </p>
+      <a
+        href="/profile"
+        className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg"
+      >
+        Go to Profile
+      </a>
+    </div>
+  </div>
+);
+
 export default function DashboardPage() {
   const router = useRouter(); // Initialize router
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,11 +62,12 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState({ submit: false, markAsSold: null }); // Add loading state
   const [totalEarnings, setTotalEarnings] = useState(0); // Initialize total earnings
   const [totalSales, setTotalSales] = useState(0); // Initialize total sales
+  const [showMissingInfoPopup, setShowMissingInfoPopup] = useState(false);
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/fetch`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/fetch?email=${encodeURIComponent(user.email)}`); // Pass email as query parameter
         if (response.ok) {
           const data = await response.json();
           console.log('API Response:', data); // Log the API response
@@ -62,14 +87,53 @@ export default function DashboardPage() {
       }
     };
 
-    fetchItems();
-  }, []);
+    const checkUserProfile = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email)}`);
+          if (response.ok) {
+            const data = await response.json();
+            if (!data.phone || !data.address) {
+              setShowMissingInfoPopup(true);
+            }
+          } else {
+            console.error('Failed to fetch user details');
+          }
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+        }
+      }
+    };
 
-  const toggleModal = () => {
+    if (user) {
+      fetchItems();
+      checkUserProfile();
+    }
+    
+  }, [user]);
+
+  // Update toggleModal to check user profile details when Add Item button is clicked
+  const toggleModal = async () => {
     if (!user) {
       router.push('/signin'); // Redirect to signup page if user is not signed in
       return;
     }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email)}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (!data.phone || !data.address) {
+          setShowMissingInfoPopup(true);
+          return; // Prevent opening the modal if the popup is shown
+        }
+      } else {
+        console.error('Failed to fetch user details');
+      }
+    } catch (error) {
+      console.error('Error fetching user details:', error);
+    }
+
     setIsModalOpen((prev) => !prev);
   };
 
@@ -206,6 +270,7 @@ export default function DashboardPage() {
   return (
     <>
       {notification && <Notification message={notification} onClose={() => setNotification(null)} />}
+      {showMissingInfoPopup && <MissingInfoPopup onClose={() => setShowMissingInfoPopup(false)} />}
       <section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-8">

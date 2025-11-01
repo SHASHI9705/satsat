@@ -2,12 +2,14 @@ import { Request, Response } from 'express';
 import { PrismaClient, DashboardMetrics } from '@prisma/client';
 import multer from 'multer';
 import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 // Extend Express Request type to include files
 declare global {
   namespace Express {
     interface Request {
       files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[];
+      user?: { id: number }; // Add user property with id
     }
   }
 }
@@ -17,6 +19,16 @@ const prisma = new PrismaClient();
 // Configure Multer to use memory storage
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage });
+
+// Hardcode JWT_SECRET for debugging purposes
+const JWT_SECRET: string = 'shashi9705';
+
+// Debugging: Log the JWT_SECRET value (ensure this is removed in production)
+console.debug('JWT_SECRET value:', JWT_SECRET);
+
+if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined. Please set it in the environment variables.');
+}
 
 // Update the createItem function to upload files directly to S3
 export const createItem = async (req: Request, res: Response): Promise<void> => {
@@ -159,10 +171,20 @@ export const updateItemSoldStatus = async (req: Request, res: Response): Promise
     }
 };
 
-// Fetch all items
+// Update fetchItems to directly use email for fetching items
 export const fetchItems = async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.query;
+
+    if (!email || typeof email !== 'string') {
+        res.status(400).json({ message: 'Email is required and must be a string' });
+        return;
+    }
+
     try {
+        console.debug('Fetching items for email:', email); // Debugging: Log the email
+
         const items = await prisma.item.findMany({
+            where: { user: { email } },
             select: {
                 id: true,
                 name: true,
@@ -170,12 +192,14 @@ export const fetchItems = async (req: Request, res: Response): Promise<void> => 
                 category: true,
                 actualPrice: true,
                 discountedPrice: true,
-                description: true, // Include description in the response
+                description: true,
                 sold: true,
                 createdAt: true,
                 updatedAt: true,
             },
         });
+        console.debug('Fetched items:', items); // Debugging: Log the fetched items
+
         res.status(200).json({ items });
     } catch (error) {
         console.error('Error fetching items:', error);

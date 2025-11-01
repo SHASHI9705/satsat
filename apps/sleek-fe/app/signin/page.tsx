@@ -5,6 +5,8 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
+import { auth, provider } from '../../firebase/firebaseConfig';
+import { signInWithPopup } from 'firebase/auth';
 import { useAuth } from "../../firebase/AuthProvider";
 import { useRouter } from 'next/navigation'; // Import useRouter
 
@@ -20,6 +22,9 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
 
   const { signIn } = useAuth();
   const { signInWithGoogle } = useAuth();
+   const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
+    const [user, setUser] = useState<any>(null);
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -38,17 +43,36 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
 
   const handleGoogleSignIn = async () => {
     try {
-      await signInWithGoogle(); // Perform Google sign-in
-      setNotification('Signed in successfully with Google!'); // Set success notification
-      setTimeout(() => {
-        setNotification(null); // Clear notification after 2 seconds
-        router.push('/'); // Redirect to the homepage
-      }, 2000);
-    } catch (err: any) {
-      console.error(err);
-      setNotification(err?.message || 'Google sign-in failed'); // Set error notification
-      setTimeout(() => setNotification(null), 3000); // Clear notification after 3 seconds
-    }
+        setLoading(true);
+        setError('');
+        const result = await signInWithPopup(auth, provider);
+        const user = result.user;
+        if (!user.displayName || !user.email) throw new Error("Google account missing name or email");
+  
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/create`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: user.displayName,
+            email: user.email,
+            password: Math.random().toString(36).slice(-8),
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Google sign in failed");
+        setUser(data.user);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        alert('Google signin successful');
+        router.push('/'); // Redirect to home page
+      } catch (err) {
+        setError(err.message);
+        console.error(err);
+        alert('An error occurred during Google signup');
+      } finally {
+        setLoading(false);
+      }
   };
 
   return (
