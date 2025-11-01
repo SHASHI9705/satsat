@@ -131,66 +131,32 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
 
           {/* Actions */}
           <div className="flex items-center gap-2">
-            <Link href="/dashboard">
-              <Button type="button" aria-label="Sell an item" variant="black" className="gap-2 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-                <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline font-semibold">Sell Item</span>
-              </Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href="/dashboard">
+                  <Button type="button" aria-label="Sell an item" variant="black" className="gap-2 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
+                    <Plus className="w-5 h-5" />
+                    <span className="hidden sm:inline font-semibold">Sell Item</span>
+                  </Button>
+                </Link>
 
-            <div className="hidden sm:flex items-center gap-4">
-              {user ? (
-                <div className="relative dropdown-container">
-                  <Avatar
-                    className="w-9 h-9 border border-black cursor-pointer"
-                    onClick={toggleDropdown}
-                  >
-                    {user.photoURL ? (
-                      <AvatarImage src={user.photoURL} alt="avatar" />
-                    ) : (
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                        {user.email?.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-
-                  {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <Link href="/profile">
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">My Profile</div>
-                      </Link>
-                      <Link href="/dashboard">
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Dashboard</div>
-                      </Link>
-                      <div
-                        onClick={handleLogout}
-                        className="px-4 py-2 bg-red-100 hover:bg-red-200 cursor-pointer"
-                      >
-                        Logout
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <>
-                  <Link href="/signin">
-                    <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">
-                      Login
-                    </Button>
-                  </Link>
-                </>
-              )}
-            </div>
-
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden bg-green-200"
-              aria-label="Menu"
-              onClick={toggleSidebar} // Open sidebar on click
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden bg-green-200"
+                  aria-label="Menu"
+                  onClick={toggleSidebar} // Open sidebar on click
+                >
+                  <Menu className="w-5 h-5" />
+                </Button>
+              </>
+            ) : (
+              <Link href="/signin">
+                <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">
+                  Login
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -203,9 +169,9 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
             onClick={toggleSidebar} // Close sidebar when clicking outside
           ></div>
           <div
-            className={`w-64 bg-gradient-to-r from-green-400 to-green-700 h-full shadow-lg transform transition-transform duration-700 will-change-transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} // Added will-change for smoother animation
+            className={`w-64 bg-gradient-to-r from-green-300 to-green-500 h-full shadow-lg transform transition-transform duration-700 will-change-transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} // Added will-change for smoother animation
           >
-            <div className="p-4 border-b flex flex-col items-center bg-gradient-to-r from-green-400 to-green-700"> {/* Centered content */}
+            <div className="p-4 border-b flex flex-col items-center bg-gradient-to-r from-green-300 to-green-600"> {/* Centered content */}
               {user?.photoURL ? (
                 <img
                   src={user.photoURL}
@@ -213,7 +179,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                   className="w-16 h-16 rounded-full border border-black" // Circular profile photo with black border
                 />
               ) : (
-                <div className="bg-gradient-to-r from-green-400 to-green-700 w-16 h-16 rounded-full border border-black flex items-center justify-center bg-gray-200">
+                <div className="bg-gradient-to-r from-green-300 to-green-600 w-16 h-16 rounded-full border border-black flex items-center justify-center bg-gray-200">
                   <span className="text-lg font-bold text-gray-600">
                     {user?.email?.charAt(0).toUpperCase() || 'U'}
                   </span>
@@ -221,7 +187,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
               )}
               <h2 className="text-xl font-bold mt-2 ">Menu</h2>
             </div>
-            <div className="p-4 space-y-2 bg-gradient-to-r from-green-400 to-green-700">
+            <div className="p-4 space-y-2 bg-gradient-to-r from-green-300 to-green-600">
               <Link href="/profile">
                 <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <User className="mr-3 w-5 h-5" />
