@@ -24,7 +24,7 @@ export default function CareersPage({ onBack }: { onBack?: () => void }) {
           <Card className="p-6 border-beige-200 bg-white">
             <p className="text-beige-800 leading-relaxed mb-6">
               Help us build the cleanest, safest local marketplace. We’re a small team that values craft,
-              kindness, and speed. If you love polished UI and community-focused products, we’d love to hear from you.
+              kindness, and speed. If you love polished UI and community-focused products, we’d love to hear from you in feedback form.
             </p>
 
             <div className="space-y-3">
