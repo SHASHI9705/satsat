@@ -4,8 +4,8 @@ import corsMiddleware from './middleware/corsMiddleware';
 import itemRoutes from './routes/itemRoutes';
 import sellerRoutes from './routes/sellerRoutes';
 import dotenv from 'dotenv';
-const path = require('path');
 
+import path from 'path';
 dotenv.config(); 
 
 

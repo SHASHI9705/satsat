@@ -1,9 +1,11 @@
 import AWS from 'aws-sdk';
 import { v4 as uuidv4 } from 'uuid';
 
+import path from 'path';
+import dotenv from 'dotenv';
 
-const path = require('path');
-require('dotenv').config();
+
+dotenv.config();
 
 // Configure AWS S3
 const s3 = new AWS.S3({

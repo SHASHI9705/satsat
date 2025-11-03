@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response,RequestHandler } from 'express';
 import { PrismaClient, DashboardMetrics } from '@prisma/client';
 import multer from 'multer';
 import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
@@ -103,7 +103,7 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
 };
 
 // Export the Multer middleware for use in routes
-export const uploadMiddleware = upload.array('images', 10); // Allow up to 10 files
+export const uploadMiddleware: RequestHandler  = upload.array('images', 10); // Allow up to 10 files
 
 // Update the 'sold' status of an item
 export const updateItemSoldStatus = async (req: Request, res: Response): Promise<void> => {
