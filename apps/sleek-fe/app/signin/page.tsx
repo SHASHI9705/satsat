@@ -69,7 +69,7 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
       } catch (err) {
         setError(err.message);
         console.error(err);
-        alert('An error occurred during Google signup');
+        alert('An error occurred during Google signin');
       } finally {
         setLoading(false);
       }

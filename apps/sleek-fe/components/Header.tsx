@@ -140,6 +140,38 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                   </Button>
                 </Link>
 
+                <div className="relative dropdown-container">
+                  <Avatar
+                    className="w-9 h-9 border border-black cursor-pointer"
+                    onClick={toggleDropdown}
+                  >
+                    {user.photoURL ? (
+                      <AvatarImage src={user.photoURL} alt="avatar" />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                        {user.email?.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <Link href="/profile">
+                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">My Profile</div>
+                      </Link>
+                      <Link href="/dashboard">
+                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Dashboard</div>
+                      </Link>
+                      <div
+                        onClick={handleLogout}
+                        className="px-4 py-2 bg-red-100 hover:bg-red-200 cursor-pointer"
+                      >
+                        Logout
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 <Button
                   variant="ghost"
                   size="icon"
