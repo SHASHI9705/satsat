@@ -140,7 +140,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                   </Button>
                 </Link>
 
-                <div className="relative dropdown-container">
+                <div className=" hidden sm:block relative dropdown-container">
                   <Avatar
                     className="w-9 h-9 border border-black cursor-pointer"
                     onClick={toggleDropdown}
