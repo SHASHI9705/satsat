@@ -31,9 +31,10 @@ interface ProductCardProps {
   onFavorite?: (productId: string) => void;
   onMessage?: (productId: string) => void;
   onViewDetails?: () => void; // Added onViewDetails property
+  className?: string; // Added className property
 }
 
-export function ProductCard({ product, onFavorite, onMessage, onViewDetails }: ProductCardProps) {
+export function ProductCard({ product, onFavorite, onMessage, onViewDetails, className }: ProductCardProps) {
   // Added state to track if the product is favorited
   const [isFavorited, setIsFavorited] = useState(false);
   const router = useRouter();
@@ -62,7 +63,7 @@ export function ProductCard({ product, onFavorite, onMessage, onViewDetails }: P
   };
 
   return (
-    <Card className="group overflow-hidden card-hover border-0 shadow-soft hover:shadow-strong rounded-2xl bg-white">
+    <Card className={`group overflow-hidden card-hover border-0 shadow-soft hover:shadow-strong rounded-2xl bg-white ${className}`}>
       <div className="relative">
         <div className="aspect-square overflow-hidden bg-gray-50">
           <ImageWithFallback

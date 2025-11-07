@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+"use client"
+
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
 import { Search, TrendingUp, Users, Shield } from 'lucide-react';
 import { useRouter } from 'next/navigation'; // Import useRouter
-// import catImage from '../cat.png';
+import { Card } from './ui/card';
 
 
 
@@ -12,6 +14,7 @@ const stats: { label: string; value: string; icon: React.ComponentType<any>; }[]
 
 export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: string) => void; onCategorySelect: (category: string) => void; }) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [randomItems, setRandomItems] = useState<{ title: string; description: string }[]>([]);
   const router = useRouter(); // Initialize useRouter
 
   // deterministic seeded RNG (persisted to localStorage) to keep decorations stable across reloads
@@ -106,10 +109,53 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
     }
   };
 
-  return (
-    <section className="relative py-12 lg:py-12 overflow-hidden bg-white">
+  useEffect(() => {
+    const fetchRandomItems = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/all`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (Array.isArray(data.items)) {
+            const randomItems = data.items
+              .filter((item) => item) // Ensure item is defined
+              .map((item) => ({
+                id: item.id,
+                title: item.name,
+                price: item.discountedPrice,
+                originalPrice: item.actualPrice,
+                image: item.images?.[0] || '/placeholder-image.png', // Fallback image
+                seller: {
+                  name: item.user?.name || 'Unknown Seller',
+                  rating: (Math.random() * (5 - 4) + 4).toFixed(1), // Random rating between 4 and 5
+                  verified: false // Static verified status for now
+                },
+                category: item.category,
+                isFavorited: false // Static favorite status for now
+              }))
+              .sort(() => 0.5 - Math.random())
+              .slice(0, 3); // Get up to 3 random items
+            setRandomItems(randomItems);
+          } else {
+            console.error('API response does not contain a valid items array:', data);
+          }
+        } else {
+          console.error('Failed to fetch random items');
+        }
+      } catch (error) {
+        console.error('Error fetching random items:', error);
+      }
+    };
 
-      <div className="container mx-auto px-4 relative z-10">
+    fetchRandomItems();
+  }, []);
+
+  return (
+    <section className=" relative py-12 lg:py-12 overflow-hidden bg-white">
+
+      {/* Existing Hero Section for larger screens */}
+      <div className="hidden sm:block container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Main Heading */}
           <div className="space-y-4">
@@ -154,6 +200,62 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
 
         </div>
       </div>
+
+      {/* New Section for phone screens */}
+      <div className="block sm:hidden w-full overflow-hidden">
+        <div className="flex w-full h-96 items-center justify-center relative">
+          <div className="w-full h-full flex animate-slide-one-by-one">
+            {[...randomItems, ...randomItems].map((item, index) => (
+              <div
+                key={`${item.id}-${index}`}
+                className="flex-shrink-0 w-full h-full px-4 flex flex-col items-center justify-center border-2 border-black shadow-lg rounded-lg bg-white"
+              >
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full h-3/4 object-cover rounded-t-lg"
+                />
+                <h3 className="text-lg font-medium mt-2 text-center">{item.title}</h3>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes slide-one-by-one {
+          0% {
+            transform: translateX(0);
+          }
+          20% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-100%);
+          }
+          45% {
+            transform: translateX(-100%);
+          }
+          50% {
+            transform: translateX(-200%);
+          }
+          70% {
+            transform: translateX(-200%);
+          }
+          75% {
+            transform: translateX(-300%);
+          }
+          95% {
+            transform: translateX(-300%);
+          }
+          100% {
+            transform: translateX(0);
+          }
+        }
+        .animate-slide-one-by-one {
+          animation: slide-one-by-one 12s infinite;
+        }
+      `}</style>
     </section>
   );
 }
