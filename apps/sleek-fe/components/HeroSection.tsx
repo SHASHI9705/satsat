@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Badge } from './ui/badge';
@@ -15,7 +15,9 @@ const stats: { label: string; value: string; icon: React.ComponentType<any>; }[]
 export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: string) => void; onCategorySelect: (category: string) => void; }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [randomItems, setRandomItems] = useState<{ title: string; description: string }[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const router = useRouter(); // Initialize useRouter
+  const touchStartX = useRef(0);
 
   // deterministic seeded RNG (persisted to localStorage) to keep decorations stable across reloads
   function mulberry32(seed: number) {
@@ -135,7 +137,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                 isFavorited: false // Static favorite status for now
               }))
               .sort(() => 0.5 - Math.random())
-              .slice(0, 3); // Get up to 3 random items
+              .slice(0, 4); // Get up to 3 random items
             setRandomItems(randomItems);
           } else {
             console.error('API response does not contain a valid items array:', data);
@@ -151,8 +153,43 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
     fetchRandomItems();
   }, []);
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    if (touchStartX.current - touchEndX > 50) {
+      handleSwipe('left');
+    } else if (touchEndX - touchStartX.current > 50) {
+      handleSwipe('right');
+    }
+  };
+
+  const handleSwipe = (direction) => {
+    if (direction === 'left') {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % randomItems.length);
+    } else if (direction === 'right') {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? randomItems.length - 1 : prevIndex - 1
+      );
+    }
+  };
+
+  const handleProductClick = (productId) => {
+    router.push(`/selecteditem?id=${productId}`);
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % randomItems.length);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [randomItems.length]);
+
   return (
-    <section className=" relative py-12 lg:py-12 overflow-hidden bg-white">
+    <section className=" relative py-4 md:py-12 lg:py-12 overflow-hidden bg-black md:bg-white">
 
       {/* Existing Hero Section for larger screens */}
       <div className="hidden sm:block container mx-auto px-4 relative z-10">
@@ -202,23 +239,62 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       </div>
 
       {/* New Section for phone screens */}
-      <div className="block sm:hidden w-full overflow-hidden">
-        <div className="flex w-full h-96 items-center justify-center relative">
-          <div className="w-full h-full flex animate-slide-one-by-one">
-            {[...randomItems, ...randomItems].map((item, index) => (
-              <div
-                key={`${item.id}-${index}`}
-                className="flex-shrink-0 w-full h-full px-4 flex flex-col items-center justify-center border-2 border-black shadow-lg rounded-lg bg-white"
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-3/4 object-cover rounded-t-lg"
+      <div className="block px-4 sm:hidden w-full overflow-hidden">
+        
+        <h1 className="text-4xl lg:text-7xl font-charlsworth text-center leading-tight mb-4">
+          <span className="text-white">Buy • Connect • Sell</span>
+        </h1>
+        <div className="max-w-2xl mb-4 mx-auto">
+                <div className="flex gap-1 p-2 bg-brand-soft rounded-2xl shadow-lg border">
+              <div className="flex-1 relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
+                <Input
+                  placeholder="Search for textbooks, laptops, furniture..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                  className="pl-12 border-0 text-lg h-12 focus-visible:ring-0"
                 />
-                <h3 className="text-lg font-medium mt-2 text-center">{item.title}</h3>
               </div>
-            ))}
+              <Button 
+                type="button"
+                aria-label="Search marketplace"
+                onClick={handleSearch}
+                variant="black"
+                className="px-8 h-12 hero-cta"
+              >
+                Search
+              </Button>
+            </div>
           </div>
+        <div
+          className="relative w-90 h-96 overflow-hidden rounded-lg"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
+          {randomItems.map((item, index) => (
+            <img
+              key={index}
+              src={item.image}
+              alt={item.title}
+              onClick={() => handleProductClick(item.id)}
+              className={`absolute inset-0 rounded-lg shadow-md w-full h-96 object-fit border border-white transition-opacity duration-300 cursor-pointer ${
+                index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+              }`}
+            />
+          ))}
+        </div>
+
+        <div className="flex justify-center mt-4 gap-2">
+          {randomItems.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImageIndex(index)}
+              className={`w-3 h-3 rounded-full ${
+                index === currentImageIndex ? 'bg-blue-400' : 'bg-gray-400'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
