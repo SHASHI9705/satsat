@@ -219,9 +219,7 @@ export default function SelectedItemPage() {
 		);
 	}
 
-	if (!item) {
-		return <p>Loading...</p>; // Show a loading state while fetching data
-	}
+	
 
 	const handleViewDetails = (productId) => {
 		router.push(`/selecteditem?id=${productId}`);
