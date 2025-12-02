@@ -8,13 +8,6 @@ import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
 import Loader from '../../components/ui/loader'; // Corrected loader import
 import { useRouter } from 'next/navigation'; // Import useRouter
-import Razorpay from 'razorpay';
-
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
 
 // Add Notification component
 const Notification = ({ message, onClose }) => (
@@ -26,6 +19,7 @@ const Notification = ({ message, onClose }) => (
     >
       Close
     </button>
+    
   </div>
 );
 
@@ -142,16 +136,6 @@ export default function DashboardPage() {
     setTimeout(() => setNotification(null), 2000); // Auto-hide after 2 seconds
   };
 
-  const loadRazorpayScript = () => {
-    return new Promise((resolve, reject) => {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.onload = () => resolve(true);
-      script.onerror = () => reject(false);
-      document.body.appendChild(script);
-    });
-  };
-
   const handlePaymentAndSubmit = async (e) => {
     e.preventDefault();
     setLoading((prev) => ({ ...prev, submit: true }));
@@ -167,68 +151,32 @@ export default function DashboardPage() {
       return;
     }
 
-    const isRazorpayLoaded = await loadRazorpayScript();
+    try {
+      const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (!isRazorpayLoaded) {
-      alert('Failed to load Razorpay. Please try again.');
+      if (!createResponse.ok) {
+        console.error('Failed to create item');
+        alert('Failed to create item. Please try again.');
+        return;
+      }
+
+      const data = await createResponse.json();
+      console.log('Item created successfully:', data);
+      setProducts((prev) => [...prev, data.item]);
+      toggleModal();
+      showNotification('Item created successfully!');
+
+      // Increment active listings dynamically
+      setTotalEarnings((prev) => prev + 1);
+    } catch (error) {
+      console.error('Error creating item:', error);
+      alert('An error occurred while creating the item. Please try again.');
+    } finally {
       setLoading((prev) => ({ ...prev, submit: false }));
-      return;
     }
-
-    const options = {
-      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY,
-      amount: 700, // Amount in paise (7 INR)
-      currency: 'INR',
-      name: 'SleekRoad',
-      description: 'Add Item Fee',
-      handler: async (response) => {
-        try {
-          const paymentId = response.razorpay_payment_id;
-          console.log('Payment successful:', paymentId);
-
-          const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
-            method: 'POST',
-            body: formData,
-          });
-
-          if (!createResponse.ok) {
-            console.error('Failed to create item');
-            alert('Failed to create item. Please try again.');
-            return;
-          }
-
-          const data = await createResponse.json();
-          console.log('Item created successfully:', data);
-          setProducts((prev) => [...prev, data.item]);
-          toggleModal();
-          showNotification('Item created successfully!');
-
-          // Increment active listings dynamically
-          setTotalEarnings((prev) => prev + 1);
-        } catch (error) {
-          console.error('Error creating item:', error);
-          alert('An error occurred while creating the item. Please try again.');
-        } finally {
-          setLoading((prev) => ({ ...prev, submit: false }));
-        }
-      },
-      prefill: {
-        name: user.name,
-        email: user.email,
-      },
-      theme: {
-        color: '#3399cc',
-      },
-    };
-
-    const rzp = new window.Razorpay(options);
-    rzp.on('payment.failed', (response) => {
-      console.error('Payment failed:', response.error);
-      alert('Payment failed. Please try again.');
-      setLoading((prev) => ({ ...prev, submit: false }));
-    });
-
-    rzp.open();
   };
 
   const handleMarkAsSold = async (id) => {
