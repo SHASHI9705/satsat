@@ -24,6 +24,7 @@ export default function ProfilePage() {
     address: '',
   });
 
+  
   useEffect(() => {
     if (user?.email) {
       const fetchUserDetails = async () => {
