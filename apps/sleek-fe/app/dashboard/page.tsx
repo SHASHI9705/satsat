@@ -284,6 +284,7 @@ export default function DashboardPage() {
 
           {/* Actions Section */}
           <div className="flex flex-col items-center gap-4 mb-12">
+          <p>Please upload images smaller than 10 MB</p>
             <Button
               className="bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
               onClick={toggleModal}
@@ -315,7 +316,6 @@ export default function DashboardPage() {
                       name="images" // Changed from 'photos' to 'images'
                       accept="image/*"
                       multiple
-                      capture="environment"
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                     />
                     <p className="text-xs text-gray-500 mt-1">Upload 1 to 3 photos.</p>
