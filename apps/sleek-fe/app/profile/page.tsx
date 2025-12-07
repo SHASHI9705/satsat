@@ -109,6 +109,7 @@ export default function ProfilePage() {
 
   return (
     <section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
+      
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-4 max-w-4xl mx-auto">
@@ -130,44 +131,49 @@ export default function ProfilePage() {
         </div>
 
         {/* Profile Card */}
-        <div className="max-w-4xl mx-auto bg-gray-100 dark:bg-gray-900 shadow-lg rounded-lg p-8 flex items-center gap-8 relative">
-          {/* Profile Logo */}
-          <div className="relative w-32 h-32 border-4 border-black rounded-full overflow-visible">
-            <Avatar className="w-full h-full">
-              {user?.photoURL ? (
-                <AvatarImage src={user.photoURL} alt="Profile" />
-              ) : (
-                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                  {userDetails.email?.charAt(0).toUpperCase()}
-                </AvatarFallback>
-              )}
-            </Avatar>
+        <div className="max-w-4xl mx-auto bg-gray-100 dark:bg-gray-900 shadow-lg rounded-lg p-8 relative">
+          {/* Profile Header */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8 mb-6">
+            {/* Left Side: Profile Photo and Name */}
+            <div className="flex flex-col items-center sm:items-start gap-4">
+              {/* Profile Photo */}
+              <div className="relative w-24 h-24 border-4 border-black rounded-full overflow-hidden sm:w-32 sm:h-32">
+                <Avatar className="w-full h-full">
+                  {user?.photoURL ? (
+                    <AvatarImage src={user.photoURL} alt="Profile" />
+                  ) : (
+                    <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
+                      {userDetails.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
 
-            {/* Star Icon Positioned Closer to Circle */}
-            <div className="absolute bottom-0 right-0 translate-x-1/4 translate-y-1/4 bg-yellow-400 rounded-full p-2 z-10">
-              <Star className="w-6 h-6 text-black" />
-            </div>
-          </div>
+                
+              </div>
 
-          {/* Profile Details */}
-          <div className="flex-1">
-            <p className="text-2xl font-extrabold text-white bg-gradient-to-r from-green-300 to-green-600 rounded-md px-4 py-2">
-              {userDetails.name}
-            </p>
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Email:</span>
-              <Mail className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-              <span className="text-lg text-gray-700 dark:text-gray-300">{userDetails.email}</span>
+              {/* Profile Name */}
+              <p className="text-xl sm:text-2xl font-extrabold text-white bg-gradient-to-r from-green-300 to-green-600 rounded-md px-4 py-2 text-center sm:text-left">
+                {userDetails.name}
+              </p>
             </div>
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Phone:</span>
-              <Phone className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-              <span className="text-lg text-gray-700 dark:text-gray-300">{userDetails.phone}</span>
-            </div>
-            <div className="flex items-center gap-2 mt-4">
-              <span className="text-lg font-medium text-gray-700 dark:text-gray-300">Address:</span>
-              <MapPin className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-              <span className="text-lg text-gray-700 dark:text-gray-300">{userDetails.address}</span>
+
+            {/* Right Side: Profile Details */}
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-sm sm:text-lg font-medium text-gray-700 truncate dark:text-gray-300">Email:</span>
+                <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
+                <span className="text-sm sm:text-lg text-gray-700 truncate dark:text-gray-300 break-words break-all">{userDetails.email}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-sm sm:text-lg font-medium text-gray-700 truncate dark:text-gray-300">Phone:</span>
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
+                <span className="text-sm sm:text-lg truncate text-gray-700 dark:text-gray-300 break-words">{userDetails.phone}</span>
+              </div>
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-sm sm:text-lg font-medium text-gray-700 dark:text-gray-300">Address:</span>
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300" />
+                <span className="text-sm truncate sm:text-lg text-gray-700 dark:text-gray-300 break-words">{userDetails.address}</span>
+              </div>
             </div>
           </div>
         </div>
