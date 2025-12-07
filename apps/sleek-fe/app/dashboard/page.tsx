@@ -8,6 +8,7 @@ import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
 import Loader from '../../components/ui/loader'; // Corrected loader import
 import { useRouter } from 'next/navigation'; // Import useRouter
+import imageCompression from 'browser-image-compression';
 
 // Add Notification component
 const Notification = ({ message, onClose }) => (
@@ -213,6 +214,40 @@ export default function DashboardPage() {
     }
   };
 
+  const handleImageUpload = async (file) => {
+    try {
+      // Compression options
+      const options = {
+        maxSizeMB: 1, // Maximum size in MB
+        maxWidthOrHeight: 1920, // Resize to maintain aspect ratio
+        useWebWorker: true, // Use a web worker for better performance
+      };
+
+      // Compress the image
+      const compressedFile = await imageCompression(file, options);
+
+      // Log the compressed file size
+      console.log('Compressed file size:', compressedFile.size / 1024, 'KB');
+
+      // Proceed with the upload
+      const formData = new FormData();
+      formData.append('file', compressedFile);
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log('Image uploaded successfully');
+      } else {
+        console.error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error compressing or uploading image:', error);
+    }
+  };
+
   const activeListings = products.filter((product) => !product.sold).length; // Calculate active listings dynamically
 
   return (
@@ -284,7 +319,7 @@ export default function DashboardPage() {
 
           {/* Actions Section */}
           <div className="flex flex-col items-center gap-4 mb-12">
-          <p>Please upload images smaller than 10 MB</p>
+          
             <Button
               className="bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
               onClick={toggleModal}
@@ -294,6 +329,7 @@ export default function DashboardPage() {
             <p className="text-sm text-gray-600 text-center">
              Mark the item as sold once it’s been sold.
             </p>
+            
           </div>
 
           {/* Modal for Adding New Product */}
