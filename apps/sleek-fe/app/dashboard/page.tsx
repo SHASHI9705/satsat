@@ -306,7 +306,8 @@ export default function DashboardPage() {
                   <X className="w-5 h-5" />
                 </button>
                 <h2 className="text-xl font-bold mb-4">Add New Product</h2>
-                <form onSubmit={handlePaymentAndSubmit}>
+                <form onSubmit={handlePaymentAndSubmit}
+                encType="multipart/form-data">
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Upload Photos</label>
                     <input
@@ -314,6 +315,7 @@ export default function DashboardPage() {
                       name="images" // Changed from 'photos' to 'images'
                       accept="image/*"
                       multiple
+                      capture="environment"
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                     />
                     <p className="text-xs text-gray-500 mt-1">Upload 1 to 3 photos.</p>

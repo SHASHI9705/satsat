@@ -18,7 +18,17 @@ const prisma = new PrismaClient();
 
 // Configure Multer to use memory storage
 const storage = multer.memoryStorage(); // Store files in memory
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 15 * 1024 * 1024,
+    files: 10,
+  },
+  fileFilter(req, file, cb) {
+    if (file.mimetype.startsWith("image/")) cb(null, true);
+    else cb(new Error("Only images allowed"));
+  },
+});
 
 // Hardcode JWT_SECRET for debugging purposes
 const JWT_SECRET: string = 'shashi9705';
