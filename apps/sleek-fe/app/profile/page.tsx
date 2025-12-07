@@ -24,7 +24,6 @@ export default function ProfilePage() {
     address: '',
   });
 
-  
   useEffect(() => {
     if (user?.email) {
       const fetchUserDetails = async () => {
@@ -50,6 +49,7 @@ export default function ProfilePage() {
     setIsEditing(true);
   };
 
+  
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditDetails((prev) => ({ ...prev, [name]: value }));
