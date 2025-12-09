@@ -367,13 +367,12 @@ export default function DashboardPage() {
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                     >
                       <option>Electronics</option>
-                      <option>Textbooks</option>
-                      <option>Tech Products</option>
-                      <option>Clothes</option>
-                      <option>Shoes</option>
-                      <option>Books</option>
+                      <option>Sports</option>
                       <option>Instruments</option>
-                      <option>Tutoring & Services</option>
+                      <option>Shoes</option>
+                      <option>Tech Products</option>
+                      <option>Books</option>
+                      <option>Clothes</option>
                       <option>Others</option>
                     </select>
                   </div>
