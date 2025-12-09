@@ -93,7 +93,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 				</div>
 
 				{/* Categories Line */}
-				<div className="flex justify-center py-2 gap-3 overflow-x-auto pb-4 justify-start pl-6">
+				<div className="flex lg:justify-center justify-start py-2 gap-3 overflow-x-auto pb-4">
 					{[
 						'All Categories',
 						'Electronics',
