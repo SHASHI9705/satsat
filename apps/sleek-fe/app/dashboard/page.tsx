@@ -156,25 +156,30 @@ export default function DashboardPage() {
 
     // Compress images before appending to FormData
     const files = e.target.elements['images']?.files;
-    if (files) {
-        for (const file of files) {
-            try {
+
+    if (files && files.length > 0) {
+        // 🔴 Remove original images ONLY ONCE
+        formData.delete('images');
+
+        try {
+            for (const file of files) {
                 const compressedFile = await imageCompression(file, {
-                    maxSizeMB: 0.9, // Ensure the file is less than 900 KB
-                    maxWidthOrHeight: 1920, // Optional: Resize to a maximum dimension
+                    maxSizeMB: 0.9,          // < 900 KB
+                    maxWidthOrHeight: 1920,  // Resize if needed
                     useWebWorker: true,
                 });
-                // Remove the original file key and append only the compressed file
-                formData.delete('images');
+
+                // ✅ Append ALL compressed images
                 formData.append('images', compressedFile, compressedFile.name);
-            } catch (error) {
-                console.error('Error compressing image:', error);
-                alert('Failed to compress image. Please try again.');
-                setLoading((prev) => ({ ...prev, submit: false }));
-                return;
             }
+        } catch (error) {
+            console.error('Error compressing image:', error);
+            alert('Failed to compress image. Please try again.');
+            setLoading((prev) => ({ ...prev, submit: false }));
+            return;
         }
     }
+
 
     try {
         const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
