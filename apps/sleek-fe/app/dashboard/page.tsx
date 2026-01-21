@@ -137,46 +137,70 @@ export default function DashboardPage() {
     setTimeout(() => setNotification(null), 2000); // Auto-hide after 2 seconds
   };
 
+  // Fixing duplicate image issue by ensuring only compressed images are appended to FormData
+  // Adjusting logic to include all form fields along with compressed images
   const handlePaymentAndSubmit = async (e) => {
     e.preventDefault();
     setLoading((prev) => ({ ...prev, submit: true }));
 
-    const formData = new FormData(e.target);
+    const formData = new FormData(e.target); // Use the existing form data to include all fields
     const user = JSON.parse(localStorage.getItem('user'));
 
     if (user && user.id) {
-      formData.append('userId', user.id);
+        formData.append('userId', user.id);
     } else {
-      console.error('User details not found in local storage');
-      setLoading((prev) => ({ ...prev, submit: false }));
-      return;
+        console.error('User details not found in local storage');
+        setLoading((prev) => ({ ...prev, submit: false }));
+        return;
+    }
+
+    // Compress images before appending to FormData
+    const files = e.target.elements['images']?.files;
+    if (files) {
+        for (const file of files) {
+            try {
+                const compressedFile = await imageCompression(file, {
+                    maxSizeMB: 0.9, // Ensure the file is less than 900 KB
+                    maxWidthOrHeight: 1920, // Optional: Resize to a maximum dimension
+                    useWebWorker: true,
+                });
+                // Remove the original file key and append only the compressed file
+                formData.delete('images');
+                formData.append('images', compressedFile, compressedFile.name);
+            } catch (error) {
+                console.error('Error compressing image:', error);
+                alert('Failed to compress image. Please try again.');
+                setLoading((prev) => ({ ...prev, submit: false }));
+                return;
+            }
+        }
     }
 
     try {
-      const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
-        method: 'POST',
-        body: formData,
-      });
+        const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+            method: 'POST',
+            body: formData,
+        });
 
-      if (!createResponse.ok) {
-        console.error('Failed to create item');
-        alert('Failed to create item. Please try again.');
-        return;
-      }
+        if (!createResponse.ok) {
+            console.error('Failed to create item');
+            alert('Failed to create item. Please try again.');
+            return;
+        }
 
-      const data = await createResponse.json();
-      console.log('Item created successfully:', data);
-      setProducts((prev) => [...prev, data.item]);
-      toggleModal();
-      showNotification('Item created successfully!');
+        const data = await createResponse.json();
+        console.log('Item created successfully:', data);
+        setProducts((prev) => [...prev, data.item]);
+        toggleModal();
+        showNotification('Item created successfully!');
 
-      // Increment active listings dynamically
-      setTotalEarnings((prev) => prev + 1);
+        // Increment active listings dynamically
+        setTotalEarnings((prev) => prev + 1);
     } catch (error) {
-      console.error('Error creating item:', error);
-      alert('An error occurred while creating the item. Please try again.');
+        console.error('Error creating item:', error);
+        alert('An error occurred while creating the item. Please try again.');
     } finally {
-      setLoading((prev) => ({ ...prev, submit: false }));
+        setLoading((prev) => ({ ...prev, submit: false }));
     }
   };
 
