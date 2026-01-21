@@ -122,7 +122,7 @@ function AllItemsPage() {
 				</div>
 
 				{/* Categories Line */}
-				<div className="flex lg:justify-center justify-start py-2 gap-3 overflow-x-auto pb-4">
+				<div>
 					{["All Categories", "Electronics", "Sports", "Instruments", "Shoes", "Tech Products", "Books","Clothes", "Others"].map((category, index) => (
 						<button
 							key={index}

@@ -232,7 +232,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                   Dashboard
                 </div>
               </Link>
-              <Link href="/terms">
+              <Link href="/comp/terms">
                 <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
                   <FileText className="mr-3 w-5 h-5" />
                   Terms
