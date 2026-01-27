@@ -42,7 +42,7 @@ export default function CareersPage({ onBack }: { onBack?: () => void }) {
             </div>
 
             <p className="text-beige-800 leading-relaxed mt-6">
-              Don’t see a fit? Send your portfolio or resume to hotdrop.tech@gmail.com.
+              Don’t see a fit? Send your portfolio or resume to <b> hotdrop.tech@gmail.com.</b>
             </p>
           </Card>
         </div>

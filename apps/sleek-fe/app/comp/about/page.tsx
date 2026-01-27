@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react';
+import Link from 'next/link';
 import { Card } from '../../../components/ui/card';
 
 export default function AboutUsPage({ onBack }: { onBack?: () => void }) {
@@ -43,7 +44,7 @@ export default function AboutUsPage({ onBack }: { onBack?: () => void }) {
               <h2 className="text-xl font-semibold text-black">What Makes Us Different</h2>
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
                 <li>
-                  <strong>Safety First:</strong> Verified accounts, secure messaging, and proactive moderation to keep
+                  <strong>Safety First:</strong> Verified accounts and proactive moderation to keep
                   scammers and bad actors out.
                 </li>
                 <li>
@@ -132,7 +133,7 @@ export default function AboutUsPage({ onBack }: { onBack?: () => void }) {
                 via the Contact Us page.
               </p>
               <p className="text-beige-800 leading-relaxed">
-                Interested in joining our team? Check out the Careers page to see open roles.
+                Interested in joining our team? <Link href="/comp/careers" className="text-green-600 underline">Check out our Careers page</Link> to see open roles.
               </p>
             </section>
 

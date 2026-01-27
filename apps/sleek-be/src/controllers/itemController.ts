@@ -1,5 +1,6 @@
 import { Request, Response,RequestHandler } from 'express';
-import { PrismaClient, DashboardMetrics } from '@prisma/client';
+import { DashboardMetrics } from '@prisma/client';
+import prisma from '../prismaClient';
 import multer from 'multer';
 import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
 import jwt, { JwtPayload } from 'jsonwebtoken';
@@ -14,7 +15,7 @@ declare global {
   }
 }
 
-const prisma = new PrismaClient();
+// `prisma` is imported from `src/prismaClient.ts` and may be `null` if initialization failed.
 
 // Configure Multer to use memory storage
 const storage = multer.memoryStorage(); // Store files in memory
@@ -30,28 +31,27 @@ const upload = multer({
   },
 });
 
-// Hardcode JWT_SECRET for debugging purposes
-const JWT_SECRET: string = 'shashi9705';
-
-// Debugging: Log the JWT_SECRET value (ensure this is removed in production)
-console.debug('JWT_SECRET value:', JWT_SECRET);
+// Load JWT secret from environment
+const JWT_SECRET = process.env.JWT_SECRET as string;
 
 if (!JWT_SECRET) {
     throw new Error('JWT_SECRET is not defined. Please set it in the environment variables.');
-}
+} 
 
 // Update the createItem function to upload files directly to S3
 export const createItem = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, category, actualPrice, discountedPrice, userId, description } = req.body;
+        const { name, category, actualPrice, discountedPrice, userId, description, tags, type } = req.body;
 
         // Validate required fields
-        if (!name || !category || !actualPrice || !userId) {
+        const finalCategory = type === 'service' ? 'Tutoring & Services' : category;
+
+        if (!name || !finalCategory || !actualPrice || !userId) {
             res.status(400).json({
                 message: 'Invalid input. Ensure all required fields are provided.',
                 missingFields: {
                     name: !name ? 'Name is required' : undefined,
-                    category: !category ? 'Category is required' : undefined,
+                    category: !finalCategory ? 'Category is required' : undefined,
                     actualPrice: !actualPrice ? 'Actual price is required' : undefined,
                     userId: !userId ? 'User ID is required' : undefined,
                 },
@@ -59,32 +59,42 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
             return;
         }
 
-        // Validate uploaded files
-        if (!req.files || (req.files as Express.Multer.File[]).length === 0) {
-            res.status(400).json({
-                message: 'No files uploaded. Please upload at least one image.',
-            });
-            return;
+        // Upload files to S3 (images are optional for services)
+        let imageUrls: string[] = [];
+        if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+            imageUrls = await Promise.all(
+                (req.files as Express.Multer.File[]).map(async (file) => {
+                    const result = await uploadToS3(file); // Pass the file object directly
+                    return result; // S3 file URL
+                })
+            );
         }
 
-        // Upload files to S3
-        const imageUrls = await Promise.all(
-            (req.files as Express.Multer.File[]).map(async (file) => {
-                const result = await uploadToS3(file); // Pass the file object directly
-                return result; // S3 file URL
-            })
-        );
+        const parsedTags = (() => {
+            if (!tags) return [] as string[];
+            if (Array.isArray(tags)) return tags.map(String).filter(Boolean);
+            if (typeof tags === 'string') {
+                try {
+                    const parsed = JSON.parse(tags);
+                    if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+                } catch {
+                    return tags.split(',').map((t) => t.trim()).filter(Boolean);
+                }
+            }
+            return [] as string[];
+        })();
 
         // Create new item
         const newItem = await prisma.item.create({
             data: {
                 name,
                 images: imageUrls,
-                category,
+                category: finalCategory,
                 actualPrice: parseFloat(actualPrice),
                 discountedPrice: parseFloat(discountedPrice),
                 userId: parseInt(userId, 10),
                 description, // Add description field
+                tags: parsedTags,
                 sold: false,
             },
         });
@@ -193,6 +203,12 @@ export const fetchItems = async (req: Request, res: Response): Promise<void> => 
     try {
         console.debug('Fetching items for email:', email); // Debugging: Log the email
 
+        if (!prisma) {
+            // DB not available — return empty list so frontend can render.
+            res.status(200).json({ items: [] });
+            return;
+        }
+
         const items = await prisma.item.findMany({
             where: { user: { email } },
             select: {
@@ -272,9 +288,10 @@ export const fetchAllItems = async (req: Request, res: Response): Promise<void> 
             },
         });
         res.status(200).json({ items });
-    } catch (error) {
-        console.error('Error fetching all items:', error);
-        res.status(500).json({ message: 'Error fetching all items', error });
+    } catch (error: any) {
+        // Log the error but return an empty list so the frontend doesn't break
+        console.error('Error fetching all items (returning empty list):', error?.message || error);
+        res.status(200).json({ items: [] });
     }
 };
 

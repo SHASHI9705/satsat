@@ -39,6 +39,7 @@ model Item {
   updatedAt      DateTime @updatedAt
   sold           Boolean  @default(false)
   description    String? // Optional description field for the item
+  tags           String[] @default([])
   dashboardMetricsId Int?
   dashboardMetrics   DashboardMetrics? @relation(fields: [dashboardMetricsId], references: [id])
 }

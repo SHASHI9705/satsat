@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+"use client"
+
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -8,52 +10,55 @@ import { useAuth } from '../firebase/AuthProvider';
 import { 
   Search, 
   Plus, 
-  Menu,
   ShoppingBag,
-  Zap
+  Zap,
+  Bell,
+  Home,
+  Tag,
+  Users,
+  Heart,
+  Settings,
+  LogOut,
+  ChevronDown,
+  Package,
+  BarChart3,
+  User,
+  Shield,
+  HelpCircle
 } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // Import useRouter
-import { User, BarChart, FileText, Lock, Bug, LogOut } from 'lucide-react';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 
 export function Header({ notificationCount = 0 }: { notificationCount?: number; }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, signOutUser } = useAuth(); // Use signOutUser instead of logout
+  const { user, signOutUser } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // State for sidebar visibility
-  const router = useRouter(); // Initialize useRouter
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(notificationCount);
+  const categoriesRef = useRef<HTMLDivElement>(null);
+  const closeTimeoutRef = useRef<number | null>(null);
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
   };
 
-  const toggleSidebar = () => {
-    console.log('Toggling sidebar:', !isSidebarOpen); // Debug log for state
-    setIsSidebarOpen((prev) => !prev);
-  };
-
   const handleLogout = async () => {
     try {
-      await signOutUser(); // Call the correct logout method
-      router.push('/'); // Redirect to the homepage after logout
+      await signOutUser();
+      router.push('/');
     } catch (error) {
       console.error('Error during logout:', error);
     }
   };
 
-  const handleClickOutside = (event) => {
-    if (!event.target.closest('.dropdown-container')) {
-      setIsDropdownOpen(false);
-    }
-  };
+  const handleSearch = (e?: any) => {
+    if (e?.preventDefault) e.preventDefault();
 
-  useEffect(() => {
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, []);
-
-  const handleSearch = () => {
     const categories = [
       'All Categories',
       'Clothes',
@@ -71,198 +76,363 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
     );
 
     if (matchedCategory) {
-      router.push(`/allitems?category=${matchedCategory}`);
+      router.push(`/allitems?category=${encodeURIComponent(matchedCategory)}`);
+    } else if (searchQuery.trim()) {
+      router.push(`/allitems?search=${encodeURIComponent(searchQuery.trim())}`);
     } else {
-      alert('No category found');
+      router.push('/allitems');
     }
   };
 
+  // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutsideSidebar = (event) => {
-      if (
-        isSidebarOpen &&
-        !event.target.closest('.sidebar') &&
-        !event.target.closest('.menu-button')
-      ) {
-        setIsSidebarOpen(false);
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
+        setIsDropdownOpen(false);
+      }
+      if (categoriesRef.current && !categoriesRef.current.contains(target)) {
+        setIsCategoriesOpen(false);
       }
     };
 
-    document.addEventListener('click', handleClickOutsideSidebar);
-
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('click', handleClickOutsideSidebar);
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
     };
-  }, [isSidebarOpen]);
+  }, []);
+
+  // Close search on mobile when clicking outside
+  useEffect(() => {
+    if (isSearchExpanded) {
+      const handleClickOutsideSearch = (event: MouseEvent) => {
+        const target = event.target as Element;
+        if (!target.closest('.search-container') && !target.closest('.search-toggle')) {
+          setIsSearchExpanded(false);
+        }
+      };
+      
+      document.addEventListener('mousedown', handleClickOutsideSearch);
+      return () => document.removeEventListener('mousedown', handleClickOutsideSearch);
+    }
+  }, [isSearchExpanded]);
+
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/allitems') return pathname.startsWith('/allitems');
+    return pathname === href;
+  };
+
+  // Sync header search with /allitems query param
+  useEffect(() => {
+    if (pathname?.startsWith('/allitems')) {
+      const s = searchParams.get('search') || '';
+      setSearchQuery(s);
+    }
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
+    if (!user?.uid) {
+      setUnreadCount(notificationCount);
+      return;
+    }
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('toUserId', '==', user.uid),
+      where('read', '==', false)
+    );
+
+    const unsub = onSnapshot(q, (snap) => {
+      setUnreadCount(snap.size);
+    });
+
+    return () => unsub();
+  }, [user?.uid, notificationCount]);
+  const userInitial = user?.email?.charAt(0).toUpperCase() || 'U';
 
   return (
-    <header className="w-full sticky py-2 top-0 z-50 backdrop-blur-lg supports-[backdrop-filter]:bg-white/30">
-      <div className="container mx-auto px-4">
-        <div className="flex h-18 items-center justify-between">
+    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-200/50">
+      <div className="max-w-7xl mx-auto px-4 md:px-8">
+        <div className="flex h-14 md:h-16 items-center justify-between gap-4">
+          
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10">
-                <img src="/logo.svg" alt="SleekRoad Logo" className="w-full h-full object-contain border rounded border-black" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="w-9 h-9 md:w-10 md:h-10 bg-green-800 rounded-full flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <img 
+                  src="/logo.svg" 
+                  alt="SleekRoad Logo" 
+                  className="w-6 h-6 md:w-8 md:h-8 invert" 
+                />
               </div>
-              <span className="brand-title text-xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl md:text-2xl font-bold text-gray-800 tracking-tight">
                 SleekRoad
               </span>
+              <span className="text-xs text-green-600 font-medium hidden md:block">
+                Campus Marketplace
+              </span>
             </div>
-            <Badge variant="secondary" className="hidden sm:flex gap-1.5 px-3 py-1 bg-green-50 text-green-700 border-green-200">
-              <Zap className="w-3.5 h-3.5" />
-              Verified
-            </Badge>
-          </div>
+          </Link>
 
-          {/* Search Bar */}
-          <div className="flex-1 max-w-2xl mx-6 hidden md:block"> {/* Hide search bar on small screens */}
-            <div className="relative group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-hover:text-gray-600 transition-colors" />
+          {/* Desktop Navigation & Search */}
+          <div className="hidden md:flex items-center gap-8 flex-1 max-w-2xl mx-8">
+            <nav className="flex items-center gap-6">
+              <Link 
+                href="/allitems" 
+                className={`text-sm font-medium transition-colors ${isActive('/allitems') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
+              >
+                Browse
+              </Link>
+              <Link 
+                href="/trending" 
+                className={`text-sm font-medium transition-colors ${isActive('/trending') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
+              >
+                Trending
+              </Link>
+              <div
+                ref={categoriesRef}
+                onMouseEnter={() => {
+                  if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+                  setIsCategoriesOpen(true);
+                }}
+                onMouseLeave={() => {
+                  closeTimeoutRef.current = window.setTimeout(() => setIsCategoriesOpen(false), 250);
+                }}
+                onFocus={() => {
+                  if (closeTimeoutRef.current) window.clearTimeout(closeTimeoutRef.current);
+                  setIsCategoriesOpen(true);
+                }}
+                onBlur={() => {
+                  closeTimeoutRef.current = window.setTimeout(() => setIsCategoriesOpen(false), 250);
+                }}
+                className="relative"
+              >
+                <button
+                  onClick={() => setIsCategoriesOpen((s) => !s)}
+                  onKeyDown={(e) => { if (e.key === 'Escape') setIsCategoriesOpen(false); }}
+                  className={`text-sm font-medium transition-colors flex items-center gap-1 ${isCategoriesOpen ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
+                >
+                  Categories
+                  <ChevronDown className="w-4 h-4" />
+                </button>
+
+                {isCategoriesOpen && (
+                  <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-lg p-2 z-50">
+                    {[
+                      'All Categories',
+                      'Clothes',
+                      'Shoes',
+                      'Books',
+                      'Tech Products',
+                      'Electronics',
+                      'Instruments',
+                      'Tutoring & Services',
+                      'Others'
+                    ].map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => {
+                          setIsCategoriesOpen(false);
+                          router.push(`/allitems?category=${encodeURIComponent(cat)}`);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </nav>
+
+            <div className="relative flex-1 max-w-lg">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
-                placeholder="Search electronics, books, furniture, and more..."
+                placeholder="Search electronics, books, fashion..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()} // Trigger search on Enter key
-                className="pl-12 pr-4 h-11 w-full bg-gray-50 border-gray-200 rounded-xl hover:bg-gray-100 focus:bg-white transition-all duration-200 text-base"
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                className="pl-12 pr-4 h-11 bg-gray-50/50 border-gray-200 rounded-xl hover:bg-gray-100/50 focus:bg-white transition-all text-sm"
               />
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                <Link href="/dashboard">
-                  <Button type="button" aria-label="Sell an item" variant="black" className="gap-2 px-6 py-5 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105">
-                    <Plus className="w-5 h-5" />
-                    <span className="hidden sm:inline font-semibold">Sell Item</span>
-                  </Button>
-                </Link>
+          {/* Right Actions */}
+          <div className="flex items-center gap-3">
+            {/* Mobile Search Toggle */}
+            <button
+              className="md:hidden search-toggle p-2 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => setIsSearchExpanded(!isSearchExpanded)}
+            >
+              <Search className="w-5 h-5 text-gray-600" />
+            </button>
 
-                <div className=" hidden sm:block relative dropdown-container">
-                  <Avatar
-                    className="w-9 h-9 border border-black cursor-pointer"
-                    onClick={toggleDropdown}
-                  >
+            {/* Sell Button */}
+            {user && (
+              <Link href="/dashboard">
+                <Button 
+                  className="gap-2 px-4 md:px-6 h-10 bg-green-100 hover:bg-green-500 text-green-800 shadow-sm hover:shadow-md transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span className="hidden sm:inline font-semibold">Sell</span>
+                </Button>
+              </Link>
+            )}
+
+            {/* Notification Badge */}
+            <button
+              className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+              onClick={() => router.push('/inbox')}
+            >
+              <Bell className="w-5 h-5 text-gray-600" />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* User Menu */}
+            {user ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={toggleDropdown}
+                  className="flex items-center gap-2 p-1 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <Avatar className="w-8 h-8 border-2 border-green-500/20">
                     {user.photoURL ? (
                       <AvatarImage src={user.photoURL} alt="avatar" />
                     ) : (
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-semibold">
-                        {user.email?.charAt(0).toUpperCase()}
+                      <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-700 text-white font-semibold">
+                        {userInitial}
                       </AvatarFallback>
                     )}
                   </Avatar>
+                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
 
+                <AnimatePresence>
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <Link href="/profile">
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">My Profile</div>
-                      </Link>
-                      <Link href="/dashboard">
-                        <div className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Dashboard</div>
-                      </Link>
-                      <div
-                        onClick={handleLogout}
-                        className="px-4 py-2 bg-red-100 hover:bg-red-200 cursor-pointer"
-                      >
-                        Logout
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 overflow-hidden"
+                    >
+                      <div className="p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10">
+                            {user.photoURL ? (
+                              <AvatarImage src={user.photoURL} alt="avatar" />
+                            ) : (
+                              <AvatarFallback className="bg-gradient-to-br from-green-500 to-green-700 text-white text-lg">
+                                {userInitial}
+                              </AvatarFallback>
+                            )}
+                          </Avatar>
+                          <div>
+                            <p className="font-semibold text-gray-900">{user.displayName || user.email}</p>
+                            <p className="text-sm text-gray-500 truncate">{user.email}</p>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
 
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden bg-green-200"
-                  aria-label="Menu"
-                  onClick={toggleSidebar} // Open sidebar on click
-                >
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </>
+                      <div className="p-2">
+                        <Link href="/inbox">
+                          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <Bell className="w-5 h-5 text-gray-600" />
+                            <span className="text-gray-700">Inbox</span>
+                          </div>
+                        </Link>
+                        <Link href="/profile">
+                          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <User className="w-5 h-5 text-gray-600" />
+                            <span className="text-gray-700">My Profile</span>
+                          </div>
+                        </Link>
+                        <Link href="/dashboard">
+                          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <BarChart3 className="w-5 h-5 text-gray-600" />
+                            <span className="text-gray-700">Dashboard</span>
+                          </div>
+                        </Link>
+                        <Link href="/wishlist">
+                          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <Heart className="w-5 h-5 text-gray-600" />
+                            <span className="text-gray-700">Wishlist</span>
+                          </div>
+                        </Link>
+                        {/* <Link href="/settings">
+                          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                            <Settings className="w-5 h-5 text-gray-600" />
+                            <span className="text-gray-700">Settings</span>
+                          </div>
+                        </Link> */}
+                      </div>
+
+                      <div className="p-4 border-t border-gray-100">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors font-medium"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          Logout
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             ) : (
               <Link href="/signin">
-                <Button variant="outline" className="font-semibold border-2 hover:bg-gray-900 hover:text-white transition-all duration-200">
+                <Button 
+                  variant="outline" 
+                  className="font-semibold border-gray-300 hover:bg-gray-50 hover:border-gray-400 transition-colors"
+                >
                   Login
                 </Button>
               </Link>
             )}
+
+            {/* Mobile Menu Button */}
+            {/* Mobile menu removed - using header actions only */}
           </div>
         </div>
+
+        {/* Mobile Expanded Search */}
+        <AnimatePresence>
+          {isSearchExpanded && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="md:hidden search-container overflow-hidden"
+            >
+              <div className="py-4">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Input
+                    placeholder="Search for anything..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="pl-12 pr-4 h-12 bg-gray-50 border-gray-200 rounded-xl text-base"
+                    autoFocus
+                  />
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Sidebar */}
-      {isSidebarOpen && (
-        <div className="h-full fixed inset-0 z-50 flex justify-end ">
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50"
-            onClick={toggleSidebar} // Close sidebar when clicking outside
-          ></div>
-          <div
-            className={`w-64 bg-gradient-to-r from-green-300 to-green-500 h-full shadow-lg transform transition-transform duration-700 will-change-transform ${isSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`} // Added will-change for smoother animation
-          >
-            <div className="p-4 border-b flex flex-col items-center bg-gradient-to-r from-green-300 to-green-600"> {/* Centered content */}
-              {user?.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt="Profile"
-                  className="w-16 h-16 rounded-full border border-black" // Circular profile photo with black border
-                />
-              ) : (
-                <div className="bg-gradient-to-r from-green-300 to-green-600 w-16 h-16 rounded-full border border-black flex items-center justify-center bg-gray-200">
-                  <span className="text-lg font-bold text-gray-600">
-                    {user?.email?.charAt(0).toUpperCase() || 'U'}
-                  </span>
-                </div>
-              )}
-              <h2 className="text-xl font-bold mt-2 ">Menu</h2>
-            </div>
-            <div className="p-4 space-y-2 bg-gradient-to-r from-green-300 to-green-600">
-              <Link href="/profile">
-                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
-                  <User className="mr-3 w-5 h-5" />
-                  My Profile
-                </div>
-              </Link>
-              <Link href="/dashboard">
-                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
-                  <BarChart className="mr-3 w-5 h-5" />
-                  Dashboard
-                </div>
-              </Link>
-              <Link href="/comp/terms">
-                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
-                  <FileText className="mr-3 w-5 h-5" />
-                  Terms
-                </div>
-              </Link>
-              <Link href="/privacy-policy">
-                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
-                  <Lock className="mr-3 w-5 h-5" />
-                  Privacy Policy
-                </div>
-              </Link>
-              <Link href="/report-issue">
-                <div className="mb-4 flex items-center px-4 py-3 border border-green-800 rounded-lg shadow-md hover:bg-gray-100 cursor-pointer font-medium">
-                  <Bug className="mr-3 w-5 h-5" />
-                  Report Issue
-                </div>
-              </Link>
-              <div
-                onClick={handleLogout}
-                className="mb-2 flex items-center px-4 py-3 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-lg shadow-md hover:from-red-600 hover:to-red-800 cursor-pointer font-medium"
-              >
-                <LogOut className="mr-3 w-5 h-5" />
-                Logout
-              </div>
-              <div className='h-80'></div>
-              <div className='h-80'></div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Mobile sliding menu removed - navigation is accessible via header links */}
     </header>
   );
 }

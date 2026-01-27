@@ -1,427 +1,704 @@
 "use client";
 
 import { Button } from '../../components/ui/button';
-import { Star, Package, Home, ArrowLeft } from 'lucide-react';
+import { Star, Package, Home, ArrowLeft, Heart, Share2, MapPin, Clock, ChevronLeft, ChevronRight, MessageCircle, Shield, Truck, ArrowRight, CheckCircle } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { ProductCard } from '../../components/ProductCard';
-import { useRouter, useSearchParams } from 'next/navigation'; // Import useSearchParams
+import { useRouter, useSearchParams } from 'next/navigation';
 import Loader from '../../components/Loader';
-import { useAuth } from '../../firebase/AuthProvider'; // Import useAuth
+import { useAuth } from '../../firebase/AuthProvider';
 import { db } from '../../firebase/firebaseConfig';
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
 
+import { Badge } from '../../components/ui/badge';
+import { motion, AnimatePresence } from 'framer-motion';
+
 export default function SelectedItemPage() {
-	const searchParams = useSearchParams();
-	const itemId = searchParams.get('id'); // Get the item ID from query parameters
+  const searchParams = useSearchParams();
+  const itemId = searchParams.get('id');
+  
+  const router = useRouter();
+  const { user } = useAuth();
+  
+  const [item, setItem] = useState<any>(null);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [images, setImages] = useState<string[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [page, setPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [sellerDetails, setSellerDetails] = useState<any>(null);
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isZoomed, setIsZoomed] = useState(false);
 
-	const router = useRouter();
-	const { user } = useAuth(); // Get user from useAuth
+  const getRandomProductFromRelated = () => {
+    const randomIndex = Math.floor(Math.random() * relatedProducts.length);
+    const randomProduct = relatedProducts[randomIndex];
+    return {
+      ...randomProduct,
+      id: (Math.random() * 100000).toFixed(0)
+    };
+  };
 
-	const [item, setItem] = useState(null);
-	const [relatedProducts, setRelatedProducts] = useState([]);
-	const [currentImageIndex, setCurrentImageIndex] = useState(0);
-	const [images, setImages] = useState([]); // Initialize images state
+  const loadMoreProducts = () => {
+    const newProducts = Array.from({ length: 4 }, () => getRandomProductFromRelated());
+    setProducts((prev) => [...prev, ...newProducts]);
+    setPage((prev) => prev + 1);
+  };
 
-	const [products, setProducts] = useState(relatedProducts);
-	const [page, setPage] = useState(1);
-	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [sellerDetails, setSellerDetails] = useState(null); // State to store seller details
-	const [isFavorited, setIsFavorited] = useState(false); // State to track if the item is favorited
-	const [isLoading, setIsLoading] = useState(true); // Add loading state
+  useEffect(() => {
+    const handleScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 100
+      ) {
+        loadMoreProducts();
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-	const getRandomProductFromRelated = () => {
-		const randomIndex = Math.floor(Math.random() * relatedProducts.length);
-		const randomProduct = relatedProducts[randomIndex];
-		return {
-			...randomProduct,
-			id: (Math.random() * 100000).toFixed(0) // Ensure unique ID for each new product
-		};
-	};
+  const touchStartX = useRef(0);
 
-	const loadMoreProducts = () => {
-		const newProducts = Array.from({ length: 4 }, () => getRandomProductFromRelated());
-		setProducts((prev) => [...prev, ...newProducts]);
-		setPage((prev) => prev + 1);
-	};
+  const handleTouchStart = (e: any) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
 
-	useEffect(() => {
-		const handleScroll = () => {
-			if (
-				window.innerHeight + window.scrollY >=
-				document.documentElement.scrollHeight - 100
-			) {
-				loadMoreProducts();
-			}
-		};
-		window.addEventListener('scroll', handleScroll);
-		return () => window.removeEventListener('scroll', handleScroll);
-	}, []);
+  const handleTouchEnd = (e: any) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    if (touchStartX.current - touchEndX > 50) {
+      handleSwipe('left');
+    } else if (touchEndX - touchStartX.current > 50) {
+      handleSwipe('right');
+    }
+  };
 
-	const touchStartX = useRef(0);
+  const handleSwipe = (direction: string) => {
+    if (direction === 'left') {
+      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
+    } else if (direction === 'right') {
+      setCurrentImageIndex((prevIndex) =>
+        prevIndex === 0 ? images.length - 1 : prevIndex - 1
+      );
+    }
+  };
 
-	const handleTouchStart = (e) => {
-		touchStartX.current = e.touches[0].clientX;
-	};
+  const handleGetContactDetails = async () => {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
 
-	const handleTouchEnd = (e) => {
-		const touchEndX = e.changedTouches[0].clientX;
-		if (touchStartX.current - touchEndX > 50) {
-			handleSwipe('left');
-		} else if (touchEndX - touchStartX.current > 50) {
-			handleSwipe('right');
-		}
-	};
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    let fetchedSeller = null;
+    if (backendUrl) {
+      try {
+        const response = await fetch(`${backendUrl}/api/seller/${item.userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          fetchedSeller = data.seller;
+        } else {
+          console.warn('Failed to fetch seller details from backend, status:', response.status);
+        }
+      } catch (error) {
+        console.warn('Error fetching seller details from backend:', error);
+      }
+    }
 
-	const handleSwipe = (direction) => {
-		if (direction === 'left') {
-			setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-		} else if (direction === 'right') {
-			setCurrentImageIndex((prevIndex) =>
-				prevIndex === 0 ? images.length - 1 : prevIndex - 1
-			);
-		}
-	};
+    if (!fetchedSeller && item?.user) {
+      fetchedSeller = {
+        name: item.user.name || item.user.username || 'Seller',
+        email: item.user.email || '',
+        phone: item.user.phone || '',
+        avatar: item.user.avatar || '',
+        address: item.user.address || ''
+      };
+    }
 
-	const handleGetContactDetails = async () => {
-		if (!user) {
-			router.push('/signin'); // Redirect to signup page if user is not signed in
-			return;
-		}
+    if (fetchedSeller) {
+      setSellerDetails(fetchedSeller);
+      setIsModalOpen(true);
+    } else {
+      alert('Seller contact details are not available at the moment.');
+    }
+  };
 
-		// Try backend fetch if URL is configured; otherwise fall back to item.user (if available)
-		const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-		let fetchedSeller = null;
-		if (backendUrl) {
-			try {
-				const response = await fetch(`${backendUrl}/api/seller/${item.userId}`);
-				if (response.ok) {
-					const data = await response.json();
-					fetchedSeller = data.seller;
-				} else {
-					console.warn('Failed to fetch seller details from backend, status:', response.status);
-				}
-			} catch (error) {
-				console.warn('Error fetching seller details from backend:', error);
-			}
-		}
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
-		// Fallback to embedded item.user if backend is not available or returned nothing
-		if (!fetchedSeller && item?.user) {
-			fetchedSeller = {
-				name: item.user.name || item.user.username || 'Seller',
-				email: item.user.email || '',
-				phone: item.user.phone || '',
-				avatar: item.user.avatar || '',
-				address: item.user.address || ''
-			};
-		}
+  async function handleMessageSeller() {
+    if (!user) {
+      router.push('/signin');
+      return;
+    }
+    if (item?.sold) {
+      alert('This item is marked as sold. Chat is disabled.');
+      return;
+    }
 
-		if (fetchedSeller) {
-			setSellerDetails(fetchedSeller);
-			setIsModalOpen(true);
-		} else {
-			alert('Seller contact details are not available at the moment.');
-		}
-	};
+    let sellerUid = String(item?.user?.uid || item?.user?.firebaseUid || '');
 
-	const handleCloseModal = () => {
-		setIsModalOpen(false);
-	};
+    if (!sellerUid) {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+      if (backendUrl && item?.userId) {
+        try {
+          const response = await fetch(`${backendUrl}/api/seller/${item.userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            const sellerEmail = data?.seller?.email;
+            if (sellerEmail) {
+              const q = query(collection(db, 'users'), where('email', '==', sellerEmail));
+              const snap = await getDocs(q);
+              const docSnap = snap.docs[0];
+              sellerUid = docSnap?.id || '';
+            }
+          }
+        } catch (error) {
+          console.warn('Error resolving seller uid:', error);
+        }
+      }
+    }
 
-	// Ensure a conversation exists between the current user and the other email.
-	async function ensureConversation(meEmail, otherEmail) {
-		if (!meEmail || !otherEmail) return null;
-		// find any conversation that contains both participants
-		const q = query(collection(db, 'conversations'), where('participantsEmails', 'array-contains', otherEmail));
-		const snap = await getDocs(q);
-		for (const d of snap.docs) {
-			const data = d.data();
-			const parts = data.participantsEmails || [];
-			if (parts.includes(meEmail) && parts.includes(otherEmail)) return d.id;
-		}
-		// not found -> create
-		const ref = await addDoc(collection(db, 'conversations'), {
-			participantsEmails: [meEmail, otherEmail],
-			createdAt: serverTimestamp(),
-			lastMessage: '',
-			lastUpdated: serverTimestamp(),
-		});
-		return ref.id;
-	}
+    if (!sellerUid) {
+      alert('Seller chat is not available yet. Ask the seller to sign in once.');
+      return;
+    }
 
-	async function handleMessageSeller() {
-		if (!user) {
-			router.push('/signin');
-			return;
-		}
-		if (!sellerDetails?.email) {
-			alert('Seller has no contact email available.');
-			return;
-		}
-		const convId = await ensureConversation(user.email || '', sellerDetails.email);
-		setIsModalOpen(false);
-		// navigate to messages page — pass convId as query param
-		router.push(`/messages?convId=${convId}`);
-	}
+    if (sellerUid === user.uid) {
+      alert('You are the seller for this item.');
+      return;
+    }
+    router.push(`/chat?productId=${encodeURIComponent(String(itemId || ''))}&sellerId=${encodeURIComponent(sellerUid)}`);
+  }
 
-	useEffect(() => {
-		const fetchItemDetails = async () => {
-			try {
-				const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/${itemId}`);
-				if (response.ok) {
-					const data = await response.json();
-					setItem(data.item);
-					setRelatedProducts(data.relatedProducts || []); // Assuming related products are included
-				} else {
-					console.error('Failed to fetch item details');
-				}
-			} catch (error) {
-				console.error('Error fetching item details:', error);
-			} finally {
-				setIsLoading(false); // Stop loader after fetching data
-			}
-		};
+  useEffect(() => {
+    const fetchItemDetails = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/${itemId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setItem(data.item);
+          setRelatedProducts(data.relatedProducts || []);
+          setProducts(data.relatedProducts || []);
+        } else {
+          console.error('Failed to fetch item details');
+        }
+      } catch (error) {
+        console.error('Error fetching item details:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-		if (itemId) {
-			fetchItemDetails();
-		}
-	}, [itemId]);
+    if (itemId) {
+      fetchItemDetails();
+    }
+  }, [itemId]);
 
-	useEffect(() => {
-		if (item?.images) {
-			setImages(item.images); // Populate images after fetching item details
-		}
-	}, [item]);
+  useEffect(() => {
+    if (item?.images) {
+      setImages(item.images);
+    }
+  }, [item]);
 
-	useEffect(() => {
-		const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-		setIsFavorited(favorites.includes(itemId));
-	}, [itemId]);
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    setIsFavorited(favorites.includes(itemId));
+  }, [itemId]);
 
-	const handleFavoriteClick = () => {
-		const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-		if (favorites.includes(itemId)) {
-			const updatedFavorites = favorites.filter((id) => id !== itemId);
-			localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-			setIsFavorited(false);
-		} else {
-			favorites.push(itemId);
-			localStorage.setItem('favorites', JSON.stringify(favorites));
-			setIsFavorited(true);
-		}
-	};
+  const handleFavoriteClick = () => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (favorites.includes(itemId)) {
+      const updatedFavorites = favorites.filter((id: string) => id !== itemId);
+      localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      setIsFavorited(false);
+    } else {
+      favorites.push(itemId);
+      localStorage.setItem('favorites', JSON.stringify(favorites));
+      setIsFavorited(true);
+    }
+  };
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center">
-				<Loader />
-			</div>
-		);
-	}
+  const handleShareClick = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: item?.name,
+          text: `Check out ${item?.name} on SleekRoad!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
+    }
+  };
 
-	
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
 
-	const handleViewDetails = (productId) => {
-		router.push(`/selecteditem?id=${productId}`);
-	};
+  const isServiceCategory = (category?: string) => {
+    if (item?.type === 'service') return true;
+    const c = (category || '').toLowerCase();
+    return (
+      c.includes('service') ||
+      c.includes('tutoring') ||
+      ['tutor', 'developer', 'management', 'coach', 'gamer'].some((k) => c.includes(k))
+    );
+  };
 
-	return (
-		<section className="min-h-screen py-8 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-950/10 dark:to-red-950/10">
-			<div className="container mx-auto px-4">
-				{/* Header with Back and Home Buttons */}
-				<div className="flex items-center justify-between p-4 border-gray-300">
-					<button
-						onClick={() => window.history.back()}
-						className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded-md text-black hover:bg-gray-100"
-					>
-						<ArrowLeft className="w-5 h-5 text-black" />
-						<span className="text-sm font-medium">Back</span>
-					</button>
-					<a
-						href="/"
-						className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded-md text-black hover:bg-gray-100"
-					>
-						<Home className="w-5 h-5 text-black" />
-						<span className="text-sm font-medium">Home</span>
-					</a>
-				</div>
+  const formatPriceWithUnit = (price?: number) => {
+    if (price == null) return '';
+    return `${formatPrice(price)}${isServiceCategory(item?.category) ? ' /hr' : ''}`;
+  };
 
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-					{/* Image Section */}
-					<div className="flex-verticle justify-center items-center relative">
-						<div
-							className="relative w-full max-w-lg h-96 overflow-hidden rounded-lg"
-							onTouchStart={handleTouchStart} // Attach touch start event
-							onTouchEnd={handleTouchEnd} // Attach touch end event
-						>
-							{images.map((image, index) => (
-								<img
-									key={index}
-									src={image}
-									alt={`${item.name} - ${index + 1}`}
-									className={`absolute inset-0 rounded-lg shadow-md w-full h-96 object-contain transition-opacity duration-300 ${
-										index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-									}`}
-								/>
-							))}
-						</div>
+  const serviceTags = (() => {
+    const tags = (item?.tags || item?.skills || item?.serviceTags || []) as any;
+    if (Array.isArray(tags)) return tags.filter(Boolean);
+    if (typeof tags === 'string') return tags.split(',').map((t) => t.trim()).filter(Boolean);
+    return [] as string[];
+  })();
 
-						{/* Move the indicator below the image box */}
-						<div className="flex justify-center mt-4 gap-2"> {/* Added margin-top to separate from the image box */}
-							{images.map((_, index) => (
-								<button
-									key={index}
-									onClick={() => setCurrentImageIndex(index)}
-									className={`w-3 h-3 rounded-full ${
-										index === currentImageIndex ? 'bg-blue-400' : 'bg-gray-400'
-									}`}
-								/>
-							))}
-						</div>
-					</div>
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white">
+        <Loader />
+      </div>
+    );
+  }
 
-					{/* Details Section */}
-					<div>
-						<div className="flex items-center gap-2 mb-4">
-							<h1 className="text-4xl font-bold mb-4 line-clamp-2">{item.name}</h1>
-						</div>
-						<p className="text-lg font-semibold text-green-600 mb-2">
-							₹{item.discountedPrice}
-							<span className="line-through text-gray-500 ml-2">
-								₹{item.actualPrice}
-							</span>
-						</p>
-						<p className="text-muted-foreground mb-6">{item.description}</p>
+  const handleViewDetails = (productId: string) => {
+    router.push(`/selecteditem?id=${productId}`);
+  };
 
-						<div className="flex items-center gap-2 mb-4">
-							<Star className="w-5 h-5 text-yellow-500" />
-							<span className="text-sm font-medium">
-								{item.rating || '4.5'} (Verified Seller)
-							</span>
-						</div>
+  const calculateDiscount = () => {
+    if (!item?.actualPrice || !item?.discountedPrice) return 0;
+    return Math.round((1 - item.discountedPrice / item.actualPrice) * 100);
+  };
 
-						<div className="flex gap-4">
-							<Button 
-							  className="bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
-							  onClick={handleGetContactDetails}
-							>
-								Get Contact Details
-							</Button>
-							<Button 
-							  className={`border ${isFavorited ? 'bg-red-500 text-white' : 'bg-white text-red-500'} hover:bg-red-100`} 
-							  onClick={handleFavoriteClick}
-							>
-								{isFavorited ? 'Favorited' : 'Add to Favorites'}
-							</Button>
-						</div>
-					</div>
-				</div>
+  // ...existing code...
 
-				{/* Related Products Section */}
-				<div className="mt-12">
-					<div className="flex items-center gap-3 mb-4">
-						<Package className="w-6 h-6 text-gray-700" />
-						<h2 className="text-3xl font-extrabold">More in {item.category}</h2>
-					</div>
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-						{relatedProducts.map((product) => (
-							<div key={product.id} className="mb-4">
-								<ProductCard 
-									product={{
-									id: product.id,
-									title: product.name,
-									price: product.discountedPrice,
-									originalPrice: product.actualPrice,
-									image: product.images?.[0] || '/placeholder-image.png', // Fallback image
-									condition: 'Good', // Static condition for now
-									seller: {
-										name: product.user?.name || 'Unknown Seller',
-										rating: parseFloat((Math.random() * (5 - 4) + 4).toFixed(1)),
-										verified: false // Static verified status for now
-									},
-									location: product.category,
-									postedTime: 'Just now', // Static posted time for now
-									category: product.category,
-									isFavorited: false // Static favorite status for now
-								}}
-								onViewDetails={() => handleViewDetails(product.id)}
-								 />
-							</div>
-						))}
-					</div>
-				</div>
-			</div>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-[#F4F2F2] to-white">
+      {/* Navigation Bar */}
+      <div className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200/50">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors group"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-medium">Back</span>
+            </button>
+            
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleShareClick}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                title="Share"
+              >
+                <Share2 className="w-5 h-5 text-gray-600" />
+              </button>
+              <button
+                onClick={() => router.push('/')}
+                className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                title="Home"
+              >
+                <Home className="w-5 h-5 text-gray-600" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-			{/* Modal for Contact Details (upgraded UI + messaging integration) */}
-			{isModalOpen && sellerDetails && (
-				<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50 p-4">
-					<div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
-						<div className="flex flex-col md:flex-row">
-							{/* Left: Seller summary */}
-							<div className="md:w-1/3 p-6 bg-gradient-to-b from-green-50 to-white flex flex-col items-center gap-4">
-								<div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-200 bg-white flex items-center justify-center">
-									{sellerDetails.avatar ? (
-										<img src={sellerDetails.avatar} alt={sellerDetails.name} className="w-full h-full object-cover" />
-									) : (
-										<span className="text-2xl font-bold text-gray-700">{sellerDetails.name?.charAt(0) || 'S'}</span>
-									)}
-								</div>
-								<h3 className="text-lg font-semibold text-gray-900 text-center">{sellerDetails.name}</h3>
-								<p className="text-sm text-muted-foreground text-center">Verified Seller</p>
-							</div>
-						
-							{/* Right: Contact details and actions */}
-							<div className="md:w-2/3 p-6">
-								<div className="flex items-start justify-between">
-									<div>
-										<h4 className="text-xl font-bold">Contact & chat</h4>
-										<p className="text-sm text-muted-foreground mt-1">Connect with the seller securely through the in-app chat or via email/phone.</p>
-									</div>
-									<div>
-										<button onClick={() => setIsModalOpen(false)} className="text-sm text-gray-500 hover:text-gray-700">Close</button>
-									</div>
-								</div>
-							
-								<div className="mt-6 grid gap-3">
-									<div className="flex items-center gap-3">
-										<svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 8.5C3 6.29 4.79 4.5 7 4.5h10c2.21 0 4 1.79 4 4v7c0 2.21-1.79 4-4 4H7c-2.21 0-4-1.79-4-4v-7z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-										<div>
-											<p className="text-sm text-gray-700"><strong>Email</strong></p>
-											<p className="text-sm text-muted-foreground">{sellerDetails.email || 'Not provided'}</p>
-										</div>
-									</div>
-									{sellerDetails.phone && (
-										<div className="flex items-center gap-3">
-											<svg className="w-5 h-5 text-gray-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.86 19.86 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.86 19.86 0 0 1 2.09 4.18 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.72c.12 1.05.36 2.07.72 3.03a2 2 0 0 1-.45 2.11L9.91 9.91a16 16 0 0 0 6 6l1.05-1.05a2 2 0 0 1 2.11-.45c.96.36 1.98.6 3.03.72A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-											<div>
-												<p className="text-sm text-gray-700"><strong>Phone</strong></p>
-												<p className="text-sm text-muted-foreground">{sellerDetails.phone}</p>
-											</div>
-										</div>
-									)}
-									{sellerDetails.address && (
-										<div className="mt-2 text-sm text-muted-foreground">{sellerDetails.address}</div>
-									)}
-								</div>
-							
-								<div className="mt-6 flex flex-col sm:flex-row gap-3">
-									
-									<button
-										className="flex-1 px-4 py-2 rounded-lg border border-gray-200 bg-black text-white hover:bg-gray-50"
-										onClick={() => {
-										navigator.clipboard?.writeText(sellerDetails.email || '')
-											.then(() => alert('Email copied to clipboard'))
-											.catch(() => alert('Unable to copy'));
-										}}
-									>
-										Copy email
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			)}
-		</section>
-	);
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          {/* Image Gallery */}
+          <div className="space-y-6">
+            {/* Main Image */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-gray-100 to-gray-200">
+              <div className="aspect-square relative">
+                <img
+                  src={images[currentImageIndex] || '/placeholder-image.png'}
+                  alt={item?.name}
+                  className={`w-full h-full object-contain transition-transform duration-500 ${isZoomed ? 'scale-150' : 'scale-100'}`}
+                  onClick={() => setIsZoomed(!isZoomed)}
+                />
+                
+                {/* Discount Badge */}
+                {calculateDiscount() > 0 && (
+                  <div className="absolute top-4 left-4 bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full font-bold shadow-lg">
+                    {calculateDiscount()}% OFF
+                  </div>
+                )}
+                
+                {/* Navigation Arrows */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)}
+                      className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => setCurrentImageIndex((prev) => (prev + 1) % images.length)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full shadow-lg flex items-center justify-center hover:bg-white transition-colors"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Image Thumbnails */}
+              {images.length > 1 && (
+                <div className="p-4 flex gap-3 overflow-x-auto scrollbar-hide">
+                  {images.map((image, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      className={`flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 transition-all ${index === currentImageIndex ? 'border-green-500 shadow-md' : 'border-gray-200'}`}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Image Indicators for Mobile */}
+            <div className="flex justify-center gap-2 lg:hidden">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${index === currentImageIndex ? 'bg-green-600' : 'bg-gray-300'}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Product Details */}
+          <div className="space-y-8">
+            {/* Header */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Badge className="bg-green-100 text-green-700 border-green-200 font-medium">
+                  {item?.category}
+                </Badge>
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200 font-medium">
+                  Campus Verified
+                </Badge>
+              </div>
+              
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+                {item?.name}
+              </h1>
+              
+              <div className="flex items-baseline gap-4">
+                <span className="text-3xl md:text-4xl font-bold text-gray-900">
+                  {formatPriceWithUnit(item?.discountedPrice)}
+                </span>
+                {item?.actualPrice && item.actualPrice > item.discountedPrice && (
+                  <>
+                    <span className="text-lg text-gray-400 line-through">
+                      {formatPriceWithUnit(item.actualPrice)}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="prose max-w-none">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
+              <p className="text-gray-600 leading-relaxed">
+                {item?.description}
+              </p>
+            </div>
+
+            {isServiceCategory(item?.category) && serviceTags.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">Skills & Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {serviceTags.map((tag: string, index: number) => (
+                    <span
+                      key={`${tag}-${index}`}
+                      className="text-xs text-gray-600 bg-gray-100 px-2 py-1 rounded-full"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Features */}
+            {/* <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Features</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <Shield className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Secure Payment</p>
+                    <p className="text-xs text-gray-500">100% protected</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Truck className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Campus Delivery</p>
+                    <p className="text-xs text-gray-500">Free on campus</p>
+                  </div>
+                </div>
+              </div>
+            </div> */}
+
+            {/* Seller Info */}
+            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Seller Information</h3>
+                {/* <div className="flex items-center gap-1">
+                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                  <span className="text-sm font-medium">{item?.rating || '4.5'}</span>
+                </div> */}
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-700 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                  {item?.user?.name?.charAt(0) || 'S'}
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">{item?.user?.name || 'Verified Seller'}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-600">Verified Student</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  size="lg"
+                  className="h-14 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl transition-all"
+                  onClick={handleMessageSeller}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Chat with Seller
+                </Button>
+                
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14 border-2 hover:bg-gray-50 transition-colors"
+                  onClick={handleGetContactDetails}
+                >
+                  <MessageCircle className="w-5 h-5 mr-2" />
+                  Contact Seller
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-14 border-2 hover:bg-gray-50 transition-colors"
+                  onClick={handleFavoriteClick}
+                >
+                  <Heart className={`w-5 h-5 mr-2 ${isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
+                  {isFavorited ? 'Favorited' : 'Add to Favorites'}
+                </Button>
+              </div>
+              
+              <Button
+                size="lg"
+                className="w-full h-14 bg-gray-900 text-white hover:bg-gray-800 transition-colors"
+                onClick={() => window.open(`https://wa.me/?text=Check out ${item?.name} on SleekRoad: ${window.location.href}`, '_blank')}
+              >
+                Share on WhatsApp
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Products Section */}
+        {relatedProducts.length > 0 && (
+          <div className="mt-20">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-3 bg-gradient-to-r from-green-500 to-green-600 rounded-xl">
+                    <Package className="w-6 h-6 text-white" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900">Related Products</h2>
+                </div>
+                <p className="text-gray-600">More items you might like</p>
+              </div>
+              <Button
+                variant="ghost"
+                className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                onClick={() => router.push(`/allitems?category=${item?.category}`)}
+              >
+                View All
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {relatedProducts.map((product: any) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    title: product.name,
+                    price: product.discountedPrice,
+                    originalPrice: product.actualPrice,
+                    image: product.images?.[0] || '/placeholder-image.png',
+                    condition: 'Good',
+                    seller: {
+                      name: product.user?.name || 'Unknown Seller',
+                      rating: parseFloat((Math.random() * (5 - 4) + 4).toFixed(1)),
+                      verified: false
+                    },
+                    location: product.category,
+                    postedTime: 'Just now',
+                    category: product.category,
+                    isFavorited: false,
+                    badge: calculateDiscount() > 20 ? 'Sale' : 'Trending'
+                  }}
+                  onViewDetails={() => handleViewDetails(product.id)}
+                />
+              ))}
+            </div>
+
+            {products.length < relatedProducts.length * 2 && (
+              <div className="text-center mt-12">
+                <Button
+                  variant="outline"
+                  className="px-8 py-3 border-gray-300 hover:border-gray-400"
+                  onClick={loadMoreProducts}
+                >
+                  Load More Products
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Contact Modal */}
+      <AnimatePresence>
+        {isModalOpen && sellerDetails && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={handleCloseModal}
+            />
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="fixed inset-0 flex items-center justify-center z-50 p-4"
+            >
+              <div className="bg-white rounded-3xl max-w-md w-full overflow-hidden shadow-2xl">
+                <div className="p-8">
+                  <div className="text-center mb-6">
+                    <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden border-4 border-green-100">
+                      {sellerDetails.avatar ? (
+                        <img src={sellerDetails.avatar} alt={sellerDetails.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-green-500 to-green-700 flex items-center justify-center text-white text-2xl font-bold">
+                          {sellerDetails.name?.charAt(0) || 'S'}
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900">{sellerDetails.name}</h3>
+                    <p className="text-gray-600 mt-1">Verified Seller</p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {sellerDetails.email && (
+                      <div className="p-4 bg-gray-50 rounded-xl">
+                        <p className="text-sm text-gray-500 mb-1">Email</p>
+                        <p className="font-medium text-gray-900">{sellerDetails.email}</p>
+                      </div>
+                    )}
+                    
+                    {sellerDetails.phone && (
+                      <div className="p-4 bg-gray-50 rounded-xl">
+                        <p className="text-sm text-gray-500 mb-1">Phone</p>
+                        <p className="font-medium text-gray-900">{sellerDetails.phone}</p>
+                      </div>
+                    )}
+                    
+                    {sellerDetails.address && (
+                      <div className="p-4 bg-gray-50 rounded-xl">
+                        <p className="text-sm text-gray-500 mb-1">Location</p>
+                        <p className="font-medium text-gray-900">{sellerDetails.address}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-3 mt-8">
+                    <Button
+                      className="flex-1 bg-gray-900 text-white hover:bg-gray-800"
+                      onClick={() => {
+                        navigator.clipboard.writeText(sellerDetails.email || '');
+                        alert('Email copied to clipboard!');
+                      }}
+                    >
+                      Copy Email
+                    </Button>
+                    <Button
+                      className="flex-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white"
+                      onClick={() => {
+                        if (sellerDetails?.email) {
+                          window.location.href = `mailto:${sellerDetails.email}`;
+                        } else {
+                          handleGetContactDetails();
+                        }
+                      }}
+                    >
+                      Contact
+                    </Button>
+                  </div>
+                </div>
+                
+                <button
+                  onClick={handleCloseModal}
+                  className="w-full py-4 text-gray-500 hover:text-gray-700 border-t border-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 }

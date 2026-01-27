@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Header } from '../components/Header';
+import { useRouter } from 'next/navigation';
 import { HeroSection } from '../components/HeroSection';
 import { CategoryGrid } from '../components/CategoryGrid';
 import { FeaturedProducts } from '../components/FeaturedProducts';
@@ -31,12 +32,7 @@ const features = [
     description: 'All users verified with .edu emails for a safe community',
     gradient: 'bg-brand'
   },
-  {
-    icon: MessageCircle,
-    title: 'In-App Messaging',
-    description: 'Secure communication with buyers and sellers',
-    gradient: 'bg-brand'
-  },
+
   {
     icon: TrendingUp,
     title: 'Smart Pricing',
@@ -59,6 +55,7 @@ export default function App() {
 
 function AppContent() {
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const { user } = useAuth();
@@ -88,6 +85,8 @@ function AppContent() {
   const handleCategorySelect = (categoryId: string) => {
     setSelectedCategory(categoryId);
     console.log('Selected category:', categoryId);
+    // Navigate to the collection page so "See Collection" links work
+    router.push(`/allitems?category=${encodeURIComponent(categoryId)}`);
   };
 
   const handleFavorite = (productId: string) => {

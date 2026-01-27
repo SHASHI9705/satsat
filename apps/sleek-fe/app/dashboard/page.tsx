@@ -3,89 +3,228 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
-import { Plus, TrendingUp, Package, IndianRupee, Home, ShoppingBag, X } from 'lucide-react';
+import { Plus, TrendingUp, Package, IndianRupee, Home, ShoppingBag, X, Upload } from 'lucide-react';
 import { Input } from '../../components/ui/input';
 import { useAuth } from '../../firebase/AuthProvider';
-import Loader from '../../components/ui/loader'; // Corrected loader import
-import { useRouter } from 'next/navigation'; // Import useRouter
+import Loader from '../../components/ui/loader';
+import { useRouter } from 'next/navigation';
 import imageCompression from 'browser-image-compression';
 
-// Add Notification component
-const Notification = ({ message, onClose }) => (
-  <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
-    {message}
-    <button
-      onClick={onClose}
-      className="ml-4 text-sm underline hover:text-gray-200"
-    >
-      Close
-    </button>
-    
-  </div>
-);
-
-// Add a popup card for users with missing phone number or address
-const MissingInfoPopup = ({ onClose }) => (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-    <div className="bg-white rounded-lg shadow-lg p-6 w-96 relative">
-      <button
-        onClick={onClose}
-        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-      >
-        <X className="w-5 h-5" />
-      </button>
-      <h2 className="text-xl font-bold mb-4">Complete Your Profile</h2>
-      <p className="text-sm text-gray-600 mb-4">
-        To continue, please add your phone number and address to your profile.
-      </p>
-      <a
-        href="/profile"
-        className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg"
-      >
-        Go to Profile
-      </a>
-    </div>
-  </div>
-);
-
 export default function DashboardPage() {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
+  
+  // State variables for products
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [products, setProducts] = useState([]);
   const { user } = useAuth();
   const [notification, setNotification] = useState(null);
-  const [loading, setLoading] = useState({ submit: false, markAsSold: null }); // Add loading state
-  const [totalEarnings, setTotalEarnings] = useState(0); // Initialize total earnings
-  const [totalSales, setTotalSales] = useState(0); // Initialize total sales
+  const [loading, setLoading] = useState({ submit: false, markAsSold: null });
+  const [totalEarnings, setTotalEarnings] = useState(0);
+  const [totalSales, setTotalSales] = useState(0);
   const [showMissingInfoPopup, setShowMissingInfoPopup] = useState(false);
+  
+  // State variables for services modal
+  const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+  const [serviceName, setServiceName] = useState('');
+  const [serviceCategory, setServiceCategory] = useState('');
+  const [customCategory, setCustomCategory] = useState('');
+  const [servicePrice, setServicePrice] = useState('');
+  const [serviceDescription, setServiceDescription] = useState('');
+  const [serviceImage, setServiceImage] = useState<File | null>(null);
+  const [serviceTags, setServiceTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Service categories
+  const serviceCategories = [
+    { value: 'tutor', label: 'Tutor' },
+    { value: 'developer', label: 'Developer' },
+    { value: 'management', label: 'Management' },
+    { value: 'coach', label: 'Coach' },
+    { value: 'gamer', label: 'Gamer' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  // Add Notification component
+  const Notification = ({ message, onClose }: { message: string; onClose: () => void }) => (
+    <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50">
+      {message}
+      <button
+        onClick={onClose}
+        className="ml-4 text-sm underline hover:text-gray-200"
+      >
+        Close
+      </button>
+    </div>
+  );
+
+  // Add a popup card for users with missing phone number or address
+  const MissingInfoPopup = ({ onClose }: { onClose: () => void }) => (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-96 relative">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <h2 className="text-xl font-bold mb-4">Complete Your Profile</h2>
+        <p className="text-sm text-gray-600 mb-4">
+          To continue, please add your phone number and address to your profile.
+        </p>
+        <a
+          href="/profile"
+          className="block w-full text-center bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white font-medium py-2 px-4 rounded-lg"
+        >
+          Go to Profile
+        </a>
+      </div>
+    </div>
+  );
+
+
+
+  // Handle service image upload
+  const handleServiceImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setServiceImage(file);
+    }
+  };
+
+  // Remove service tag
+  const removeTag = (index: number) => {
+    setServiceTags(serviceTags.filter((_, i) => i !== index));
+  };
+
+  // Handle service submission
+  const handleServiceSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Basic client-side validation to surface issues early
+      if (!serviceName || !serviceCategory) {
+        alert('Please provide a service name and select a category.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Build FormData to submit to the existing item creation endpoint (services are treated as items with optional images)
+      const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+      // Prefer numeric DB user id if available in localStorage
+      const dbUserId = localUser?.id ? Number(localUser.id) : NaN;
+      if (!dbUserId || Number.isNaN(dbUserId) || dbUserId <= 0) {
+        // No numeric DB user id found — cannot create item reliably
+        alert('Unable to list service: no numeric user id found. Please sign in via the app so your account is linked.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const selectedCategoryDefinition = serviceCategories.find((cat) => cat.value === serviceCategory);
+      const serviceTypeTag = serviceCategory === 'other'
+        ? customCategory.trim()
+        : selectedCategoryDefinition?.label || serviceCategory;
+      const tagCandidates = [...serviceTags, serviceTypeTag]
+        .map((tag) => tag?.trim())
+        .filter(Boolean);
+      const uniqueTags = Array.from(new Set(tagCandidates));
+
+      const formData = new FormData();
+      formData.append('name', serviceName);
+      formData.append('category', 'Tutoring & Services');
+      formData.append('actualPrice', servicePrice || '0');
+      formData.append('discountedPrice', servicePrice || '0');
+      formData.append('description', serviceDescription || '');
+      formData.append('userId', String(dbUserId));
+      formData.append('type', 'service');
+      formData.append('tags', JSON.stringify(uniqueTags));
+
+      if (serviceImage) {
+        formData.append('images', serviceImage, serviceImage.name);
+      }
+
+      // Submit service to backend item endpoint (handles optional images)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        // Try to parse error details from backend
+        let errorText = `HTTP ${response.status}`;
+        try {
+          const errBody = await response.json();
+          errorText = errBody?.message || JSON.stringify(errBody) || errorText;
+        } catch (e) {
+          const txt = await response.text();
+          if (txt) errorText = txt;
+        }
+        throw new Error(errorText);
+      }
+
+      if (response.ok) {
+        alert('Service listed successfully!');
+        // Reset form
+        setServiceName('');
+        setServiceCategory('');
+        setCustomCategory('');
+        setServicePrice('');
+        setServiceDescription('');
+        setServiceImage(null);
+        setServiceTags([]);
+        setTagInput('');
+        setIsServiceModalOpen(false);
+        
+        // Refresh services list or navigate to services page
+        router.push('/services');
+      } else {
+        throw new Error('Failed to list service');
+      }
+    } catch (error) {
+      console.error('Error listing service:', error);
+      alert('Failed to list service. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/fetch?email=${encodeURIComponent(user.email)}`); // Pass email as query parameter
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/fetch?email=${encodeURIComponent(user?.email || '')}`);
         if (response.ok) {
           const data = await response.json();
-          console.log('API Response:', data); // Log the API response
+          console.log('API Response:', data);
           if (data && Array.isArray(data.items)) {
             setProducts(data.items);
+            // Calculate total earnings
+            const earnings = data.items
+              .filter((item: any) => item.sold)
+              .reduce((sum: number, item: any) => sum + (item.discountedPrice || 0), 0);
+            setTotalEarnings(earnings);
+            
+            // Calculate total sales
+            const sales = data.items.filter((item: any) => item.sold).length;
+            setTotalSales(sales);
           } else {
             console.error('Fetched items are not an array or undefined:', data.items);
-            setProducts([]); // Set to an empty array if the response is invalid
+            setProducts([]);
           }
         } else {
           console.error('Failed to fetch items');
-          setProducts([]); // Set to an empty array on fetch failure
+          setProducts([]);
         }
       } catch (error) {
         console.error('Error fetching items:', error);
-        setProducts([]); // Set to an empty array on error
+        setProducts([]);
       }
     };
 
     const checkUserProfile = async () => {
       if (user) {
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email)}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email || '')}`);
           if (response.ok) {
             const data = await response.json();
             if (!data.phone || !data.address) {
@@ -104,23 +243,21 @@ export default function DashboardPage() {
       fetchItems();
       checkUserProfile();
     }
-    
   }, [user]);
 
-  // Update toggleModal to check user profile details when Add Item button is clicked
   const toggleModal = async () => {
     if (!user) {
-      router.push('/signin'); // Redirect to signup page if user is not signed in
+      router.push('/signin');
       return;
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email)}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email || '')}`);
       if (response.ok) {
         const data = await response.json();
         if (!data.phone || !data.address) {
           setShowMissingInfoPopup(true);
-          return; // Prevent opening the modal if the popup is shown
+          return;
         }
       } else {
         console.error('Failed to fetch user details');
@@ -132,87 +269,80 @@ export default function DashboardPage() {
     setIsModalOpen((prev) => !prev);
   };
 
-  const showNotification = (message) => {
+  const showNotification = (message: string) => {
     setNotification(message);
-    setTimeout(() => setNotification(null), 2000); // Auto-hide after 2 seconds
+    setTimeout(() => setNotification(null), 2000);
   };
 
-  // Fixing duplicate image issue by ensuring only compressed images are appended to FormData
-  // Adjusting logic to include all form fields along with compressed images
-  const handlePaymentAndSubmit = async (e) => {
+  const handlePaymentAndSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading((prev) => ({ ...prev, submit: true }));
 
-    const formData = new FormData(e.target); // Use the existing form data to include all fields
-    const user = JSON.parse(localStorage.getItem('user'));
+    const formData = new FormData(e.target as HTMLFormElement);
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     if (user && user.id) {
-        formData.append('userId', user.id);
+      formData.append('userId', user.id);
     } else {
-        console.error('User details not found in local storage');
-        setLoading((prev) => ({ ...prev, submit: false }));
-        return;
+      console.error('User details not found in local storage');
+      setLoading((prev) => ({ ...prev, submit: false }));
+      return;
     }
 
     // Compress images before appending to FormData
-    const files = e.target.elements['images']?.files;
+    const files = (e.target as HTMLFormElement).elements.namedItem('images') as HTMLInputElement;
+    const fileList = files?.files;
 
-    if (files && files.length > 0) {
-        // 🔴 Remove original images ONLY ONCE
-        formData.delete('images');
+    if (fileList && fileList.length > 0) {
+      formData.delete('images');
 
-        try {
-            for (const file of files) {
-                const compressedFile = await imageCompression(file, {
-                    maxSizeMB: 0.9,          // < 900 KB
-                    maxWidthOrHeight: 1920,  // Resize if needed
-                    useWebWorker: true,
-                });
+      try {
+        for (const file of fileList) {
+          const compressedFile = await imageCompression(file, {
+            maxSizeMB: 0.9,
+            maxWidthOrHeight: 1920,
+            useWebWorker: true,
+          });
 
-                // ✅ Append ALL compressed images
-                formData.append('images', compressedFile, compressedFile.name);
-            }
-        } catch (error) {
-            console.error('Error compressing image:', error);
-            alert('Failed to compress image. Please try again.');
-            setLoading((prev) => ({ ...prev, submit: false }));
-            return;
+          formData.append('images', compressedFile, compressedFile.name);
         }
+      } catch (error) {
+        console.error('Error compressing image:', error);
+        alert('Failed to compress image. Please try again.');
+        setLoading((prev) => ({ ...prev, submit: false }));
+        return;
+      }
     }
 
-
     try {
-        const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
-            method: 'POST',
-            body: formData,
-        });
+      const createResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+        method: 'POST',
+        body: formData,
+      });
 
-        if (!createResponse.ok) {
-            console.error('Failed to create item');
-            alert('Failed to create item. Please try again.');
-            return;
-        }
+      if (!createResponse.ok) {
+        console.error('Failed to create item');
+        alert('Failed to create item. Please try again.');
+        return;
+      }
 
-        const data = await createResponse.json();
-        console.log('Item created successfully:', data);
-        setProducts((prev) => [...prev, data.item]);
-        toggleModal();
-        showNotification('Item created successfully!');
-
-        // Increment active listings dynamically
-        setTotalEarnings((prev) => prev + 1);
+      const data = await createResponse.json();
+      console.log('Item created successfully:', data);
+      setProducts((prev) => [...prev, data.item]);
+      toggleModal();
+      showNotification('Item created successfully!');
     } catch (error) {
-        console.error('Error creating item:', error);
-        alert('An error occurred while creating the item. Please try again.');
+      console.error('Error creating item:', error);
+      alert('An error occurred while creating the item. Please try again.');
     } finally {
-        setLoading((prev) => ({ ...prev, submit: false }));
+      setLoading((prev) => ({ ...prev, submit: false }));
     }
   };
 
-  const handleMarkAsSold = async (id) => {
-    const product = products.find((product) => product.id === id); // Find the product being marked as sold
-    console.log('Marking as sold:', { id, product }); // Log the payload and product details
-    setLoading((prev) => ({ ...prev, markAsSold: id })); // Set loading for mark as sold
+  const handleMarkAsSold = async (id: string) => {
+    const product = products.find((product) => product.id === id);
+    console.log('Marking as sold:', { id, product });
+    setLoading((prev) => ({ ...prev, markAsSold: id }));
 
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/update-sold-status`, {
@@ -224,11 +354,11 @@ export default function DashboardPage() {
       });
 
       if (response.ok) {
-        setProducts((prev) => prev.filter((product) => product.id !== id)); // Remove the item from the products state
-        console.log('Item removed from products state:', id); // Log the removal
+        setProducts((prev) => prev.filter((product) => product.id !== id));
+        console.log('Item removed from products state:', id);
         if (product) {
-          setTotalSales((prev) => prev + 1); // Increment total sales by 1
-          setTotalEarnings((prev) => prev + product.discountedPrice); // Increment total earnings by the discounted price
+          setTotalSales((prev) => prev + 1);
+          setTotalEarnings((prev) => prev + (product.discountedPrice || 0));
         }
         showNotification('Item marked as sold and removed successfully!');
       } else {
@@ -239,26 +369,21 @@ export default function DashboardPage() {
       console.error('Error marking item as sold:', error);
       alert('An error occurred while marking the item as sold. Please try again.');
     } finally {
-      setLoading((prev) => ({ ...prev, markAsSold: null })); // Reset loading for mark as sold
+      setLoading((prev) => ({ ...prev, markAsSold: null }));
     }
   };
 
-  const handleImageUpload = async (file) => {
+  const handleImageUpload = async (file: File) => {
     try {
-      // Compression options
       const options = {
-        maxSizeMB: 1, // Maximum size in MB
-        maxWidthOrHeight: 1920, // Resize to maintain aspect ratio
-        useWebWorker: true, // Use a web worker for better performance
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true,
       };
 
-      // Compress the image
       const compressedFile = await imageCompression(file, options);
-
-      // Log the compressed file size
       console.log('Compressed file size:', compressedFile.size / 1024, 'KB');
 
-      // Proceed with the upload
       const formData = new FormData();
       formData.append('file', compressedFile);
 
@@ -277,7 +402,7 @@ export default function DashboardPage() {
     }
   };
 
-  const activeListings = products.filter((product) => !product.sold).length; // Calculate active listings dynamically
+  const activeListings = products.filter((product) => !product.sold).length;
 
   return (
     <>
@@ -310,7 +435,7 @@ export default function DashboardPage() {
                 <Package className="w-8 h-8 text-orange-500" />
                 <div>
                   <h2 className="sm:text-lg text-md font-bold">Products</h2>
-                  <p className="text-gray-600">{activeListings} Active Listings</p> {/* Use dynamic count */}
+                  <p className="text-gray-600">{activeListings} Active Listings</p>
                 </div>
               </div>
             </Card>
@@ -320,7 +445,7 @@ export default function DashboardPage() {
                 <IndianRupee className="w-8 h-8 text-green-500" />
                 <div>
                   <h2 className="text-lg font-bold">Earnings</h2>
-                  <p className="text-gray-600">₹{totalEarnings} This Month</p> {/* Use dynamic earnings */}
+                  <p className="text-gray-600">₹{totalEarnings} This Month</p>
                 </div>
               </div>
             </Card>
@@ -330,7 +455,7 @@ export default function DashboardPage() {
                 <TrendingUp className="w-8 h-8 text-blue-500" />
                 <div>
                   <h2 className="text-lg font-bold">Sales</h2>
-                  <p className="text-gray-600">{totalSales} Successful Sales</p> {/* Use dynamic sales count */}
+                  <p className="text-gray-600">{totalSales} Successful Sales</p>
                 </div>
               </div>
             </Card>
@@ -347,19 +472,235 @@ export default function DashboardPage() {
           </div>
 
           {/* Actions Section */}
-          <div className="flex flex-col items-center gap-4 mb-12">
-          
+          <div className="flex flex-col md:flex-row items-center gap-4 justify-center mb-12">
             <Button
-              className="bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
+              className="bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700 text-white h-12 px-6 rounded-xl gap-2 whitespace-nowrap"
               onClick={toggleModal}
             >
+              <Plus className="w-4 h-4" />
               Add New Product
             </Button>
-            <p className="text-sm text-gray-600 text-center">
-             Mark the item as sold once it’s been sold.
+            <Button
+              onClick={() => setIsServiceModalOpen(true)}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white h-12 px-6 rounded-xl gap-2 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              Sell Services
+            </Button>
+            <p className="text-sm text-gray-600 text-center md:ml-4">
+              Mark the item as sold once it's been sold.
             </p>
-            
           </div>
+
+
+
+          {/* Services Modal */}
+          {isServiceModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">List Your Service</h3>
+                    <button
+                      onClick={() => setIsServiceModalOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleServiceSubmit} className="space-y-4">
+                    {/* Service Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Service Name
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., Math Tutoring, Web Development"
+                        value={serviceName}
+                        onChange={(e) => setServiceName(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    {/* Category */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {serviceCategories.map((category) => (
+                          <button
+                            key={category.value}
+                            type="button"
+                            onClick={() => setServiceCategory(category.value)}
+                            className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                              serviceCategory === category.value
+                                ? 'border-blue-500 bg-blue-50 text-blue-700'
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {category.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* If "Other" is selected, show custom category input */}
+                    {serviceCategory === 'other' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Your Service Type
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="Enter your service type..."
+                          value={customCategory}
+                          onChange={(e) => setCustomCategory(e.target.value)}
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    {/* Price */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                          ₹
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={servicePrice}
+                          onChange={(e) => setServicePrice(e.target.value)}
+                          className="pl-8 w-full"
+                          required
+                        />
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                          /hour
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Description */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        placeholder="Describe your service in detail..."
+                        value={serviceDescription}
+                        onChange={(e) => setServiceDescription(e.target.value)}
+                        className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                        required
+                      />
+                    </div>
+
+                    {/* Image Upload */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Service Image
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleServiceImageUpload}
+                          className="hidden"
+                          id="service-image"
+                        />
+                        <label htmlFor="service-image" className="cursor-pointer">
+                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600">
+                            {serviceImage ? serviceImage.name : 'Click to upload an image'}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Skills/Tags
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {serviceTags.map((tag, index) => (
+                          <div
+                            key={index}
+                            className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                          >
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => removeTag(index)}
+                              className="ml-1 hover:text-blue-900"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="Add a skill or tag..."
+                          value={tagInput}
+                          onChange={(e) => setTagInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && tagInput.trim()) {
+                              e.preventDefault();
+                              setServiceTags([...serviceTags, tagInput.trim()]);
+                              setTagInput('');
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            if (tagInput.trim()) {
+                              setServiceTags([...serviceTags, tagInput.trim()]);
+                              setTagInput('');
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Submit Button */}
+                    <div className="pt-4">
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3"
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                            Listing Service...
+                          </>
+                        ) : (
+                          'List My Service'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Modal for Adding New Product */}
           {isModalOpen && (
@@ -372,13 +713,12 @@ export default function DashboardPage() {
                   <X className="w-5 h-5" />
                 </button>
                 <h2 className="text-xl font-bold mb-4">Add New Product</h2>
-                <form onSubmit={handlePaymentAndSubmit}
-                encType="multipart/form-data">
+                <form onSubmit={handlePaymentAndSubmit} encType="multipart/form-data">
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Upload Photos</label>
                     <input
                       type="file"
-                      name="images" // Changed from 'photos' to 'images'
+                      name="images"
                       accept="image/*"
                       multiple
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
@@ -396,12 +736,23 @@ export default function DashboardPage() {
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-green-500 focus:border-green-500"
                     >
                       <option>Electronics</option>
-                      <option>Sports</option>
-                      <option>Instruments</option>
                       <option>Shoes</option>
+                      <option>Fashion</option>
+                      <option>Toys & Games</option>
+                      <option>Books & Academic</option>
                       <option>Tech Products</option>
-                      <option>Books</option>
-                      <option>Clothes</option>
+                      <option>Beauty & Personal Care</option>
+                      <option>Furniture & Living</option>
+                      <option>Kitchen & Dining</option>
+                      <option>Tutoring & Services</option>
+                      <option>Study Supplies</option>
+                      <option>Stationery</option>
+                      <option>Software & Digital</option>
+                      <option>Instruments</option>
+                      <option>Sports & Fitness</option>
+                      <option>Pet Supplies</option>
+                      <option>Vehicles & Transport</option>
+                      <option>Accessories</option>
                       <option>Others</option>
                     </select>
                   </div>
@@ -413,7 +764,6 @@ export default function DashboardPage() {
                     <label className="block text-sm font-medium mb-1">Discounted Price</label>
                     <Input name="discountedPrice" type="number" placeholder="Enter discounted price" />
                   </div>
-                  {/* New description input field */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium mb-1">Description</label>
                     <textarea
@@ -425,7 +775,7 @@ export default function DashboardPage() {
                   <Button
                     type="submit"
                     className="w-full bg-gradient-to-r from-green-300 to-green-600 hover:from-green-400 hover:to-green-700"
-                    disabled={loading.submit} // Disable button while loading
+                    disabled={loading.submit}
                   >
                     {loading.submit ? <Loader /> : 'Submit'}
                   </Button>
@@ -455,7 +805,6 @@ export default function DashboardPage() {
                       <p>Actual Price: ₹{product.actualPrice}</p>
                       <p>Discounted Price: ₹{product.discountedPrice}</p>
                     </div>
-                    {/* New description display */}
                     <div className="text-sm truncate text-gray-600 mb-4">
                       <p>{product.description}</p>
                     </div>
@@ -474,7 +823,7 @@ export default function DashboardPage() {
                     <Button
                       className="mt-4 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-medium py-2 px-4 rounded-lg"
                       onClick={() => handleMarkAsSold(product.id)}
-                      disabled={loading.markAsSold === product.id} // Disable button while loading
+                      disabled={loading.markAsSold === product.id}
                     >
                       {loading.markAsSold === product.id ? <Loader /> : 'Mark as Sold'}
                     </Button>

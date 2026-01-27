@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://hotdrop.tech
+
+# Sitemaps
+Sitemap: https://hotdrop.tech/sitemap.xml

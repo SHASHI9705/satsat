@@ -1,91 +1,46 @@
 "use client"
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Badge } from './ui/badge';
-import { Search, TrendingUp, Users, Shield } from 'lucide-react';
-import { useRouter } from 'next/navigation'; // Import useRouter
-import { Card } from './ui/card';
-
-
-
-const stats: { label: string; value: string; icon: React.ComponentType<any>; }[] = [];
+import { ShoppingBag, User, Recycle, ArrowRight, Star, Shield, TrendingUp, Users, ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Span } from 'next/dist/trace';
 
 export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: string) => void; onCategorySelect: (category: string) => void; }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [randomItems, setRandomItems] = useState<{ title: string; description: string }[]>([]);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const router = useRouter(); // Initialize useRouter
+  const [randomItems, setRandomItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
   const touchStartX = useRef(0);
+  const [carouselIndex, setCarouselIndex] = useState(2);
+  const [isPaused, setIsPaused] = useState(false);
+  const interactionTimeoutRef = useRef<number | null>(null);
+  const [itemsToShow, setItemsToShow] = useState(5);
 
-  // deterministic seeded RNG (persisted to localStorage) to keep decorations stable across reloads
-  function mulberry32(seed: number) {
-    return function () {
-      let t = (seed += 0x6D2B79F5);
-      t = Math.imul(t ^ (t >>> 15), t | 1);
-      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-    };
-  }
+  // Carousel Logic
+  const pauseAfterInteraction = () => {
+    setIsPaused(true);
+    if (interactionTimeoutRef.current) window.clearTimeout(interactionTimeoutRef.current);
+    interactionTimeoutRef.current = window.setTimeout(() => setIsPaused(false), 5000);
+  };
 
-  const catTransforms = useMemo(() => {
-    const count = 10;
-    // try to reuse a seed from localStorage so the layout is stable
-    let seed = Date.now() & 0xffffffff;
-    try {
-      const stored = localStorage.getItem('sleekhub-hero-seed');
-      if (stored) seed = Number(stored) || seed;
-      else localStorage.setItem('sleekhub-hero-seed', String(seed));
-    } catch (e) {
-      // localStorage may be unavailable in some environments; fall back to Date.now()
-    }
-    const randBase = mulberry32(seed);
-    const rand = (min: number, max: number) => randBase() * (max - min) + min;
-    const positions: { left: number; top: number; angle: number; scale: number }[] = [];
-    const minDist = 8; // minimum distance (in percent) between cats
-    const centerRect = { left: 25, right: 75, top: 15, bottom: 55 }; // avoid center area
-
-    for (let i = 0; i < count; i++) {
-      let attempts = 0;
-      while (attempts < 200) {
-        const left = Number(rand(2, 98).toFixed(2));
-        const top = Number(rand(2, 88).toFixed(2));
-
-        // skip positions that fall inside the central text area
-        if (left > centerRect.left && left < centerRect.right && top > centerRect.top && top < centerRect.bottom) {
-          attempts++;
-          continue;
-        }
-
-        // ensure minimum spacing from existing cats
-        let ok = true;
-        for (const p of positions) {
-          const dx = Math.abs(p.left - left);
-          const dy = Math.abs(p.top - top);
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < minDist) {
-            ok = false;
-            break;
-          }
-        }
-
-        if (ok) {
-          positions.push({ left, top, angle: Math.round(rand(-30, 30)), scale: Number(rand(0.85, 1.15).toFixed(2)) });
-          break;
-        }
-
-        attempts++;
-      }
-
-      // fallback if we couldn't find a spaced position
-      if (positions.length <= i) {
-        positions.push({ left: Number(rand(2, 98).toFixed(2)), top: Number(rand(2, 88).toFixed(2)), angle: Math.round(rand(-20, 20)), scale: 1 });
-      }
-    }
-
-    return positions;
-  }, []);
+  const handleNext = () => {
+    const visibleCount = Math.min(itemsToShow, randomItems.length || itemsToShow);
+    setCarouselIndex((prev) => (prev + 1) % Math.max(visibleCount, 1));
+    pauseAfterInteraction();
+  };
+  const handlePrev = () => {
+    const visibleCount = Math.min(itemsToShow, randomItems.length || itemsToShow);
+    setCarouselIndex((prev) => (prev - 1 + Math.max(visibleCount, 1)) % Math.max(visibleCount, 1));
+    pauseAfterInteraction();
+  };
+  const getCarouselPosition = (index: number) => {
+    const visibleCount = Math.min(itemsToShow, randomItems.length || itemsToShow);
+    const position = (index - carouselIndex + visibleCount) % Math.max(visibleCount, 1);
+    if (position > visibleCount / 2) return position - visibleCount;
+    return position;
+  };
 
   const handleSearch = () => {
     const categories = [
@@ -107,231 +62,428 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
     if (matchedCategory) {
       router.push(`/allitems?category=${matchedCategory}`);
     } else {
-      alert('No category found');
+      onSearch(searchQuery);
     }
   };
 
   useEffect(() => {
     const fetchRandomItems = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/all`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          if (Array.isArray(data.items)) {
-            const randomItems = data.items
-              .filter((item) => item) // Ensure item is defined
-              .map((item) => ({
-                id: item.id,
-                title: item.name,
-                price: item.discountedPrice,
-                originalPrice: item.actualPrice,
-                image: item.images?.[0] || '/placeholder-image.png', // Fallback image
-                seller: {
-                  name: item.user?.name || 'Unknown Seller',
-                  rating: (Math.random() * (5 - 4) + 4).toFixed(1), // Random rating between 4 and 5
-                  verified: false // Static verified status for now
-                },
-                category: item.category,
-                isFavorited: false // Static favorite status for now
-              }))
-              .sort(() => 0.5 - Math.random())
-              .slice(0, 4); // Get up to 3 random items
-            setRandomItems(randomItems);
-          } else {
-            console.error('API response does not contain a valid items array:', data);
-          }
-        } else {
-          console.error('Failed to fetch random items');
+        const base = process.env.NEXT_PUBLIC_BACKEND_URL;
+        if (!base) {
+          setError('Backend URL not configured');
+          setRandomItems([]);
+          setLoading(false);
+          return;
         }
-      } catch (error) {
-        console.error('Error fetching random items:', error);
+
+        const response = await fetch(`${base}/api/item/all`);
+        if (!response.ok) {
+          const text = await response.text().catch(() => '');
+          setError(`Failed to fetch items: ${response.status} ${text}`);
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        if (!Array.isArray(data.items)) {
+          setError('Unexpected API shape');
+          setRandomItems([]);
+          setLoading(false);
+          return;
+        }
+
+        const favorites = typeof window !== 'undefined'
+          ? JSON.parse(localStorage.getItem('favorites') || '[]')
+          : [];
+
+        const randomItems = data.items
+          .filter((item) => item)
+          .map((item) => ({
+            id: item.id,
+            title: item.name,
+            price: item.discountedPrice,
+            originalPrice: item.actualPrice,
+            image: item.images?.[0] || '/placeholder-image.png',
+            condition: item.condition || item.itemCondition || 'Good',
+            seller: {
+              name: item.user?.name || 'Unknown Seller',
+              verified: false,
+            },
+            category: item.category,
+            isFavorited: favorites.includes(item.id),
+            badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? "New Arrival" : "Sale") : undefined,
+          }))
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 12);
+
+        setRandomItems(randomItems);
+        setLoading(false);
+      } catch (err) {
+        console.error('Error fetching random items:', err);
+        setError('Error fetching items');
+        setLoading(false);
       }
     };
 
     fetchRandomItems();
   }, []);
 
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
+  useEffect(() => {
+    const onResize = () => {
+      const mobile = window.innerWidth < 768;
+      setItemsToShow(mobile ? 3 : 5);
+    };
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
-  const handleTouchEnd = (e) => {
-    const touchEndX = e.changedTouches[0].clientX;
-    if (touchStartX.current - touchEndX > 50) {
-      handleSwipe('left');
-    } else if (touchEndX - touchStartX.current > 50) {
-      handleSwipe('right');
-    }
-  };
+  // Auto-advance carousel when not paused
+  useEffect(() => {
+    const visibleCount = Math.min(itemsToShow, randomItems.length || itemsToShow);
+    if (isPaused || visibleCount <= 1) return;
+    const id = setInterval(() => {
+      setCarouselIndex((prev) => (prev + 1) % visibleCount);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [isPaused, itemsToShow, randomItems.length]);
 
-  const handleSwipe = (direction) => {
-    if (direction === 'left') {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % randomItems.length);
-    } else if (direction === 'right') {
-      setCurrentImageIndex((prevIndex) =>
-        prevIndex === 0 ? randomItems.length - 1 : prevIndex - 1
-      );
-    }
-  };
-
-  const handleProductClick = (productId) => {
+  // Cleanup interaction timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (interactionTimeoutRef.current) window.clearTimeout(interactionTimeoutRef.current);
+    };
+  }, []);
+  const handleProductClick = (productId: string) => {
     router.push(`/selecteditem?id=${productId}`);
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => (prevIndex + 1) % randomItems.length);
-    }, 2000);
+  const addToCart = (item: any) => {
+    // You can add actual cart logic here
+  };
 
-    return () => clearInterval(interval);
-  }, [randomItems.length]);
+  const toggleFavorite = (productId: string) => {
+    if (typeof window === 'undefined') return;
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const isFav = favorites.includes(productId);
+    const next = isFav ? favorites.filter((id: string) => id !== productId) : [...favorites, productId];
+    localStorage.setItem('favorites', JSON.stringify(next));
+    setRandomItems((prev) =>
+      prev.map((item) =>
+        item.id === productId ? { ...item, isFavorited: !isFav } : item
+      )
+    );
+  };
+
+  const formatCurrency = (price: number) => {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(price || 0);
+  };
+
+  const isTechCategory = (category?: string) => {
+    const c = (category || '').toLowerCase();
+    return (
+      c.includes('tech') ||
+      c.includes('electronic') ||
+      c.includes('gadget') ||
+      c.includes('laptop') ||
+      c.includes('phone') ||
+      c.includes('computer')
+    );
+  };
+
+  const trendingItems = randomItems.slice(0, 4);
+  const techItems = randomItems.filter((item) => isTechCategory(item.category)).slice(0, 4);
 
   return (
-    <section className=" relative py-4 md:py-12 lg:py-12 overflow-hidden bg-black md:bg-white">
+    <div className="min-h-screen bg-[#F4F2F2] font-sans text-gray-700">
 
-      {/* Existing Hero Section for larger screens */}
-      <div className="hidden sm:block container mx-auto px-4 relative z-10">
-        <div className="max-w-4xl mx-auto text-center space-y-8">
-          {/* Main Heading */}
-          <div className="space-y-4">
-            <Badge className="badge-brand text-black px-4 py-2 text-sm font-medium">
-              Campus Marketplace
-            </Badge><br></br>
+      {/* Hero Carousel Section */}
+      <div className="relative flex flex-col items-center justify-center mt-0 pb-10 md:pb-12 overflow-hidden min-h-[80vh]">
+        <div className="pointer-events-none absolute -top-24 right-[-10%] h-64 w-64 rounded-full bg-green-200/40 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-[-10%] h-64 w-64 rounded-full bg-green-100/60 blur-3xl" />
+        {/* <div className="w-full max-w-6xl flex justify-between items-center px-6 md:px-12 mb-2 z-10">
+          <span className="text-xs font-bold bg-green-100 text-green-800 px-3 py-1 rounded-full uppercase tracking-wider">New Drops Daily</span>
+          <button 
+            onClick={() => router.push('/allitems')}
+            className="flex items-center gap-1 bg-[#D8C7CD]/50 backdrop-blur-sm text-gray-800 text-sm font-medium px-5 py-1.5 rounded-full hover:bg-[#D8C7CD] transition-all hover:pr-3"
+          >
+            View All <ArrowRight className="w-3 h-3" />
+          </button>
+        </div> */}
 
-            <h1 className="text-4xl lg:text-7xl font-charlsworth leading-tight mt-4">
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-700">SleekRoad</span> <br></br>
-              <span className="text-black">Buy • Connect • Sell</span>
-            </h1>
-
-            <p className="text-lg lg:text-xl text-muted-foreground max-w-2xl mx-auto mt-4">
-               A curated local marketplace for students and campus communities
-            </p>
-          </div>
-
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto">
-                <div className="flex gap-1 p-2 bg-brand-soft rounded-2xl shadow-lg border">
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input
-                  placeholder="Search for textbooks, laptops, furniture..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-12 border-0 text-lg h-12 focus-visible:ring-0"
-                />
-              </div>
-              <Button 
-                type="button"
-                aria-label="Search marketplace"
-                onClick={handleSearch}
-                variant="black"
-                className="px-8 h-12 hero-cta"
-              >
-                Search
-              </Button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* New Section for phone screens */}
-      <div className="block px-4 sm:hidden w-full overflow-hidden">
-        
-        <h1 className="text-4xl lg:text-7xl font-charlsworth text-center leading-tight mb-4">
-          <span className="text-white">Buy • Connect • Sell</span>
-        </h1>
-        <div className="max-w-2xl mb-4 mx-auto">
-                <div className="flex gap-1 p-2 bg-brand-soft rounded-2xl shadow-lg border">
-              <div className="flex-1 relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" />
-                <Input
-                  placeholder="Search for textbooks, laptops, furniture..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  className="pl-12 border-0 text-lg h-12 focus-visible:ring-0"
-                />
-              </div>
-              <Button 
-                type="button"
-                aria-label="Search marketplace"
-                onClick={handleSearch}
-                variant="black"
-                className="px-8 h-12 hero-cta"
-              >
-                Search
-              </Button>
-            </div>
-          </div>
         <div
-          className="relative w-90 h-96 overflow-hidden rounded-lg"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
+          className="relative w-full h-[380px] md:h-[500px] flex items-center justify-center perspective-1000 touch-pan-y"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
         >
-          {randomItems.map((item, index) => (
-            <img
-              key={index}
-              src={item.image}
-              alt={item.title}
-              onClick={() => handleProductClick(item.id)}
-              className={`absolute inset-0 rounded-lg shadow-md w-full h-96 object-fit border border-white transition-opacity duration-300 cursor-pointer ${
-                index === currentImageIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
-              }`}
-            />
-          ))}
-        </div>
+          <button
+            onClick={handlePrev}
+            className="flex absolute left-4 lg:left-24 z-30 p-2 bg-white/90 backdrop-blur rounded-full shadow-md hover:shadow-lg hover:scale-105 text-gray-800 border border-gray-100 transition-all"
+            aria-label="Previous slide"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handlePrev();
+              }
+            }}
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+          <button onClick={handleNext} className="flex absolute right-4 lg:right-24 z-30 p-2 bg-white/90 backdrop-blur rounded-full shadow-md hover:shadow-lg hover:scale-105 text-gray-800 border border-gray-100 transition-all" aria-label="Next slide" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNext(); } }}>
+            <ChevronRight className="w-6 h-6" />
+          </button>
 
-        <div className="flex justify-center mt-4 gap-2">
-          {randomItems.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-3 h-3 rounded-full ${
-                index === currentImageIndex ? 'bg-blue-400' : 'bg-gray-400'
-              }`}
-            />
-          ))}
+          <div className="relative w-full max-w-5xl h-full flex items-center justify-center">
+            <AnimatePresence initial={false} mode='popLayout'>
+              {loading ? (
+                /* simple placeholders while loading */
+                [0,1,2].map((i) => (
+                  <motion.div key={`skeleton-${i}`} className="absolute rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-gray-100 animate-pulse" style={{ width: '320px', height: '440px' }} />
+                ))
+              ) : error ? (
+                <div className="text-center text-red-500 p-8">{error}</div>
+              ) : (
+                randomItems.slice(0, itemsToShow).map((item, index) => {
+                const position = getCarouselPosition(index);
+                const isCenter = position === 0;
+                const visibleCount = Math.min(itemsToShow, randomItems.length || itemsToShow);
+                if (Math.abs(position) > Math.floor(visibleCount / 2)) return null;
+                return (
+                  <motion.div
+                    key={item.id}
+                    className={`absolute rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-white cursor-pointer select-none w-[260px] md:w-[320px] h-[360px] md:h-[440px]`}
+                    initial={false}
+                    animate={{
+                      x: `${position * 95}%`,
+                      scale: isCenter ? 1 : 0.75,
+                      zIndex: 10 - Math.abs(position),
+                      opacity: Math.abs(position) >= 2 ? 0.4 : 1,
+                      rotateY: position * -4,
+                      filter: isCenter ? "blur(0px)" : "blur(7px)",
+                    }}
+                    transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                    style={{ transformStyle: 'preserve-3d' }}
+                    onClick={() => handleProductClick(item.id)}
+                  >
+                    <div className="relative w-full h-full">
+                      <img 
+                        src={item.image} 
+                        alt={item.title || item.category || 'Product image'} 
+                        className="w-full h-full object-cover pointer-events-none" 
+                      />
+                      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 ${isCenter ? 'opacity-100' : ''} transition-opacity duration-500 flex flex-col justify-end p-8`}>
+                        <h3 className="text-white text-3xl font-bold tracking-tighter">{item.category}</h3>
+                        <p className="text-white/80 text-sm mt-1">{item.title}</p>
+                        <p className="text-white font-semibold mt-2">{formatCurrency(item.price)}</p>
+                      </div>
+                      {!isCenter && <div className="absolute inset-0 bg-white/20" />}
+                    </div>
+                  </motion.div>
+                );
+              }) )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
 
-      <style jsx>{`
-        @keyframes slide-one-by-one {
-          0% {
-            transform: translateX(0);
-          }
-          20% {
-            transform: translateX(0);
-          }
-          25% {
-            transform: translateX(-100%);
-          }
-          45% {
-            transform: translateX(-100%);
-          }
-          50% {
-            transform: translateX(-200%);
-          }
-          70% {
-            transform: translateX(-200%);
-          }
-          75% {
-            transform: translateX(-300%);
-          }
-          95% {
-            transform: translateX(-300%);
-          }
-          100% {
-            transform: translateX(0);
-          }
-        }
-        .animate-slide-one-by-one {
-          animation: slide-one-by-one 12s infinite;
-        }
-      `}</style>
-    </section>
+      {/* Mobile search removed */}
+
+      {/* Featured Categories */}
+      <section className="px-6 md:px-12 mt-12 mb-20">
+        <div className="flex items-end gap-4 mb-8">
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-black">Trending on Campus</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-green-300 to-transparent rounded-full mb-2 opacity-60" />
+          <button 
+            onClick={() => router.push('/allitems')}
+            className="text-sm font-semibold text-green-700 hover:text-green-900 mb-1 hidden md:block"
+          >
+            See All
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {trendingItems.map((item) => (
+            <motion.div 
+              key={item.id}
+              whileHover={{ y: -8 }}
+              onClick={() => handleProductClick(item.id)}
+              className="flex flex-col gap-3 group cursor-pointer"
+            >
+              <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
+                {item.badge && (
+                  <span className="absolute top-4 left-4 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    {item.badge}
+                  </span>
+                )}
+                <img 
+                  src={item.image} 
+                  alt={item.title} 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                />
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    addToCart(item); 
+                  }}
+                  aria-label="Add to cart"
+                  className="absolute bottom-4 right-4 bg-white text-black p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:bg-black hover:text-white"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                </button>
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    toggleFavorite(item.id);
+                  }}
+                  aria-label="Add to favorites"
+                  className="absolute bottom-4 left-4 bg-white text-black p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:bg-red-500 hover:text-white"
+                >
+                  <Heart className={`w-5 h-5 ${item.isFavorited ? 'fill-red-500 text-red-500' : ''}`} />
+                </button>
+              </div>
+              <div className="px-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
+                    <p className="text-sm text-gray-500">{item.condition}</p>
+                  </div>
+                  <span className="font-semibold text-gray-900 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-gray-100">
+                    {formatCurrency(item.price)}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 mt-2">
+                  <span className="text-xs text-gray-400">• {item.seller.name}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Tech Products Section */}
+      <section className="px-6 md:px-12 mt-4 mb-20">
+        <div className="flex items-end gap-4 mb-8">
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-black">Tech & Electronics</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-blue-300 to-transparent rounded-full mb-2 opacity-60" />
+          <button 
+            onClick={() => onCategorySelect('Tech Products')}
+            className="text-sm font-semibold text-blue-700 hover:text-blue-900 mb-1 hidden md:block"
+          >
+            See Collection
+          </button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {techItems.map((item) => (
+            <motion.div 
+              key={item.id}
+              whileHover={{ y: -8 }}
+              onClick={() => handleProductClick(item.id)}
+              className="flex flex-col gap-3 group cursor-pointer"
+            >
+              <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
+                {item.badge && (
+                  <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    {item.badge}
+                  </span>
+                )}
+                <img 
+                  src={item.image} 
+                  alt={item.title} 
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                />
+                <button 
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    addToCart(item); 
+                  }}
+                  aria-label="Add to cart"
+                  className="absolute bottom-4 right-4 bg-white text-black p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:bg-black hover:text-white"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="px-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
+                    <p className="text-sm text-gray-500">{item.category} • {item.condition}</p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="font-semibold text-gray-900">{formatCurrency(item.price)}</span>
+                    {item.originalPrice && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatCurrency(item.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="px-6 md:px-12 mb-20">
+        <div className="bg-black text-white rounded-[3rem] p-8 md:p-16 relative overflow-hidden shadow-lg">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-green-600 rounded-full blur-[100px] opacity-40 translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-600 rounded-full blur-[100px] opacity-40 -translate-x-1/2 translate-y-1/2 pointer-events-none"></div>
+
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="max-w-xl">
+              {/* <span className="inline-block px-3 py-1 bg-green-500/20 text-green-300 text-xs font-bold rounded-full mb-4 border border-green-500/30">
+                CAMPUS COMMUNITY
+              </span> */}
+              <h2 className="text-3xl md:text-5xl font-semibold tracking-tight mb-4 leading-tight">
+                Connect With <b><span className="text-red-700">LPU's</span> Largest Community.</b>
+              </h2>
+              <p className="text-gray-400 mb-8">
+                Join thousands of students buying, selling, and connecting on SleekRoad. 
+                Get the best deals on campus essentials.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button 
+                  onClick={() => router.push('/allitems')}
+                  className="bg-white text-black font-semibold py-4 px-8 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  Start Shopping
+                </button>
+                <button 
+                  onClick={() => router.push('/dashboard')}
+                  className="border border-white/30 text-white font-semibold py-4 px-8 rounded-full hover:bg-white/10 transition-colors"
+                >
+                  Sell Your Items
+                </button>
+              </div>
+            </div>
+            
+            <div className="hidden lg:block w-64 h-80 bg-gray-600 rounded-3xl rotate-3 hover:rotate-0 transition-transform duration-500 border-4 border-red-800 overflow-hidden shadow-2xl">
+              <img 
+                src="./catt.jpg" 
+                className="w-full h-full object-cover opacity-80" 
+                alt="Campus Marketplace" 
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer removed */}
+    </div>
   );
 }
