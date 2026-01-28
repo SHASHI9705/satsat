@@ -5,6 +5,7 @@ import { Footer } from '../../components/Footer';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
 import { useRouter } from 'next/navigation';
+import { Suspense } from 'react';
 
 const serviceCategories = [
   {
@@ -44,7 +45,15 @@ const howItWorks = [
   },
 ];
 
-export default function ServicesPage() {
+export default function ServicesPageWrapper() {
+  return (
+    <Suspense fallback={<div>Loading services...</div>}>
+      <ServicesPage />
+    </Suspense>
+  );
+}
+
+function ServicesPage() {
   const router = useRouter();
 
   return (
