@@ -16,6 +16,7 @@ import { db } from '../../firebase/firebaseConfig';
 import { useAuth } from '../../firebase/AuthProvider';
 import { Button } from '../../components/ui/button';
 import { getChatId, getOrCreateChat, sendMessage, subscribeMessages } from '../../firebase/useChat';
+import { Suspense } from 'react';
 
 interface ItemData {
   id: string;
@@ -27,6 +28,14 @@ interface ItemData {
 }
 
 export default function ChatPage() {
+  return (
+    <Suspense fallback={<div>Loading chat...</div>}>
+      <ChatPageContent />
+    </Suspense>
+  );
+}
+
+function ChatPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -112,7 +121,6 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (!chatId || !user) return;
-
     const chatRef = doc(db, 'chats', chatId);
     const unsub = onSnapshot(chatRef, (snap) => {
       if (snap.exists()) {

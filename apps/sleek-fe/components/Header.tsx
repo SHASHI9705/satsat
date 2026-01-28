@@ -30,15 +30,6 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
-import { Suspense } from 'react';
-
-// Define the `isActive` function
-const isActive = (href: string) => {
-  const pathname = usePathname();
-  if (!pathname) return false;
-  if (href === '/allitems') return pathname.startsWith('/allitems');
-  return pathname === href;
-};
 
 export function Header({ notificationCount = 0 }: { notificationCount?: number; }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,24 +118,21 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
     }
   }, [isSearchExpanded]);
 
-  const SearchParamsWrapper = () => {
-    const searchParams = useSearchParams();
-    const pathname = usePathname();
-
-    useEffect(() => {
-      if (pathname?.startsWith('/allitems')) {
-        const s = searchParams.get('search') || '';
-        setSearchQuery(s);
-      }
-    }, [pathname, searchParams]);
-
-    return null;
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const isActive = (href: string) => {
+    if (!pathname) return false;
+    if (href === '/allitems') return pathname.startsWith('/allitems');
+    return pathname === href;
   };
 
-  // Wrap the `SearchParamsWrapper` in a `<Suspense>` boundary
-  <Suspense fallback={null}>
-    <SearchParamsWrapper />
-  </Suspense>;
+  // Sync header search with /allitems query param
+  useEffect(() => {
+    if (pathname?.startsWith('/allitems')) {
+      const s = searchParams.get('search') || '';
+      setSearchQuery(s);
+    }
+  }, [pathname, searchParams]);
 
   useEffect(() => {
     if (!user?.uid) {
