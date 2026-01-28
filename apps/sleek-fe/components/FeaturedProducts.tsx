@@ -113,7 +113,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 				{/* Section Header */}
 				<div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
 					<div className="mb-6 md:mb-0">
-						<div className="flex items-center gap-3 mb-4">
+						<div className="flex items-center gap-3">
 							<div>
 								{/* <Badge className="bg-green-100 text-green-700 border-green-200 font-medium mb-2">
 									Hot This Week
@@ -123,14 +123,14 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 								</h2>
 							</div>
 						</div>
-						<p className="text-gray-600 max-w-2xl">
-							Discover the most popular items and deals from students across campus
+						<p className="hidden md:block text-gray-600 max-w-2xl">
+							Discover the most popular items and deals from students across campus.
 						</p>
 					</div>
 					
 					<Button
 						variant="ghost"
-						className="text-green-600 hover:text-green-700 hover:bg-green-50 font-medium gap-2"
+						className="text-green-600 hover:text-green-700 hover:bg-green-50 font-medium "
 						onClick={() => router.push('/allitems')}
 					>
 						View All

@@ -11,7 +11,7 @@ if (!JWT_SECRET) {
 
 // Create a new user manually
 export const createUser = async (req: Request, res: Response): Promise<void> => {
-    const { name, email, password, phone, address, googleId } = req.body;
+    const { name, email, password, phone, address, googleId, regnumber } = req.body; // Added regnumber
 
     console.log('Request body:', req.body); // Log the incoming request body
     console.log('Checking if user exists with email:', email); // Log email being checked
@@ -30,8 +30,6 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
             const hashedPassword = password ? await bcrypt.hash(password, 10) : undefined;
 
-            
-
             const userData = {
                 name,
                 email,
@@ -39,6 +37,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
                 googleId,
                 ...(phone ? { phone } : {}), // Include phone only if provided
                 ...(hashedPassword ? { password: hashedPassword } : {}),
+                ...(regnumber ? { regnumber } : {}), // Include regnumber only if provided
             };
 
             user = await prisma.user.create({
@@ -48,7 +47,6 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         }
 
         const jwtToken = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
-        
 
         res.status(200).json({ message: 'User authenticated successfully', user, token: jwtToken });
     } catch (error) {
@@ -74,6 +72,7 @@ export const getUserDetails = async (req: Request, res: Response): Promise<void>
                 email: true,
                 phone: true,
                 address: true,
+                regnumber: true, // Include regnumber in the response
             },
         });
 
@@ -91,7 +90,7 @@ export const getUserDetails = async (req: Request, res: Response): Promise<void>
 
 // Update user details
 export const updateUserDetails = async (req: Request, res: Response): Promise<void> => {
-    const { email, name, phone, address } = req.body;
+    const { email, name, phone, address, regnumber } = req.body; // Added regnumber
 
     if (!email) {
         res.status(400).json({ message: 'Email is required' });
@@ -101,7 +100,7 @@ export const updateUserDetails = async (req: Request, res: Response): Promise<vo
     try {
         const updatedUser = await prisma.user.update({
             where: { email },
-            data: { name, phone, address },
+            data: { name, phone, address, regnumber }, // Include regnumber in the update
         });
 
         res.status(200).json({ message: 'User details updated successfully', user: updatedUser });

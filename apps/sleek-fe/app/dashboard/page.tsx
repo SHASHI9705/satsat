@@ -70,7 +70,7 @@ export default function DashboardPage() {
         </button>
         <h2 className="text-xl font-bold mb-4">Complete Your Profile</h2>
         <p className="text-sm text-gray-600 mb-4">
-          To continue, please add your phone number and address to your profile.
+          To continue, please add your phone number, address and registraton number to your profile.
         </p>
         <a
           href="/profile"
@@ -227,7 +227,7 @@ export default function DashboardPage() {
           const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email || '')}`);
           if (response.ok) {
             const data = await response.json();
-            if (!data.phone || !data.address) {
+            if (!data.phone || !data.address || !data.regnumber) { // Include regnumber in the validation
               setShowMissingInfoPopup(true);
             }
           } else {
@@ -255,7 +255,7 @@ export default function DashboardPage() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/details?email=${encodeURIComponent(user.email || '')}`);
       if (response.ok) {
         const data = await response.json();
-        if (!data.phone || !data.address) {
+        if (!data.phone || !data.address || !data.regnumber) { // Include regnumber in the validation
           setShowMissingInfoPopup(true);
           return;
         }

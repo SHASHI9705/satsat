@@ -18,6 +18,7 @@ interface UserDetails {
   email: string;
   phone: string;
   address: string;
+  regnumber: string; // Added registration number field
 }
 
 export default function ProfilePage() {
@@ -28,6 +29,7 @@ export default function ProfilePage() {
     email: '',
     phone: '',
     address: '',
+    regnumber: '', // Initialize regnumber
   });
   const [isEditing, setIsEditing] = useState(false);
   const [editDetails, setEditDetails] = useState<UserDetails>({
@@ -35,6 +37,7 @@ export default function ProfilePage() {
     email: '',
     phone: '',
     address: '',
+    regnumber: '', // Initialize regnumber
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -255,6 +258,13 @@ export default function ProfilePage() {
                   {userDetails.address || 'No address set'}
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-gray-700 dark:text-gray-300 flex-shrink-0" />
+                <span className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-300 min-w-[60px]">Reg. Number:</span>
+                <span className="text-sm sm:text-base text-gray-700 dark:text-gray-300 break-all">
+                  {userDetails.regnumber || 'No registration number set'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -278,7 +288,7 @@ export default function ProfilePage() {
                   <Input
                     id="name"
                     name="name"
-                    value={editDetails.name}
+                    value={editDetails.name || ''} // Default to empty string
                     onChange={handleInputChange}
                     className="w-full"
                     required
@@ -293,7 +303,7 @@ export default function ProfilePage() {
                   <Input
                     id="email"
                     name="email"
-                    value={editDetails.email}
+                    value={editDetails.email || ''} // Default to empty string
                     className="w-full bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
                     readOnly
                     disabled
@@ -307,22 +317,35 @@ export default function ProfilePage() {
                   <Input
                     id="phone"
                     name="phone"
-                    value={editDetails.phone}
+                    value={editDetails.phone || ''} // Default to empty string
                     onChange={handleInputChange}
                     className="w-full"
                   />
                 </div>
                 
-                <div className="mb-6">
+                <div className="mb-4">
                   <label htmlFor="address" className="block text-sm font-medium mb-1">
                     Address
                   </label>
                   <Input
                     id="address"
                     name="address"
-                    value={editDetails.address}
+                    value={editDetails.address || ''} // Default to empty string
                     onChange={handleInputChange}
                     className="w-full"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label htmlFor="regnumber" className="block text-sm font-medium mb-1">
+                    Registration Number
+                  </label>
+                  <Input
+                    id="regnumber"
+                    name="regnumber"
+                    value={editDetails.regnumber || ''} // Default to empty string
+                    onChange={handleInputChange}
+                    placeholder="Enter registration number"
                   />
                 </div>
                 
@@ -366,13 +389,7 @@ export default function ProfilePage() {
             {
               label: 'Terms and Conditions',
               icon: FileText,
-              onClick: () => router.push('/terms'),
-              disabled: loading
-            },
-            {
-              label: 'Settings',
-              icon: Settings,
-              onClick: () => router.push('/settings'),
+              onClick: () => router.push('/comp/terms'),
               disabled: loading
             },
             {

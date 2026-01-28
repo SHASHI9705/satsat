@@ -300,8 +300,8 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       {/* Featured Categories */}
       <section className="px-6 md:px-12 mt-12 mb-20">
         <div className="flex items-end gap-4 mb-8">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-black">Trending on Campus</h2>
-          <div className="h-1 flex-1 bg-gradient-to-r from-green-300 to-transparent rounded-full mb-2 opacity-60" />
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Trending on Campus</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-green-800 to-transparent rounded-full mb-2 opacity-60" />
           <button 
             onClick={() => router.push('/allitems')}
             className="text-sm font-semibold text-green-700 hover:text-green-900 mb-1 hidden md:block"
@@ -373,8 +373,8 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       {/* Tech Products Section */}
       <section className="px-6 md:px-12 mt-4 mb-20">
         <div className="flex items-end gap-4 mb-8">
-          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight text-black">Tech & Electronics</h2>
-          <div className="h-1 flex-1 bg-gradient-to-r from-blue-300 to-transparent rounded-full mb-2 opacity-60" />
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Tech & Electronics</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-blue-800 to-transparent rounded-full mb-2 opacity-60" />
           <button 
             onClick={() => onCategorySelect('Tech Products')}
             className="text-sm font-semibold text-blue-700 hover:text-blue-900 mb-1 hidden md:block"

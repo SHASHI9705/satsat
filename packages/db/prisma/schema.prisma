@@ -19,6 +19,7 @@ model User {
   updatedAt DateTime @updatedAt
   items    Item[] // Relation to the Item model
   dashboardMetrics DashboardMetrics[] // Relation to the DashboardMetrics model
+  regnumber String? // Added field for registration number
 }
 
 model TestTable {

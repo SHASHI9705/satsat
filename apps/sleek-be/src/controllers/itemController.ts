@@ -222,6 +222,12 @@ export const fetchItems = async (req: Request, res: Response): Promise<void> => 
                 sold: true,
                 createdAt: true,
                 updatedAt: true,
+                user: {
+                    select: {
+                        name: true,
+                        regnumber: true, // Include regnumber in the response
+                    },
+                },
             },
         });
         console.debug('Fetched items:', items); // Debugging: Log the fetched items
@@ -311,6 +317,7 @@ export const fetchItemById = async (req: Request, res: Response): Promise<void> 
                 user: {
                     select: {
                         name: true,
+                        regnumber: true, // Include regnumber in the response
                     },
                 },
             },
@@ -328,7 +335,8 @@ export const fetchItemById = async (req: Request, res: Response): Promise<void> 
             include: {
                 user: {
                     select: {
-                        name: true, // Include the user's name
+                        name: true,
+                        regnumber: true, // Include regnumber in related products
                     },
                 },
             },
