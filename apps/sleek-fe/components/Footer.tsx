@@ -78,7 +78,7 @@ export function Footer() {
     <footer className="bg-white border-t border-gray-100">
       {/* Main Footer */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
           {/* Brand Column */}
           <div className="space-y-6">
             <div className="flex items-center gap-3">
@@ -91,8 +91,8 @@ export function Footer() {
               </div>
             </div>
             
-            <p className="text-gray-600 text-sm leading-relaxed">
-             <b>Buy.Sell.Connect---</b>
+            <p className="text-gray-600 text-lg font-bold leading-relaxed">
+             <b>Buy.Sell.Connect</b>
             </p>
             
             {/* <div className="flex gap-4">
@@ -131,92 +131,94 @@ export function Footer() {
             </div> */}
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Marketplace</h3>
-            <ul className="space-y-4">
-              <li>
-                <Link 
-                  href="/allitems" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  Browse Items
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/dashboard" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  Sell Items
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/allitems?category=Services" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/comp/help" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  Help & Support
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <div className='grid grid-cols-2 w-full'>
+            {/* Quick Links */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Marketplace</h3>
+              <ul className="space-y-4">
+                <li>
+                  <Link 
+                    href="/allitems" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    Browse Items
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/dashboard" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    Sell Items
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/allitems?category=Services" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    Services
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/comp/help" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    Help & Support
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          {/* Company Links */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Company</h3>
-            <ul className="space-y-4">
-              <li>
-                <Link 
-                  href="/comp/about" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/comp/privacy" 
-                  className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/comp/terms" 
-                  className="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-red-500"></span>
-                  Terms of Service
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href="/comp/careers" 
-                  className="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 group"
-                >
-                  <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-red-500"></span>
-                  Careers
-                </Link>
-              </li>
-            </ul>
-          </div>
+            {/* Company Links */}
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Company</h3>
+              <ul className="space-y-4">
+                <li>
+                  <Link 
+                    href="/comp/about" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    About Us
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/comp/privacy" 
+                    className="text-gray-600 hover:text-green-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-green-500"></span>
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/comp/terms" 
+                    className="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-red-500"></span>
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/comp/careers" 
+                    className="text-gray-600 hover:text-red-600 transition-colors flex items-center gap-2 group"
+                  >
+                    <span className="w-1 h-1 bg-gray-400 rounded-full group-hover:bg-red-500"></span>
+                    Careers
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
+          </div>
           {/* Newsletter & Contact */}
           <div className="space-y-6">
             {/* <div>
@@ -253,10 +255,6 @@ export function Footer() {
                 <div className="flex items-center gap-3 text-gray-600">
                   <Mail className="w-4 h-4" />
                   <span className="text-sm">hotdrop.tech@gmail.com</span>
-                </div>
-                <div className="flex items-center gap-3 text-gray-600">
-                  <Phone className="w-4 h-4" />
-                  <span className="text-sm">9322902827</span>
                 </div>
               </div>
             </div>

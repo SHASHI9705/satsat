@@ -22,7 +22,7 @@ const categories = [
     name: 'Electronics',
     icon: Laptop,
     count: '284+ items',
-    image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'electronics.jpg',
     description: 'Latest tech gadgets & devices',
     items: ['Laptops', 'Phones', 'Accessories', 'Smartwatches', 'Headphones']
   },
@@ -31,7 +31,7 @@ const categories = [
     name: 'Books & Academic',
     icon: BookOpen,
     count: '512+ items',
-    image: 'https://images.unsplash.com/photo-1532012197267-da84d127e765?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'books.jpg',
     description: 'Textbooks, study guides & notes',
     items: ['Textbooks', 'Study Guides', 'Notebooks', 'Reference Books']
   },
@@ -40,7 +40,7 @@ const categories = [
     name: 'Fashion & Style',
     icon: Shirt,
     count: '196+ items',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'fasion.jpg',
     description: 'Clothing, shoes & accessories',
     items: ['Clothing', 'Shoes', 'Accessories', 'Bags', 'Watches', 'Jackets']
   },
@@ -49,7 +49,7 @@ const categories = [
     name: 'Furniture & Living',
     icon: Armchair,
     count: '147+ items',
-    image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'furn.jpg',
     description: 'Campus living essentials',
     items: ['Desks', 'Chairs', 'Storage', 'Shelves', 'Tables', 'Cabinets']
   },
@@ -58,7 +58,7 @@ const categories = [
     name: 'Software & Digital',
     icon: Code,
     count: '89+ items',
-    image: 'https://images.unsplash.com/photo-1611224923853-80b023f02d71?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'software.jpg',
     description: 'Licenses, tools & resources',
     items: ['Licenses', 'Tools', 'Resources', 'Templates', 'Plugins', 'APIs']
   },
@@ -67,7 +67,7 @@ const categories = [
     name: 'Tutoring & Services',
     icon: GraduationCap,
     count: '156+ items',
-    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'tutor.jpg',
     description: 'Academic help & services',
     items: ['Math', 'Science', 'Languages', 'Geography', 'Computer Science']
   },
@@ -76,7 +76,7 @@ const categories = [
     name: 'Audio & Music',
     icon: Headphones,
     count: '73+ items',
-    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'audio.jpg',
     description: 'Sound equipment & instruments',
     items: ['Headphones', 'Speakers', 'Instruments', 'Microphones']
   },
@@ -85,7 +85,7 @@ const categories = [
     name: 'Study Supplies',
     icon: Calculator,
     count: '201+ items',
-    image: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+    image: 'study.jpg',
     description: 'Study essentials & stationery',
     items: ['Calculators', 'Stationery', 'Tech', 'Gadgets', 'Printers', 'Software']
   }

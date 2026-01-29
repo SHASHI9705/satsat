@@ -355,14 +355,14 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
-                    <p className="text-sm text-gray-500">{item.condition}</p>
+                    
                   </div>
                   <span className="font-semibold text-gray-900 bg-white px-2.5 py-1 rounded-lg shadow-sm border border-gray-100">
                     {formatCurrency(item.price)}
                   </span>
                 </div>
                 <div className="flex items-center gap-1 mt-2">
-                  <span className="text-xs text-gray-400">• {item.seller.name}</span>
+                  <span className="text-xs font-bold text-gray-800">• {item.seller.name}</span>
                 </div>
               </div>
             </motion.div>
@@ -418,12 +418,12 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
-                    <p className="text-sm text-gray-500">{item.category} • {item.condition}</p>
+                    <p className="text-sm bg-gray-400 rounded w-fit px-1 border-black border text-gray-800">• {item.category} </p>
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="font-semibold text-gray-900">{formatCurrency(item.price)}</span>
                     {item.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through">
+                      <span className="text-sm text-gray-600 line-through">
                         {formatCurrency(item.originalPrice)}
                       </span>
                     )}

@@ -1,5 +1,4 @@
 import { Request, Response,RequestHandler } from 'express';
-import { DashboardMetrics } from '@prisma/client';
 import prisma from '../prismaClient';
 import multer from 'multer';
 import { uploadToS3, deleteFromS3 } from '../utils/s3Uploader'; // Import deleteFromS3 function
