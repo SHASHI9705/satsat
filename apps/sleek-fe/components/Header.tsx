@@ -190,7 +190,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                 Browse
               </Link>
               <Link 
-                href="/trending" 
+                href="#trending" 
                 className={`text-sm font-medium transition-colors ${isActive('/trending') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
               >
                 Trending

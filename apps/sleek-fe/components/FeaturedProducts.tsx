@@ -118,7 +118,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 								{/* <Badge className="bg-green-100 text-green-700 border-green-200 font-medium mb-2">
 									Hot This Week
 								</Badge> */}
-								<h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+								<h2 id="trending" className="text-3xl md:text-4xl font-bold text-gray-900">
 									Trending on Campus
 								</h2>
 							</div>

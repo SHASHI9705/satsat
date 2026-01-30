@@ -118,6 +118,15 @@ function AllItemsPage() {
 		fetchItems();
 	}, []);
 
+	useEffect(() => {
+		// Set default view and sort controls for mobile view
+		const isMobile = window.innerWidth <= 768;
+		if (isMobile) {
+			setViewMode('list');
+			setSortBy('newest');
+		}
+	}, []);
+
 	const handleCategoryClick = (category: string) => {
 		setSelectedCategory(category);
 		router.push(`/allitems?category=${encodeURIComponent(category)}`);
@@ -456,7 +465,7 @@ function AllItemsPage() {
 										onClick={() => handleViewDetails(product.id)}
 									>
 										<div className="flex flex-col md:flex-row">
-											<div className="md:w-48 h-48 md:h-auto overflow-hidden">
+											<div className="md:w-48 h-48 md:h-30 overflow-hidden">
 												<img
 													src={product.images?.[0] || '/placeholder-image.png'}
 													alt={product.name}

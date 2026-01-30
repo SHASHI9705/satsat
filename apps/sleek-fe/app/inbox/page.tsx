@@ -60,7 +60,7 @@ export default function InboxPage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white p-6">
-        <div className="text-center text-gray-600">Sign in to view messages.</div>
+        <div className=" bg-green-200 p-8 rounded border border-black text-center text-gray-600 font-bold"><a className='bg-blue-400 font-bold rounded p-1 border border-black' href="/signin">Signin</a> to view messages.</div>
       </div>
     );
   }

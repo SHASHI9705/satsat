@@ -582,7 +582,6 @@ export default function SelectedItemPage() {
                       verified: false
                     },
                     location: product.category,
-                    postedTime: 'Just now',
                     category: product.category,
                     isFavorited: false,
                     badge: calculateDiscount() > 20 ? 'Sale' : 'Trending'

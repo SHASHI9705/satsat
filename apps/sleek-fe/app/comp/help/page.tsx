@@ -19,7 +19,8 @@ export default function ReportIssuePage({ onBack }: { onBack?: () => void }) {
     name: '',
     email: user?.email || '',
     issueType: 'Bug',
-    description: ''
+    description: '',
+    productReport: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +42,8 @@ export default function ReportIssuePage({ onBack }: { onBack?: () => void }) {
           name: '',
           email: user?.email || '',
           issueType: 'Bug',
-          description: ''
+          description: '',
+          productReport: ''
         });
         setStatus('idle');
       }, 3000);
@@ -111,6 +113,16 @@ export default function ReportIssuePage({ onBack }: { onBack?: () => void }) {
                     <option>Other</option>
                   </select>
                 </div>
+
+                <div>
+                <label className="text-sm text-beige-700 mb-1 block">Report on product (Optional)</label>
+                <Input
+                  placeholder="Product id or title"
+                  className="h-12 bg-cream-50 border-beige-200"
+                  value={formData.productReport || ''}
+                  onChange={(e) => setFormData({ ...formData, productReport: e.target.value })}
+                />
+              </div>
                 
               </div>
 
@@ -124,6 +136,8 @@ export default function ReportIssuePage({ onBack }: { onBack?: () => void }) {
                   onChange={(e) => setFormData({...formData, description: e.target.value})}
                 />
               </div>
+
+              
 
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-3">

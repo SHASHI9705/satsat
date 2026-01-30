@@ -198,11 +198,10 @@ export function ProductCard({ product, onFavorite, onMessage, onViewDetails, cla
                     <span className="text-sm font-medium text-gray-900">
                       {product.seller?.name || 'Unknown Seller'}
                     </span>
-                    {product.seller?.verified && (
+                    
                       <Badge variant="secondary" className="text-xs px-1 py-0 bg-green-100 text-green-700 border-green-200">
                         ✓ Verified
                       </Badge>
-                    )}
                   </div>
 
                 </div>

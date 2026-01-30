@@ -18,7 +18,7 @@ import { useState, useEffect } from 'react';
 
 const categories = [
   {
-    id: 'electronics',
+    id: 'Electronics',
     name: 'Electronics',
     icon: Laptop,
     count: '284+ items',
@@ -27,7 +27,7 @@ const categories = [
     items: ['Laptops', 'Phones', 'Accessories', 'Smartwatches', 'Headphones']
   },
   {
-    id: 'books & Academic' ,
+    id: 'Books & Academic' ,
     name: 'Books & Academic',
     icon: BookOpen,
     count: '512+ items',
@@ -36,7 +36,7 @@ const categories = [
     items: ['Textbooks', 'Study Guides', 'Notebooks', 'Reference Books']
   },
   {
-    id: 'fashion ',
+    id: 'Fashion & Style',
     name: 'Fashion & Style',
     icon: Shirt,
     count: '196+ items',
@@ -45,7 +45,7 @@ const categories = [
     items: ['Clothing', 'Shoes', 'Accessories', 'Bags', 'Watches', 'Jackets']
   },
   {
-    id: 'furniture & living',
+    id: 'Furniture & Living',
     name: 'Furniture & Living',
     icon: Armchair,
     count: '147+ items',
@@ -54,7 +54,7 @@ const categories = [
     items: ['Desks', 'Chairs', 'Storage', 'Shelves', 'Tables', 'Cabinets']
   },
   {
-    id: 'software',
+    id: 'Software & Digital',
     name: 'Software & Digital',
     icon: Code,
     count: '89+ items',
@@ -63,7 +63,7 @@ const categories = [
     items: ['Licenses', 'Tools', 'Resources', 'Templates', 'Plugins', 'APIs']
   },
   {
-    id: 'tutoring',
+    id: 'Tutoring & Services',
     name: 'Tutoring & Services',
     icon: GraduationCap,
     count: '156+ items',
@@ -72,7 +72,7 @@ const categories = [
     items: ['Math', 'Science', 'Languages', 'Geography', 'Computer Science']
   },
   {
-    id: 'instruments',
+    id: 'Instruments',
     name: 'Audio & Music',
     icon: Headphones,
     count: '73+ items',
@@ -81,7 +81,7 @@ const categories = [
     items: ['Headphones', 'Speakers', 'Instruments', 'Microphones']
   },
   {
-    id: 'study supplies',
+    id: 'Study Supplies',
     name: 'Study Supplies',
     icon: Calculator,
     count: '201+ items',
@@ -134,7 +134,7 @@ export function CategoryGrid({ onCategorySelect }: CategoryGridProps) {
     }
 
     // Default: route by category name
-    router.push(`/allitems?category=${encodeURIComponent(categoryName)}`);
+    router.push(`/allitems?category=${encodeURIComponent(categoryId)}`);
   };
 
   return (

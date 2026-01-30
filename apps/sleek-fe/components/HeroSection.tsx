@@ -418,7 +418,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
-                    <p className="text-sm bg-gray-400 rounded w-fit px-1 border-black border text-gray-800">• {item.category} </p>
+                    <p className="text-sm  w-fit px-1 text-gray-800">• {item.category} </p>
                   </div>
                   <div className="flex flex-col items-end">
                     <span className="font-semibold text-gray-900">{formatCurrency(item.price)}</span>
