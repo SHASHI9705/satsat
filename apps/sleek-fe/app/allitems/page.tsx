@@ -102,7 +102,7 @@ function AllItemsPage() {
 						},
 						location: 'Campus Area',
 						postedTime: ['Just now', '1 hour ago', 'Today', 'Yesterday'][Math.floor(Math.random() * 4)],
-						badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? 'Trending' : 'Sale') : undefined
+						badge: item.sold ? 'Sold Out' : Math.random() > 0.7 ? (Math.random() > 0.5 ? 'Trending' : 'Sale') : undefined
 					}));
 					setProducts(shuffleArray(itemsWithRatings));
 				} else {
@@ -451,7 +451,7 @@ function AllItemsPage() {
 											location: product.location,
 											category: product.category,
 											isFavorited: false,
-											badge: product.sold ? 'Sold Out' : undefined,
+											badge: product.sold ? 'Sold Out' : "New",
 											
 										}}
 										onViewDetails={() => handleViewDetails(product.id)}

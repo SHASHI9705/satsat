@@ -184,7 +184,7 @@ export const fetchItems = async (req: Request, res: Response): Promise<void> => 
                 actualPrice: true,
                 discountedPrice: true,
                 description: true,
-                sold: true,
+                sold: true || false,
                 createdAt: true,
                 updatedAt: true,
                 user: {
