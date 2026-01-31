@@ -92,7 +92,7 @@ export default function SignInPage({ onBack }: { onBack?: () => void }) {
             <motion.img
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              src="/newone.jpeg"
+              src="/newone.png"
               alt="SleekRoad"
               className="w-25 h-24 mb-6 drop-shadow-2xl object-contain"
               onError={(e) => (e.currentTarget.style.display = 'none')}
