@@ -451,6 +451,7 @@ function AllItemsPage() {
 											location: product.location,
 											category: product.category,
 											isFavorited: false,
+											badge: product.sold ? 'Sold Out' : undefined,
 											
 										}}
 										onViewDetails={() => handleViewDetails(product.id)}

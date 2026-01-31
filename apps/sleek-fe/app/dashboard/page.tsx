@@ -189,6 +189,58 @@ export default function DashboardPage() {
     }
   };
 
+  // Update deleteProduct function to send id in the request body
+  const deleteProduct = async (id: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/delete`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (response.ok) {
+        setProducts((prevProducts) => prevProducts.filter((product) => product.id !== id));
+        setNotification("Product deleted successfully");
+      } else {
+        const errorData = await response.json();
+        setNotification(errorData.message || "Failed to delete product");
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      setNotification("An error occurred while deleting the product");
+    }
+  };
+
+  // Update markAsSold function to handle sold status
+  const markAsSold = async (id: string) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/update-sold-status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, sold: true }),
+      });
+
+      if (response.ok) {
+        setProducts((prevProducts) =>
+          prevProducts.map((product) =>
+            product.id === id ? { ...product, sold: true } : product
+          )
+        );
+        setNotification("Product marked as sold");
+      } else {
+        const errorData = await response.json();
+        setNotification(errorData.message || "Failed to mark product as sold");
+      }
+    } catch (error) {
+      console.error("Error marking product as sold:", error);
+      setNotification("An error occurred while marking the product as sold");
+    }
+  };
+
   useEffect(() => {
     const fetchItems = async () => {
       try {
@@ -339,39 +391,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleMarkAsSold = async (id: string) => {
-    const product = products.find((product) => product.id === id);
-    console.log('Marking as sold:', { id, product });
-    setLoading((prev) => ({ ...prev, markAsSold: id }));
-
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/update-sold-status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id, sold: true }),
-      });
-
-      if (response.ok) {
-        setProducts((prev) => prev.filter((product) => product.id !== id));
-        console.log('Item removed from products state:', id);
-        if (product) {
-          setTotalSales((prev) => prev + 1);
-          setTotalEarnings((prev) => prev + (product.discountedPrice || 0));
-        }
-        showNotification('Item marked as sold and removed successfully!');
-      } else {
-        console.error('Failed to mark item as sold');
-        alert('Failed to mark item as sold. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error marking item as sold:', error);
-      alert('An error occurred while marking the item as sold. Please try again.');
-    } finally {
-      setLoading((prev) => ({ ...prev, markAsSold: null }));
-    }
-  };
 
   const handleImageUpload = async (file: File) => {
     try {
@@ -790,11 +809,15 @@ export default function DashboardPage() {
               products.map((product) => (
                 <div
                   key={product.id}
-                  className={`bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between ${
-                    product.sold ? 'opacity-50' : ''
-                  }`}
+                  className={`bg-white shadow-lg rounded-xl p-6 flex flex-col justify-between relative`}
                 >
-                  <div>
+                  {product.sold && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="absolute inset-0 bg-black opacity-50 rounded-xl"></div>
+                      <span className="inline-block w-56 h-56 bg-no-repeat bg-center bg-contain rotate-[-1deg] z-10" style={{ backgroundImage: "url('/soldout.png')" }}></span>
+                    </div>
+                  )}
+                  <div className={`${product.sold ? 'opacity-50' : ''}`}>
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xl truncate font-bold text-gray-800">{product.name}</h3>
                       <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
@@ -821,13 +844,19 @@ export default function DashboardPage() {
                   </div>
                   {!product.sold && (
                     <Button
-                      className="mt-4 bg-gradient-to-r from-red-400 to-red-600 hover:from-red-500 hover:to-red-700 text-white font-medium py-2 px-4 rounded-lg"
-                      onClick={() => handleMarkAsSold(product.id)}
+                      className="mt-4 bg-gradient-to-r from-green-400 to-green-600 hover:from-green-500 hover:to-green-700 text-white font-medium py-2 px-4 rounded-lg"
+                      onClick={() => markAsSold(product.id)}
                       disabled={loading.markAsSold === product.id}
                     >
                       {loading.markAsSold === product.id ? <Loader /> : 'Mark as Sold'}
                     </Button>
                   )}
+                  <Button
+                    className="mt-4 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 z-20 py-2 rounded"
+                    onClick={() => deleteProduct(product.id)}
+                  >
+                    Delete
+                  </Button>
                 </div>
               ))
             ) : (

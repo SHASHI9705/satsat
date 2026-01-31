@@ -125,69 +125,35 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
 export const uploadMiddleware: RequestHandler  = upload.array('images', 10); // Allow up to 10 files
 
 // Update the 'sold' status of an item
-export const updateItemSoldStatus = async (req: Request, res: Response): Promise<void> => {
-    const { id, sold } = req.body;
-    console.log('Received request to update sold status:', { id, sold }); // Log the incoming request
+export const updateItemSoldStatus: RequestHandler = async (req, res) => {
+  const { id, sold } = req.body;
 
-    if (typeof id !== 'number' || typeof sold !== 'boolean') {
-        console.error('Invalid input:', { id, sold }); // Log invalid input
-        res.status(400).json({ message: 'Invalid input' });
-        return;
+  if (typeof id !== "number" || typeof sold !== "boolean") {
+    res.status(400).json({ message: "Invalid input" });
+    return;
+  }
+
+  try {
+    const item = await prisma.item.findUnique({
+      where: { id },
+    });
+
+    if (!item) {
+      res.status(404).json({ message: "Item not found" });
+      return;
     }
 
-    try {
-        const item = await prisma.item.findUnique({
-            where: { id },
-        });
-        console.log('Fetched item:', item); // Log the fetched item
+    // Update the sold status of the item
+    const updatedItem = await prisma.item.update({
+      where: { id },
+      data: { sold },
+    });
 
-        if (!item) {
-            console.error('Item not found:', { id }); // Log item not found
-            res.status(404).json({ message: 'Item not found' });
-            return;
-        }
-
-        if (sold) {
-            const dashboardMetrics = await prisma.dashboardMetrics.upsert({
-                where: { userId: item.userId },
-                update: {
-                    totalEarnings: { increment: item.discountedPrice },
-                    totalSales: { increment: 1 },
-                    activeListings: { decrement: 1 },
-                },
-                create: {
-                    userId: item.userId,
-                    totalEarnings: item.discountedPrice,
-                    totalSales: 1,
-                    activeListings: 0,
-                    newListings: 0,
-                },
-            });
-            console.log('Updated dashboard metrics:', dashboardMetrics); // Log the updated dashboard metrics
-        }
-
-        // Delete images from S3
-        if (item.images && Array.isArray(item.images)) {
-            for (const imageUrl of item.images) {
-                const fileKey = imageUrl.split('/').pop(); // Extract file key from URL
-                if (fileKey) {
-                    await deleteFromS3(fileKey);
-                    console.log(`Deleted image from S3: ${fileKey}`); // Log the deleted image
-                }
-            }
-        }
-
-        // Delete the item from the database
-        await prisma.item.delete({
-            where: { id },
-        });
-        console.log('Deleted item from database:', { id }); // Log the deleted item
-
-        res.status(200).json({ message: 'Item marked as sold and deleted successfully' });
-    } catch (error) {
-        console.error('Error updating item sold status:', error); // Log the error
-        res.status(500).json({ message: 'Error updating item sold status', error });
-    }
+    res.status(200).json({ message: "Item updated successfully", item: updatedItem });
+  } catch (error) {
+    console.error("Error updating item sold status:", error);
+    res.status(500).json({ message: "Failed to update item sold status" });
+  }
 };
 
 // Update fetchItems to directly use email for fetching items
@@ -238,46 +204,43 @@ export const fetchItems = async (req: Request, res: Response): Promise<void> => 
     }
 };
 
-// Add deleteItem function
-export const deleteItem = async (req: Request, res: Response): Promise<void> => {
-    const { id } = req.params;
+// Add a dedicated deleteItem function
+export const deleteItem: RequestHandler = async (req, res) => {
+  const { id } = req.body; // Extract id from the request body
 
-    if (!id) {
-        res.status(400).json({ message: 'Item ID is required' });
-        return;
+  if (!id) {
+    res.status(400).json({ message: "Product ID is required" });
+    return;
+  }
+
+  try {
+    // Fetch the product to get the image key
+    const product = await prisma.item.findUnique({
+      where: { id: parseInt(id, 10) },
+    });
+
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+      return;
     }
 
-    try {
-        // Find the item to delete
-        const item = await prisma.item.findUnique({
-            where: { id: parseInt(id, 10) },
-        });
-
-        if (!item) {
-            res.status(404).json({ message: 'Item not found' });
-            return;
-        }
-
-        // Delete images from S3
-        if (item.images && Array.isArray(item.images)) {
-            for (const imageUrl of item.images) {
-                const fileKey = imageUrl.split('/').pop(); // Extract file key from URL
-                if (fileKey) {
-                    await deleteFromS3(fileKey);
-                }
-            }
-        }
-
-        // Delete the item from the database
-        await prisma.item.delete({
-            where: { id: parseInt(id, 10) },
-        });
-
-        res.status(200).json({ message: 'Item deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting item:', error);
-        res.status(500).json({ message: 'Error deleting item', error });
+    // Delete the product image from S3
+    if (product.images && product.images.length > 0) {
+      for (const imageKey of product.images) {
+        await deleteFromS3(imageKey);
+      }
     }
+
+    // Delete the product from the database
+    await prisma.item.delete({
+      where: { id: parseInt(id, 10) },
+    });
+
+    res.status(200).json({ message: "Product deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Failed to delete product" });
+  }
 };
 
 // Add fetchAllItems function

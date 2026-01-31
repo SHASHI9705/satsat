@@ -89,63 +89,57 @@ export function ProductCard({ product, onFavorite, onMessage, onViewDetails, cla
       onMouseLeave={() => setIsHovered(false)}
       className={className}
     >
-      <Card className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl rounded-3xl bg-white transition-all duration-300 h-full flex flex-col">
-        {/* Image Container */}
-        <div className="relative overflow-hidden rounded-t-3xl">
-          <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-            <ImageWithFallback
-              src={product.image}
-              alt={product.title}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-            {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <Card
+        className={`group overflow-hidden border-0 shadow-lg hover:shadow-2xl rounded-3xl bg-white transition-all duration-300 h-full flex flex-col relative`}
+      >
+        {product.badge === 'Sold Out' && (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="absolute inset-0 bg-black opacity-50"></div>
+            <span className="inline-block w-56 h-56 bg-no-repeat bg-center bg-contain rotate-[-1deg] z-10" style={{ backgroundImage: "url('/soldout.png')" }}></span>
           </div>
-          
-          {/* Top badges removed as requested */}
-          
-          {/* Overlay Actions */}
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
-            <Button
-              size="icon"
-              variant="ghost"
-              className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all duration-300 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleFavoriteClick(product.id);
-              }}
-            >
-              <Heart 
-                className={`w-5 h-5 transition-all ${isFavorited ? 'fill-red-500 text-red-500 scale-110' : 'text-gray-700 hover:text-red-500'}`} 
+        )}
+        <div className={`${product.badge === 'Sold Out' ? 'pointer-events-none opacity-50' : ''}`}>
+          {/* Image Container */}
+          <div className="relative overflow-hidden rounded-t-3xl">
+            <div className="aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+              <ImageWithFallback
+                src={product.image}
+                alt={product.title}
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
               />
-            </Button>
-            {onMessage && (
+              {/* Gradient Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </div>
+            {/* Overlay Actions */}
+            <div className="absolute top-4 right-4 flex flex-col gap-2">
               <Button
                 size="icon"
                 variant="ghost"
                 className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all duration-300 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  onMessage?.(product.id);
+                  handleFavoriteClick(product.id);
                 }}
               >
-                <MessageCircle className="w-5 h-5 text-gray-700 hover:text-green-600" />
+                <Heart
+                  className={`w-5 h-5 transition-all ${isFavorited ? 'fill-red-500 text-red-500 scale-110' : 'text-gray-700 hover:text-red-500'}`}
+                />
               </Button>
-            )}
+              {onMessage && (
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className={`w-10 h-10 rounded-full bg-white/90 backdrop-blur-md shadow-lg transition-all duration-300 ${isHovered ? 'translate-x-0 opacity-100' : 'translate-x-4 opacity-0'}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onMessage?.(product.id);
+                  }}
+                >
+                  <MessageCircle className="w-5 h-5 text-gray-700 hover:text-green-600" />
+                </Button>
+              )}
+            </div>
           </div>
-
-          {/* Quick View Button */}
-          <Button
-            variant="default"
-            className={`absolute bottom-4 right-4 bg-white text-gray-900 border border-gray-200 rounded-full px-4 py-2 gap-2 shadow-lg transition-all duration-300 font-medium ${isHovered ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleViewDetails();
-            }}
-          >
-            <Eye className="w-4 h-4" />
-            Quick View
-          </Button>
         </div>
 
         {/* Content */}

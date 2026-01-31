@@ -100,7 +100,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
           : [];
 
         const randomItems = data.items
-          .filter((item) => item)
+          .filter((item) => item && !item.sold) // Exclude sold-out items
           .map((item) => ({
             id: item.id,
             title: item.name,
@@ -114,7 +114,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
             },
             category: item.category,
             isFavorited: favorites.includes(item.id),
-            badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? "New Arrival" : "Sale") : undefined,
+            badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? 'New Arrival' : 'Sale') : undefined,
           }))
           .sort(() => 0.5 - Math.random())
           .slice(0, 12);
@@ -260,7 +260,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                 return (
                   <motion.div
                     key={item.id}
-                    className={`absolute rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-white cursor-pointer select-none w-[260px] md:w-[320px] h-[360px] md:h-[440px]`}
+                    className={`absolute rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-white select-none w-[260px] md:w-[320px] h-[360px] md:h-[440px] ${item.badge === 'Sold Out' ? 'cursor-not-allowed pointer-events-none opacity-50' : 'cursor-pointer'}`}
                     initial={false}
                     animate={{
                       x: `${position * 95}%`,
@@ -272,7 +272,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                     }}
                     transition={{ type: "spring", stiffness: 350, damping: 20 }}
                     style={{ transformStyle: 'preserve-3d' }}
-                    onClick={() => handleProductClick(item.id)}
+                    onClick={() => item.badge !== 'Sold Out' && handleProductClick(item.id)}
                   >
                     <div className="relative w-full h-full">
                       <img 
@@ -319,9 +319,15 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
             >
               <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
                 {item.badge && (
-                  <span className="absolute top-4 left-4 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                  <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
                     {item.badge}
                   </span>
+                )}
+                {item.badge === 'Sold Out' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black opacity-50"></div>
+                    <span className="text-white text-2xl font-bold z-10">SOLD OUT</span>
+                  </div>
                 )}
                 <img 
                   src={item.image} 
@@ -395,6 +401,12 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
                   <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
                     {item.badge}
                   </span>
+                )}
+                {item.badge === 'Sold Out' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black opacity-50"></div>
+                    <span className="text-white text-2xl font-bold z-10">SOLD OUT</span>
+                  </div>
                 )}
                 <img 
                   src={item.image} 
