@@ -31,7 +31,7 @@ router.get('/fetch', fetchItems);
 router.get('/all', fetchAllItems);
 
 // Route to delete an item
-router.delete('/delete/:id', deleteItem);
+router.delete('/delete', deleteItem);
 
 // Route to fetch an item by its ID
 router.get('/:id', fetchItemById);

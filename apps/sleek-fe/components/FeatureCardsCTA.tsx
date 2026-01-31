@@ -11,12 +11,7 @@ const features = [
     description: 'All users verified with .edu emails for a safe community',
     gradient: 'bg-brand'
   },
-  {
-    icon: CheckCircle,
-    title: 'In-App Messaging',
-    description: 'Secure communication with buyers and sellers',
-    gradient: 'bg-brand'
-  },
+
   {
     icon: CheckCircle,
     title: 'Smart Pricing',

@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react';
+import Link from 'next/link';
 import { Card } from '../../../components/ui/card';
 
 export default function TermsOfServicePage({ onBack }: { onBack?: () => void }) {
@@ -136,7 +137,7 @@ export default function TermsOfServicePage({ onBack }: { onBack?: () => void }) 
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
                 <li>SleekRoad's name, logo, design, and platform features are protected by copyright, trademark, and other intellectual property laws.</li>
                 <li>You may not copy, modify, distribute, or reverse-engineer any part of SleekRoad without permission.</li>
-                <li>If you believe content on SleekRoad infringes your intellectual property, contact us via the Report Issue or Contact Us page.</li>
+                <li>If you believe content on SleekRoad infringes your intellectual property, contact us via the <Link href="/comp/help" className="text-green-600 underline">Report Issue</Link> or <Link href="/comp/help" className="text-green-600 underline">Contact Us</Link> page.</li>
               </ul>
             </section>
 
@@ -161,7 +162,7 @@ export default function TermsOfServicePage({ onBack }: { onBack?: () => void }) 
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-black">Contact</h2>
               <p className="text-beige-800 leading-relaxed">
-                Questions about these Terms? Contact us via the Contact Us page or email legal@sleekroad.app.
+                Questions about these Terms? Contact us via the <Link href="/comp/help" className="text-green-600 underline">Contact Us</Link> page or email legal@sleekroad.app.
               </p>
               <p className="text-xs text-beige-700 mt-2">
                 Last Updated: [Date]. By continuing to use SleekRoad after updates, you accept the revised Terms.

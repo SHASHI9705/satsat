@@ -3,7 +3,8 @@
     "compilerOptions": {
         "rootDir": "./src",
         "outDir": "./dist",
-        "module": "NodeNext"
+        "module": "NodeNext",
+        "types": ["node"] // Added Node.js types
     },
     "include": ["src/**/*"]
 }

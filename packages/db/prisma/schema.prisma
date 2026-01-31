@@ -19,6 +19,7 @@ model User {
   updatedAt DateTime @updatedAt
   items    Item[] // Relation to the Item model
   dashboardMetrics DashboardMetrics[] // Relation to the DashboardMetrics model
+  regnumber String? // Added field for registration number
 }
 
 model TestTable {
@@ -39,6 +40,7 @@ model Item {
   updatedAt      DateTime @updatedAt
   sold           Boolean  @default(false)
   description    String? // Optional description field for the item
+  tags           String[] @default([])
   dashboardMetricsId Int?
   dashboardMetrics   DashboardMetrics? @relation(fields: [dashboardMetricsId], references: [id])
 }

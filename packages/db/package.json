@@ -10,8 +10,8 @@
     "build": "tsc -b"
   },
   "devDependencies": {
-    "@prisma/client": "6.18.0",
     "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
     "prisma": "^6.18.0"
   },
   "keywords": [],
@@ -19,6 +19,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "@prisma/client": "6",
     "@repo/typescript-config": "workspace:*",
     "pg": "^8.16.3"
   }

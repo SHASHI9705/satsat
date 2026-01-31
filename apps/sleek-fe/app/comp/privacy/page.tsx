@@ -1,6 +1,7 @@
 "use client"
 
 import React from 'react';
+import Link from 'next/link';
 import { Card } from '../../../components/ui/card';
 
 export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
@@ -30,7 +31,7 @@ export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
                 <li>Account info: name, email, profile details, and authentication identifiers.</li>
                 <li>Listing and transaction details: titles, descriptions, prices, images, and related metadata.</li>
-                <li>Communications: messages sent via in‑app chat and support requests.</li>
+                <li>Communications: support requests and transactional notifications.</li>
                 <li>Usage data: device/browser info, IP address, and activity logs (for security and reliability).</li>
                 <li>Optional data: feedback, surveys, or media you choose to upload.</li>
               </ul>
@@ -40,7 +41,7 @@ export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-black">How We Use Data</h2>
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
-                <li>Provide core features: login, listings, search, favorites, and messaging.</li>
+                <li>Provide core features: login, listings, search, and favorites.</li>
                 <li>Protect users and the platform: fraud prevention, abuse detection, and account security.</li>
                 <li>Improve experience: troubleshooting, performance, analytics, and feature development.</li>
                 <li>Communicate important updates: transaction notices, policy changes, and support replies.</li>
@@ -51,7 +52,7 @@ export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
               <h2 className="text-xl font-semibold text-black">Your Choices & Rights</h2>
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
                 <li>Access/Update: edit your profile and listings at any time.</li>
-                <li>Delete: request account/data deletion via the Contact Us page.</li>
+                <li>Delete: request account/data deletion via the <Link href="/comp/help" className="text-green-600 underline">Contact Us</Link> page.</li>
                 <li>Controls: manage notifications and what you share publicly in listings.</li>
               </ul>
             </section>
@@ -59,7 +60,7 @@ export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-black">Security & Retention</h2>
               <ul className="list-disc pl-6 text-beige-800 space-y-2">
-                <li>We use industry‑standard safeguards to protect account and message data.</li>
+                <li>We use industry‑standard safeguards to protect account and transaction data.</li>
                 <li>We retain data only as long as needed for legal, security, and operational purposes.</li>
                 <li>Some logs may be briefly retained to diagnose incidents and prevent abuse.</li>
               </ul>
@@ -97,7 +98,7 @@ export default function PrivacyPolicyPage({ onBack }: { onBack?: () => void }) {
             <section className="space-y-3">
               <h2 className="text-xl font-semibold text-black">Reporting Concerns</h2>
               <p className="text-beige-800">
-                Use the Report Issue page or Contact Us page to flag suspicious activity, prohibited content, or safety concerns.
+                Use the <Link href="/comp/help" className="text-green-600 underline">Report Issue</Link> page or the <Link href="/comp/help" className="text-green-600 underline">Contact Us</Link> page to flag suspicious activity, prohibited content, or safety concerns.
                 Please include links, screenshots, or listing IDs to help us act quickly.
               </p>
             </section>

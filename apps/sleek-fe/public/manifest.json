@@ -19,8 +19,12 @@
     }
   ],
   "start_url": "/",
+  "scope": "/",
+  "id": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
-  "description": "A modern marketplace connecting college students and communities."
+  "description": "A modern marketplace connecting college students and communities.",
+  "categories": ["shopping", "marketplace", "education"]
 }

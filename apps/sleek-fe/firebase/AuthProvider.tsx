@@ -2,6 +2,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut, User, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth } from './firebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from './firebaseConfig';
+import { requestAndSaveToken, removeTokenForUser } from './messaging';
 
 type AuthContextValue = {
   user: User | null;
@@ -17,9 +20,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       console.log('Auth state changed:', u);
       setUser(u);
+      if (typeof window === 'undefined') return;
+
+      try {
+        if (u) {
+          await setDoc(
+            doc(db, 'users', u.uid),
+            {
+              uid: u.uid,
+              email: u.email || null,
+              displayName: u.displayName || null,
+              photoURL: u.photoURL || null,
+              updatedAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+          if ('serviceWorker' in navigator) {
+            await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          }
+          const token = await requestAndSaveToken(process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY, u.uid);
+          if (token) {
+            localStorage.setItem('fcmToken', token);
+          }
+        } else {
+          const token = localStorage.getItem('fcmToken');
+          if (token) {
+            await removeTokenForUser(token, auth.currentUser?.uid || '');
+            localStorage.removeItem('fcmToken');
+          }
+        }
+      } catch (err) {
+        console.warn('FCM token setup failed:', err);
+      }
     });
     return unsub;
   }, []);
@@ -70,6 +105,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const signOutUser = async () => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('fcmToken') : null;
+    if (token && auth.currentUser?.uid) {
+      await removeTokenForUser(token, auth.currentUser.uid);
+      localStorage.removeItem('fcmToken');
+    }
     await signOut(auth);
   };
 

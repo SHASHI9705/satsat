@@ -34,11 +34,17 @@ export default function RootLayout({
 
   return (
     <AuthProvider>
-      <html lang="en">
+      <html lang="en" className={`${geistSans.variable} ${geistMono.variable}`}>
         <head>
           <title>SleekRoad</title>
           <link rel="icon" href="/logo.svg" type="image/svg+xml" />
           <link rel="manifest" href="/manifest.json" />
+          <meta name="application-name" content="SleekRoad" />
+          <meta name="theme-color" content="#ffffff" />
+          <meta name="apple-mobile-web-app-capable" content="yes" />
+          <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+          <meta name="apple-mobile-web-app-title" content="SleekRoad" />
+          <link rel="apple-touch-icon" href="/logo.png" />
         </head>
         <body>{children}</body>
       </html>

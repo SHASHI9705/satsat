@@ -188,12 +188,16 @@ html {
 }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  /* prefer the bundled Geist variable font, fall back to Inter and system stacks */
+  font-family: var(--font-geist-sans), 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  font-size: 16px;
+  line-height: 1.6;
   background: radial-gradient(1200px 600px at 10% 10%, rgba(166,124,82,0.04), transparent 12%),
               radial-gradient(900px 400px at 90% 90%, rgba(139,94,60,0.03), transparent 10%),
               linear-gradient(180deg, #FBF9F7 0%, #F7F4F1 100%);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
 }
 
 .container {
@@ -422,6 +426,18 @@ body {
 @keyframes slideInUp {
   from {
     opacity: 0;
+  /* Prevent horizontal overflow on small screens (avoids right-side gap) */
+  @media (max-width: 640px) {
+    html, body {
+      overflow-x: hidden !important;
+    }
+
+    /* Ensure main layout padding doesn't create extra width */
+    .max-w-7xl {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
     transform: translateY(30px);
   }
   to {
