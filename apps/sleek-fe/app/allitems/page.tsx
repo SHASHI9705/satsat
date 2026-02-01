@@ -451,7 +451,7 @@ function AllItemsPage() {
 											location: product.location,
 											category: product.category,
 											isFavorited: false,
-											badge: product.sold ? 'Sold Out' : "New",
+											badge: product.sold ? 'Sold Out' : 'New',
 											
 										}}
 										onViewDetails={() => handleViewDetails(product.id)}
@@ -462,9 +462,18 @@ function AllItemsPage() {
 									// List View
 									<div
 										key={product.id}
-										className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 overflow-hidden group cursor-pointer"
-										onClick={() => handleViewDetails(product.id)}
+										className={`relative bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 overflow-hidden group ${product.sold ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+										onClick={!product.sold ? () => handleViewDetails(product.id) : undefined}
 									>
+										{product.sold && (
+											<div className=" cursor-event-none absolute inset-0 flex items-center justify-center">
+												<div className=" w-full absolute inset-0 bg-black opacity-50 rounded-xl"></div>
+												<span
+													className="inline-block w-56 h-56 bg-no-repeat bg-center bg-contain rotate-[-1deg] z-10"
+													style={{ backgroundImage: "url('/soldout.png')" }}
+												></span>
+											</div>
+										)}
 										<div className="flex flex-col md:flex-row">
 											<div className="md:w-48 h-48 md:h-30 overflow-hidden">
 												<img
@@ -478,14 +487,8 @@ function AllItemsPage() {
 													<h3 className="text-xl font-bold text-gray-900 group-hover:text-green-700 transition-colors">
 														{product.name}
 													</h3>
-													{false && (
-														<Badge className={`${
-															product.badge === 'Trending' ? 'bg-orange-100 text-orange-700' :
-															product.badge === 'Sale' ? 'bg-red-100 text-red-700' :
-															'bg-blue-100 text-blue-700'
-														}`}>
-															{product.badge}
-														</Badge>
+													{product.sold && (
+														<Badge className="bg-red-100 text-red-700">Sold Out</Badge>
 													)}
 												</div>
 												<p className="text-gray-600 mb-4 line-clamp-2">{product.description}</p>
