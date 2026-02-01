@@ -7,7 +7,7 @@ import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7n7svNE0bZKqI5oLubUbFNL25oXKOJN4",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: "civia-ad50a.firebaseapp.com",
   databaseURL: "https://civia-ad50a-default-rtdb.firebaseio.com",
   projectId: "civia-ad50a",

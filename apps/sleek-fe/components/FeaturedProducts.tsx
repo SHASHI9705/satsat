@@ -44,7 +44,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 					const data = await response.json();
 					if (Array.isArray(data.items)) {
 						const randomItems = data.items
-							.filter((item) => item)
+							.filter((item) => item && !item.sold)
 							.map((item, index) => ({
 								id: item.id,
 								title: item.name,
