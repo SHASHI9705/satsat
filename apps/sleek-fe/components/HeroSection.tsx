@@ -5,6 +5,7 @@ import { ShoppingBag, User, Recycle, ArrowRight, Star, Shield, TrendingUp, Users
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Span } from 'next/dist/trace';
+import Spotlight from './Spotlight';
 
 export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: string) => void; onCategorySelect: (category: string) => void; }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -206,7 +207,8 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
     <div className="min-h-screen bg-[#F4F2F2] font-sans text-gray-700">
 
       {/* Hero Carousel Section */}
-      <div className="relative flex flex-col items-center justify-center pt-10 md:pt-20 mt-0 md:pb-12 overflow-hidden min-h-[60vh]">
+      <div className="relative flex flex-col items-center justify-center pt-10 md:pt-10 mt-0 md:pb-12 overflow-hidden min-h-[60vh]">
+        <Spotlight />
         <div className="pointer-events-none absolute -top-24 right-[-10%] h-64 w-64 rounded-full bg-green-200/40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 left-[-10%] h-64 w-64 rounded-full bg-green-100/60 blur-3xl" />
         {/* <div className="w-full max-w-6xl flex justify-between items-center px-6 md:px-12 mb-2 z-10">
