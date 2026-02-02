@@ -111,19 +111,19 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 		<section className="py-16 bg-gradient-to-b from-white to-gray-50">
 			<div className="max-w-7xl mx-auto px-4 md:px-8">
 				{/* Section Header */}
-				<div className="flex flex-col md:flex-row md:items-center justify-between mb-12">
+				<div className="flex md:flex-row md:items-center justify-between md:mb-4">
 					<div className="mb-6 md:mb-0">
 						<div className="flex items-center gap-3">
 							<div>
 								{/* <Badge className="bg-green-100 text-green-700 border-green-200 font-medium mb-2">
 									Hot This Week
 								</Badge> */}
-								<h2 id="trending" className="text-3xl md:text-4xl font-bold text-gray-900">
+								<h2 id="trending" className="text-2xl md:text-4xl font-bold text-gray-900">
 									Trending on Campus
 								</h2>
 							</div>
 						</div>
-						<p className="hidden md:block text-gray-600 max-w-2xl">
+						<p className="hidden md:block text-gray-600 mt-4 max-w-2xl">
 							Discover the most popular items and deals from students across campus.
 						</p>
 					</div>
@@ -140,7 +140,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 
 				{/* Categories Filter */}
 				<div className="mb-12">
-					<div className="flex items-center justify-between mb-4">
+					<div className="hidden flex items-center justify-between mb-4">
 						<h3 className="text-lg font-semibold text-gray-900">Browse by Category</h3>
 						<span className="text-yellow-500 text-lg">✨</span>
 					</div>
