@@ -183,6 +183,8 @@ function AllItemsPage() {
 
 	// Apply sorting
 	const sortedProducts = [...filteredProducts].sort((a, b) => {
+		if (a.sold && !b.sold) return 1; // Sold-out items come last
+		if (!a.sold && b.sold) return -1;
 		switch (sortBy) {
 			case 'price-low':
 				return a.discountedPrice - b.discountedPrice;

@@ -314,7 +314,7 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`w-4 h-4 -ml-2 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
 
                 <AnimatePresence>

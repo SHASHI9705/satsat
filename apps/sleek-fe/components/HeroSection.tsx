@@ -206,7 +206,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
     <div className="min-h-screen bg-[#F4F2F2] font-sans text-gray-700">
 
       {/* Hero Carousel Section */}
-      <div className="relative flex flex-col items-center justify-center mt-0 pb-10 md:pb-12 overflow-hidden min-h-[80vh]">
+      <div className="relative flex flex-col items-center justify-center pt-10 md:pt-20 mt-0 md:pb-12 overflow-hidden min-h-[60vh]">
         <div className="pointer-events-none absolute -top-24 right-[-10%] h-64 w-64 rounded-full bg-green-200/40 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 left-[-10%] h-64 w-64 rounded-full bg-green-100/60 blur-3xl" />
         {/* <div className="w-full max-w-6xl flex justify-between items-center px-6 md:px-12 mb-2 z-10">
@@ -298,7 +298,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       {/* Mobile search removed */}
 
       {/* Featured Categories */}
-      <section className="px-6 md:px-12 mt-12 mb-20">
+      <section className="px-6 md:px-12 mb-20">
         <div className="flex items-end gap-4 mb-8">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Trending on Campus</h2>
           <div className="h-1 flex-1 bg-gradient-to-r from-green-800 to-transparent rounded-full mb-2 opacity-60" />

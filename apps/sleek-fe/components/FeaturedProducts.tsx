@@ -60,7 +60,7 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 								location: 'Campus Area',
 								category: item.category,
 								isFavorited: false,
-								badge: index % 4 === 0 ? 'Trending' : index % 4 === 1 ? 'Sale' : index % 4 === 2 ? 'New' : undefined
+								badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? 'New Arrival' : 'Sale') : undefined,
 							}))
 							.sort(() => 0.5 - Math.random())
 							.slice(0, 8);
