@@ -222,7 +222,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
         </div> */}
 
         <div
-          className="relative w-full h-[380px] md:h-[500px] flex items-center justify-center perspective-1000 touch-pan-y"
+          className="mb-12 relative w-full h-[380px] md:h-[500px] flex items-center justify-center perspective-1000 touch-pan-y"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -300,7 +300,7 @@ export function HeroSection({ onSearch, onCategorySelect }: { onSearch: (query: 
       {/* Mobile search removed */}
 
       {/* Featured Categories */}
-      <section className="px-6 md:px-12 mb-20">
+      <section className="pt-6 px-6 md:px-12 mb-20">
         <div className="flex items-end gap-4 mb-8">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Trending on Campus</h2>
           <div className="h-1 flex-1 bg-gradient-to-r from-green-800 to-transparent rounded-full mb-2 opacity-60" />

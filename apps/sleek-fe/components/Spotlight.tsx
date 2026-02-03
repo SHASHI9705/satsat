@@ -3,7 +3,7 @@ import React from 'react';
 const SpotlightPage: React.FC = () => {
     const randomGradient = () => {
         const colors = [
-            '#ff7e5f', '#feb47b', '#6a11cb', '#2575fc', '#ff6a00', '#ee0979', '#8e2de2', '#4a00e0', '#00c6ff', '#0072ff'
+            '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff', '#ffffff'
         ];
         const color1 = colors[Math.floor(Math.random() * colors.length)];
         const color2 = colors[Math.floor(Math.random() * colors.length)];
@@ -31,10 +31,10 @@ const SpotlightPage: React.FC = () => {
 
         @keyframes glowEffect {
             0%, 100% {
-                box-shadow: 0 0 7px rgb(100, 149, 43);
+                box-shadow: 0 0 7px rgb(0, 0, 0);
             }
             50% {
-                box-shadow: 0 0 7px rgb(49, 51, 45);
+                box-shadow: 0 0 7px rgb(0, 0, 0);
             }
         }
     `;
@@ -46,7 +46,7 @@ const SpotlightPage: React.FC = () => {
                 {Array.from('SPOTLIGHT').map((letter, index) => (
                     <span
                         key={index}
-                        className="text-white rounded text-center text-4xl font-extrabold md:w-[40px] md:h-[40px] w-[30px] h-[30px]"
+                        className="text-white rounded text-center text-xs md:text-2xl font-extrabold md:w-[30px] md:h-[30px] w-[17px] h-[17px]"
                         style={{
                             display: 'flex',
                             justifyContent: 'center',
