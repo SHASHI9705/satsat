@@ -46,7 +46,7 @@ const SpotlightPage: React.FC = () => {
                 {Array.from('SPOTLIGHT').map((letter, index) => (
                     <span
                         key={index}
-                        className="text-white rounded text-center text-xs md:text-2xl font-extrabold md:w-[30px] md:h-[30px] w-[17px] h-[17px]"
+                        className="text-black rounded text-center text-xs md:text-2xl font-extrabold md:w-[30px] md:h-[30px] w-[17px] h-[17px]"
                         style={{
                             display: 'flex',
                             justifyContent: 'center',
