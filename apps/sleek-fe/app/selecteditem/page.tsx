@@ -260,7 +260,7 @@ export default function SelectedItemPage() {
 
   const formatPriceWithUnit = (price?: number) => {
     if (price == null) return '';
-    return `${formatPrice(price)}${isServiceCategory(item?.category) ? ' /hr' : ''}`;
+    return `${formatPrice(price)}${isServiceCategory(item?.category) ? '' : ''}`;
   };
 
   const serviceTags = (() => {
