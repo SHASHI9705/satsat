@@ -41,7 +41,7 @@ function AllItemsPage() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [searchQuery, setSearchQuery] = useState('');
-	const [sortBy, setSortBy] = useState('newest');
+	const [sortBy, setSortBy] = useState('random');
 	const [showFilters, setShowFilters] = useState(false);
 	const router = useRouter();
 	const searchParams = useSearchParams();
@@ -123,7 +123,7 @@ function AllItemsPage() {
 		const isMobile = window.innerWidth <= 768;
 		if (isMobile) {
 			setViewMode('list');
-			setSortBy('newest');
+			setSortBy('random');
 		}
 	}, []);
 
@@ -194,6 +194,8 @@ function AllItemsPage() {
 				return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
 			case 'rating':
 				return (b.rating || 0) - (a.rating || 0);
+			case 'random':
+				return Math.random() - 0.5; // Random sorting logic
 			default:
 				return 0;
 		}
@@ -344,6 +346,7 @@ function AllItemsPage() {
 								<option value="price-low">Price: Low to High</option>
 								<option value="price-high">Price: High to Low</option>
 								<option value="rating">Highest Rated</option>
+								<option value="random">Select filter</option> {/* New option added */}
 							</select>
 						</div>
 					</div>
