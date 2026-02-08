@@ -68,13 +68,16 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
 
     const categories = [
       'All Categories',
+      'Electronics',
+      'Rentals',
       'Clothes',
       'Shoes',
       'Books',
-      'Tech Products',
+      'Fashion',
       'Electronics',
       'Instruments',
-      'Tutoring & Services',
+      'Services',
+      'Services',
       'Others'
     ];
 
@@ -233,13 +236,22 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                   <div className="absolute left-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-lg p-2 z-50">
                     {[
                       'All Categories',
-                      'Clothes',
-                      'Shoes',
-                      'Books',
-                      'Tech Products',
                       'Electronics',
+                      'Rentals',
+                      'Shoes',
+                      'Fashion',
+                      'Toys & Games',
+                      'Services',
+                      'Books & Academic',
+                      'Beauty & Personal Care',
+                      'Furniture & Living',
+                      'Kitchen & Dining',
+                      'Stationery',
                       'Instruments',
-                      'Tutoring & Services',
+                      'Sports & Fitness',
+                      'Pet Supplies',
+                      'Vehicles',
+                      'Accessories',
                       'Others'
                     ].map((cat) => (
                       <button

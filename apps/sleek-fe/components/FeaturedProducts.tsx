@@ -23,14 +23,23 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 	const categories = [
 		'All Categories',
 		'Electronics',
+		'Rentals',
+		'Shoes',
 		'Fashion',
-		'Books',
-		'Tech Products',
-		'Furniture',
+		'Toys & Games',
+		'Services',
+		'Books & Academic',
+		'Beauty & Personal Care',
+		'Furniture & Living',
+		'Kitchen & Dining',
+		'Stationery',
 		'Instruments',
-		'Sports',
+		'Sports & Fitness',
+		'Pet Supplies',
+		'Vehicles',
 		'Accessories',
 		'Others'
+
 	];
 
 	useEffect(() => {
@@ -179,7 +188,6 @@ export function FeaturedProducts({ onFavorite, onMessage }: FeaturedProductsProp
 								onViewDetails={() => handleViewDetails(product.id)}
 								showPostedTime={false}
 								onFavorite={onFavorite}
-								onMessage={onMessage}
 								className="h-full"
 							/>
 						))}

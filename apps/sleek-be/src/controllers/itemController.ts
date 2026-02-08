@@ -294,7 +294,7 @@ export const fetchItemById = async (req: Request, res: Response): Promise<void> 
         // Fetch related products (example logic, adjust as needed)
         const relatedProducts = await prisma.item.findMany({
             where: { category: item.category, id: { not: item.id } },
-            take: 4,
+            take: 12,
             include: {
                 user: {
                     select: {

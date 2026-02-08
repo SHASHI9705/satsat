@@ -63,8 +63,8 @@ const categories = [
     items: ['Licenses', 'Tools', 'Resources', 'Templates', 'Plugins', 'APIs']
   },
   {
-    id: 'Tutoring & Services',
-    name: 'Tutoring & Services',
+    id: 'Services',
+    name: 'Services',
     icon: GraduationCap,
     count: '156+ items',
     image: 'tutor.jpg',

@@ -104,7 +104,7 @@ export function HeroSection({
       'Tech Products',
       'Electronics',
       'Instruments',
-      'Tutoring & Services',
+      'Services',
       'Others'
     ];
 
@@ -478,7 +478,7 @@ export function HeroSection({
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Services on Campus</h2>
           <div className="h-1 flex-1 bg-gradient-to-r from-green-800 to-transparent rounded-full mb-2 opacity-60" />
           <button
-            onClick={() => onCategorySelect('Tutoring & Services')}
+            onClick={() => onCategorySelect('Services')}
             className="text-sm font-semibold text-green-700 hover:text-green-900 mb-1 hidden md:block"
           >
             See Services

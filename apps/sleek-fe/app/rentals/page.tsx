@@ -113,7 +113,7 @@ function RentalsPage() {
               </Badge> */}
               
               <h1 className="mt-4 text-4xl md:text-6xl font-bold text-gray-900 tracking-tight leading-tight">
-                Rent what you need,
+                Rent what you need,<br />
                 <span className="bg-gradient-to-r from-green-700 to-blue-500 bg-clip-text text-transparent">
                   {' '}when you need it
                 </span>
@@ -137,7 +137,7 @@ function RentalsPage() {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="h-12 px-8 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
+                  className="h-12 text-white md:text-black font-bold px-8 border-gray-300 hover:border-gray-400 hover:bg-gray-50 transition-all"
                   onClick={() => router.push('/dashboard')}
                 >
                   List a Rental

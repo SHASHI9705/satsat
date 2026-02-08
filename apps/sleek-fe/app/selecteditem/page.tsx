@@ -181,8 +181,9 @@ export default function SelectedItemPage() {
         if (response.ok) {
           const data = await response.json();
           setItem(data.item);
-          setRelatedProducts(data.relatedProducts || []);
-          setProducts(data.relatedProducts || []);
+          const filteredRelatedProducts = (data.relatedProducts || []).filter(product => !product.sold);
+          setRelatedProducts(filteredRelatedProducts);
+          setProducts(filteredRelatedProducts);
         } else {
           console.error('Failed to fetch item details');
         }
@@ -429,7 +430,7 @@ export default function SelectedItemPage() {
             {/* Description */}
             <div className="prose max-w-none">
               <h3 className="text-lg font-semibold text-gray-900 mb-3">Description</h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed whitespace-pre-line">
                 {item?.description}
               </p>
             </div>
@@ -566,9 +567,9 @@ export default function SelectedItemPage() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {relatedProducts.map((product: any) => (
+              {relatedProducts.map((product: any,index: number) => (
                 <ProductCard
-                  key={product.id}
+                  key={`${product.id}-${index}`}
                   product={{
                     id: product.id,
                     title: product.name,

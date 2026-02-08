@@ -267,16 +267,16 @@ export default function DashboardPage() {
       const uniqueTags = Array.from(new Set(tagCandidates));
 
       const details = [
-        `Price per day: ₹${rentalPricePerDay}`,
-        `Quantity available: ${rentalQuantity}`,
-        rentalDeposit ? `Security deposit: ₹${rentalDeposit}` : null,
-        `Availability: ${rentalAvailableFrom} to ${rentalAvailableTo}`,
-        `Pickup/Meetup location: ${rentalPickupLocation}`,
+        `• Price per day: ₹${rentalPricePerDay}`,
+        `• Quantity available: ${rentalQuantity}`,
+        rentalDeposit ? `• Security deposit: ₹${rentalDeposit}` : null,
+        `• Availability: ${rentalAvailableFrom} → ${rentalAvailableTo}`,
+        `• Pickup location: ${rentalPickupLocation}`,
       ].filter(Boolean).join('\n');
 
       const combinedDescription = [rentalDescription.trim(), details]
         .filter(Boolean)
-        .join('\n\n');
+        .join('\n');
 
       const formData = new FormData();
       formData.append('name', rentalName);
@@ -1173,18 +1173,14 @@ export default function DashboardPage() {
                       <option>Fashion</option>
                       <option>Toys & Games</option>
                       <option>Books & Academic</option>
-                      <option>Tech Products</option>
                       <option>Beauty & Personal Care</option>
                       <option>Furniture & Living</option>
                       <option>Kitchen & Dining</option>
-                      <option>Tutoring & Services</option>
-                      <option>Study Supplies</option>
                       <option>Stationery</option>
-                      <option>Software & Digital</option>
                       <option>Instruments</option>
                       <option>Sports & Fitness</option>
                       <option>Pet Supplies</option>
-                      <option>Vehicles & Transport</option>
+                      <option>Vehicles</option>
                       <option>Accessories</option>
                       <option>Others</option>
                     </select>

@@ -49,22 +49,20 @@ function AllItemsPage() {
 	const categories = [
 		"All Categories",
 		"Electronics",
+		"Rentals",
 		"Shoes",
 		"Fashion",
 		"Toys & Games",
+		"Services",
 		"Books & Academic",
-		"Tech Products",
 		"Beauty & Personal Care",
 		"Furniture & Living",
 		"Kitchen & Dining",
-		"Tutoring & Services",
-		"Study Supplies",
 		"Stationery",
-		"Software & Digital",
 		"Instruments",
 		"Sports & Fitness",
 		"Pet Supplies",
-		"Vehicles & Transport",
+		"Vehicles",
 		"Accessories",
 		"Others"
 	];
@@ -159,7 +157,7 @@ function AllItemsPage() {
 	// Helper: decide whether a product belongs to the selected category
 	const matchesCategory = (product: any, selectedCategory: string) => {
 		if (selectedCategory === "All Categories") return true;
-		if (selectedCategory === "Tutoring & Services") return isServiceProduct(product);
+		if (selectedCategory === "Services") return isServiceProduct(product);
 		const prodCat = (product.category || '').toLowerCase();
 		const sel = (selectedCategory || '').toLowerCase();
 		// direct contains checks (both directions)
