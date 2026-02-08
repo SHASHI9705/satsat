@@ -61,6 +61,7 @@ export function HeroSection({
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [randomItems, setRandomItems] = useState<any[]>([]);
+  const [allItems, setAllItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -151,7 +152,7 @@ export function HeroSection({
           ? JSON.parse(localStorage.getItem('favorites') || '[]')
           : [];
 
-        const randomItems = data.items
+        const mappedItems = data.items
           .filter((item) => item && !item.sold) // Exclude sold-out items
           .map((item) => ({
             id: item.id,
@@ -165,13 +166,17 @@ export function HeroSection({
               verified: false,
             },
             category: item.category,
+            tags: item.tags || [],
+            description: item.description || '',
             isFavorited: favorites.includes(item.id),
             badge: Math.random() > 0.7 ? (Math.random() > 0.5 ? 'New Arrival' : 'Sale') : undefined,
           }))
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 12);
+          .sort(() => 0.5 - Math.random());
 
-        setRandomItems(randomItems);
+        setAllItems(mappedItems);
+        const shuffled = [...mappedItems].sort(() => 0.5 - Math.random()).slice(0, 12);
+
+        setRandomItems(shuffled);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching random items:', err);
@@ -239,20 +244,27 @@ export function HeroSection({
     }).format(price || 0);
   };
 
-  const isTechCategory = (category?: string) => {
+  const isServiceCategory = (category?: string) => {
     const c = (category || '').toLowerCase();
+    return c === 'tutoring & services' || c.includes('tutoring') || c.includes('services');
+  };
+
+  const isRentalItem = (item: { category?: string; tags?: string[]; description?: string }) => {
+    const category = (item.category || '').toLowerCase();
+    const tags = (item.tags || []).map((tag) => String(tag).toLowerCase());
+    const description = (item.description || '').toLowerCase();
     return (
-      c.includes('tech') ||
-      c.includes('electronic') ||
-      c.includes('gadget') ||
-      c.includes('laptop') ||
-      c.includes('phone') ||
-      c.includes('computer')
+      category === 'rental' ||
+      category === 'rentals' ||
+      tags.includes('rental') ||
+      tags.includes('rentals') ||
+      description.includes('price per day:')
     );
   };
 
   const trendingItems = randomItems.slice(0, 4);
-  const techItems = randomItems.filter((item) => isTechCategory(item.category)).slice(0, 4);
+  const serviceItems = randomItems.filter((item) => isServiceCategory(item.category)).slice(0, 4);
+  const rentalItems = allItems.filter((item) => isRentalItem(item)).slice(0, 4);
 
   const itemsToDisplay = specificItems.length > 0 ? specificItems : randomItems;
 
@@ -314,17 +326,30 @@ export function HeroSection({
                 return (
                   <motion.div
                     key={item.id}
-                    className={`absolute rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white bg-white select-none w-[260px] md:w-[320px] h-[360px] md:h-[440px] ${item.badge === 'Sold Out' ? 'cursor-not-allowed pointer-events-none opacity-50' : 'cursor-pointer'}`}
+                    className={`absolute rounded-[2.5rem] overflow-hidden border-4 border-white bg-white select-none w-[260px] md:w-[320px] h-[360px] md:h-[440px] ${isCenter ? 'shadow-[0_0_80px_rgba(250,204,21,0.65)] ring-2 ring-yellow-300/70' : 'shadow-2xl'} ${item.badge === 'Sold Out' ? 'cursor-not-allowed pointer-events-none opacity-50' : 'cursor-pointer'}`}
                     initial={false}
                     animate={{
                       x: `${position * 95}%`,
-                      scale: isCenter ? 1 : 0.75,
+                      scale: isCenter ? [1, 1.03, 1] : 0.75,
                       zIndex: 10 - Math.abs(position),
                       opacity: Math.abs(position) >= 2 ? 0.4 : 1,
                       rotateY: position * -4,
                       filter: isCenter ? "blur(0px)" : "blur(7px)",
                     }}
-                    transition={{ type: "spring", stiffness: 350, damping: 20 }}
+                    transition={
+                      isCenter
+                        ? {
+                            type: "spring",
+                            stiffness: 350,
+                            damping: 20,
+                            scale: {
+                              duration: 3.6,
+                              repeat: Infinity,
+                              ease: "easeInOut",
+                            },
+                          }
+                        : { type: "spring", stiffness: 350, damping: 20 }
+                    }
                     style={{ transformStyle: 'preserve-3d' }}
                     onClick={() => item.badge !== 'Sold Out' && handleProductClick(item.id)}
                   >
@@ -358,6 +383,7 @@ export function HeroSection({
 						<ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
 					</Button>
         </div>
+
       </div>
 
       {/* Mobile search removed */}
@@ -383,6 +409,11 @@ export function HeroSection({
               className="flex flex-col gap-3 group cursor-pointer"
             >
               <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
+                {isRentalItem(item) && (
+                  <span className="absolute top-4 right-4 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    Rental
+                  </span>
+                )}
                 {item.badge && (
                   <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
                     {item.badge}
@@ -441,20 +472,20 @@ export function HeroSection({
         </div>
       </section>
 
-      {/* Tech Products Section */}
+      {/* Services Section */}
       <section className="px-6 md:px-12 mt-4 mb-20">
         <div className="flex items-end gap-4 mb-8">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Tech & Electronics</h2>
-          <div className="h-1 flex-1 bg-gradient-to-r from-blue-800 to-transparent rounded-full mb-2 opacity-60" />
-          <button 
-            onClick={() => onCategorySelect('Tech Products')}
-            className="text-sm font-semibold text-blue-700 hover:text-blue-900 mb-1 hidden md:block"
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Services on Campus</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-green-800 to-transparent rounded-full mb-2 opacity-60" />
+          <button
+            onClick={() => onCategorySelect('Tutoring & Services')}
+            className="text-sm font-semibold text-green-700 hover:text-green-900 mb-1 hidden md:block"
           >
-            See Collection
+            See Services
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {techItems.map((item) => (
+          {serviceItems.map((item) => (
             <motion.div 
               key={item.id}
               whileHover={{ y: -8 }}
@@ -462,6 +493,11 @@ export function HeroSection({
               className="flex flex-col gap-3 group cursor-pointer"
             >
               <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
+                {isRentalItem(item) && (
+                  <span className="absolute top-4 right-4 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    Rental
+                  </span>
+                )}
                 {item.badge && (
                   <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
                     {item.badge}
@@ -512,6 +548,105 @@ export function HeroSection({
         </div>
       </section>
 
+      {/* Rentals Section */}
+      <section className="px-6 md:px-12 mt-4 mb-20">
+        <div className="flex items-end gap-4 mb-8">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black">Rentals</h2>
+          <div className="h-1 flex-1 bg-gradient-to-r from-amber-700 to-transparent rounded-full mb-2 opacity-60" />
+          <button
+            onClick={() => router.push('/rentals')}
+            className="text-sm font-semibold text-amber-700 hover:text-amber-900 mb-1 hidden md:block"
+          >
+            Explore Rentals
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+          {rentalItems.map((item) => (
+            <motion.div
+              key={`rental-${item.id}`}
+              whileHover={{ y: -8 }}
+              onClick={() => handleProductClick(item.id)}
+              className="flex flex-col gap-3 group cursor-pointer"
+            >
+              <div className="relative overflow-hidden rounded-[2rem] h-[300px] w-full bg-white">
+                {isRentalItem(item) && (
+                  <span className="absolute top-4 right-4 bg-amber-100 text-amber-800 text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    Rental
+                  </span>
+                )}
+                {item.badge && (
+                  <span className="absolute top-4 left-4 bg-white/90 backdrop-blur text-black text-xs font-semibold px-3 py-1 rounded-full z-10 uppercase tracking-wide">
+                    {item.badge}
+                  </span>
+                )}
+                {item.badge === 'Sold Out' && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black opacity-50"></div>
+                    <span className="text-white text-2xl font-bold z-10">SOLD OUT</span>
+                  </div>
+                )}
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(item);
+                  }}
+                  aria-label="Add to cart"
+                  className="absolute bottom-4 right-4 bg-white text-black p-3 rounded-full shadow-lg opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all hover:bg-black hover:text-white"
+                >
+                  <ShoppingBag className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="px-2">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg text-gray-900 tracking-tight">{item.title}</h3>
+                    <p className="text-sm w-fit px-1 text-gray-800">• {item.category}</p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <span className="font-semibold text-gray-900">{formatCurrency(item.price)}</span>
+                    {item.originalPrice && (
+                      <span className="text-sm text-gray-600 line-through">
+                        {formatCurrency(item.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {rentalItems.length === 0 && (
+          <div className="mt-6 rounded-2xl border border-amber-200/60 bg-amber-50 p-6 text-sm text-amber-800">
+            No rentals listed yet. Be the first to add one.
+          </div>
+        )}
+
+        {/* <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <Button
+            className="bg-amber-600 hover:bg-amber-700 text-white"
+            onClick={() => router.push('/rentals')}
+          >
+            Explore Rentals
+          </Button>
+          <Button
+            variant="outline"
+            className="border-amber-200 text-amber-700 hover:bg-amber-50"
+            onClick={() => router.push('/dashboard')}
+          >
+            List Rental
+          </Button>
+        </div> */}
+      </section>
+
       {/* CTA Section */}
       <section className="px-6 md:px-12 mb-20">
         <div className="bg-black text-white rounded-[3rem] p-8 md:p-16 relative overflow-hidden shadow-lg">
@@ -559,8 +694,6 @@ export function HeroSection({
           </div>
         </div>
       </section>
-
-      {/* Footer removed */}
     </div>
   );
 }

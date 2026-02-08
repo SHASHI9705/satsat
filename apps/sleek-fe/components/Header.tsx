@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
@@ -42,6 +42,13 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
   const closeTimeoutRef = useRef<number | null>(null);
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const adminEmails = useMemo(() => {
+    return (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean);
+  }, []);
+  const isAdmin = !!user?.email && adminEmails.includes(user.email.toLowerCase());
 
   const toggleDropdown = () => {
     setIsDropdownOpen((prev) => !prev);
@@ -190,10 +197,10 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                 Browse
               </Link>
               <Link 
-                href="#trending" 
-                className={`text-sm font-medium transition-colors ${isActive('/trending') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
+                href="/rentals" 
+                className={`text-sm font-medium transition-colors ${isActive('/rentals') ? 'text-green-600' : 'text-gray-700 hover:text-green-600'}`}
               >
-                Trending
+                Rentals
               </Link>
               <div
                 ref={categoriesRef}
@@ -362,6 +369,14 @@ export function Header({ notificationCount = 0 }: { notificationCount?: number; 
                             <span className="text-gray-700">Dashboard</span>
                           </div>
                         </Link>
+                        {isAdmin && (
+                          <Link href="/admin">
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+                              <Shield className="w-5 h-5 text-gray-600" />
+                              <span className="text-gray-700">Admin</span>
+                            </div>
+                          </Link>
+                        )}
                         <Link href="/wishlist">
                           <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                             <Heart className="w-5 h-5 text-gray-600" />

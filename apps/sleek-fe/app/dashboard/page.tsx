@@ -34,6 +34,23 @@ export default function DashboardPage() {
   const [serviceTags, setServiceTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // State variables for rentals modal
+  const [isRentalModalOpen, setIsRentalModalOpen] = useState(false);
+  const [rentalName, setRentalName] = useState('');
+  const [rentalCategory, setRentalCategory] = useState('');
+  const [rentalCustomCategory, setRentalCustomCategory] = useState('');
+  const [rentalPricePerDay, setRentalPricePerDay] = useState('');
+  const [rentalQuantity, setRentalQuantity] = useState('1');
+  const [rentalDeposit, setRentalDeposit] = useState('');
+  const [rentalAvailableFrom, setRentalAvailableFrom] = useState('');
+  const [rentalAvailableTo, setRentalAvailableTo] = useState('');
+  const [rentalPickupLocation, setRentalPickupLocation] = useState('');
+  const [rentalDescription, setRentalDescription] = useState('');
+  const [rentalImage, setRentalImage] = useState<File | null>(null);
+  const [rentalTags, setRentalTags] = useState<string[]>([]);
+  const [rentalTagInput, setRentalTagInput] = useState('');
+  const [isRentalSubmitting, setIsRentalSubmitting] = useState(false);
   
   // Service categories
   const serviceCategories = [
@@ -42,6 +59,18 @@ export default function DashboardPage() {
     { value: 'management', label: 'Management' },
     { value: 'coach', label: 'Coach' },
     { value: 'gamer', label: 'Gamer' },
+    { value: 'other', label: 'Other' },
+  ];
+
+  // Rental categories
+  const rentalCategories = [
+    { value: 'electronics', label: 'Electronics' },
+    { value: 'camera', label: 'Camera & Gear' },
+    { value: 'books', label: 'Books & Academic' },
+    { value: 'furniture', label: 'Furniture' },
+    { value: 'sports', label: 'Sports & Fitness' },
+    { value: 'instruments', label: 'Instruments' },
+    { value: 'vehicles', label: 'Vehicles & Transport' },
     { value: 'other', label: 'Other' },
   ];
 
@@ -92,9 +121,22 @@ export default function DashboardPage() {
     }
   };
 
+  // Handle rental image upload
+  const handleRentalImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setRentalImage(file);
+    }
+  };
+
   // Remove service tag
   const removeTag = (index: number) => {
     setServiceTags(serviceTags.filter((_, i) => i !== index));
+  };
+
+  // Remove rental tag
+  const removeRentalTag = (index: number) => {
+    setRentalTags(rentalTags.filter((_, i) => i !== index));
   };
 
   // Handle service submission
@@ -186,6 +228,109 @@ export default function DashboardPage() {
       alert('Failed to list service. Please try again.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle rental submission
+  const handleRentalSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsRentalSubmitting(true);
+
+    try {
+      if (!rentalName || !rentalCategory || !rentalPricePerDay || !rentalAvailableFrom || !rentalAvailableTo || !rentalPickupLocation) {
+        alert('Please fill in all required rental details.');
+        setIsRentalSubmitting(false);
+        return;
+      }
+
+      if (!rentalQuantity || Number(rentalQuantity) <= 0) {
+        alert('Please provide a valid quantity for the rental listing.');
+        setIsRentalSubmitting(false);
+        return;
+      }
+
+      const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+      const dbUserId = localUser?.id ? Number(localUser.id) : NaN;
+      if (!dbUserId || Number.isNaN(dbUserId) || dbUserId <= 0) {
+        alert('Unable to list rental: no numeric user id found. Please sign in via the app so your account is linked.');
+        setIsRentalSubmitting(false);
+        return;
+      }
+
+      const selectedCategoryDefinition = rentalCategories.find((cat) => cat.value === rentalCategory);
+      const rentalTypeTag = rentalCategory === 'other'
+        ? rentalCustomCategory.trim()
+        : selectedCategoryDefinition?.label || rentalCategory;
+      const tagCandidates = [...rentalTags, rentalTypeTag, 'Rental']
+        .map((tag) => tag?.trim())
+        .filter(Boolean);
+      const uniqueTags = Array.from(new Set(tagCandidates));
+
+      const details = [
+        `Price per day: ₹${rentalPricePerDay}`,
+        `Quantity available: ${rentalQuantity}`,
+        rentalDeposit ? `Security deposit: ₹${rentalDeposit}` : null,
+        `Availability: ${rentalAvailableFrom} to ${rentalAvailableTo}`,
+        `Pickup/Meetup location: ${rentalPickupLocation}`,
+      ].filter(Boolean).join('\n');
+
+      const combinedDescription = [rentalDescription.trim(), details]
+        .filter(Boolean)
+        .join('\n\n');
+
+      const formData = new FormData();
+      formData.append('name', rentalName);
+      formData.append('category', 'Rentals');
+      formData.append('actualPrice', rentalPricePerDay || '0');
+      formData.append('discountedPrice', rentalPricePerDay || '0');
+      formData.append('quantity', rentalQuantity || '1');
+      formData.append('description', combinedDescription || rentalDescription || '');
+      formData.append('userId', String(dbUserId));
+      formData.append('type', 'rental');
+      formData.append('tags', JSON.stringify(uniqueTags));
+
+      if (rentalImage) {
+        formData.append('images', rentalImage, rentalImage.name);
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/item/create`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorText = `HTTP ${response.status}`;
+        try {
+          const errBody = await response.json();
+          errorText = errBody?.message || JSON.stringify(errBody) || errorText;
+        } catch (e) {
+          const txt = await response.text();
+          if (txt) errorText = txt;
+        }
+        throw new Error(errorText);
+      }
+
+      alert('Rental listed successfully!');
+      setRentalName('');
+      setRentalCategory('');
+      setRentalCustomCategory('');
+      setRentalPricePerDay('');
+      setRentalQuantity('1');
+      setRentalDeposit('');
+      setRentalAvailableFrom('');
+      setRentalAvailableTo('');
+      setRentalPickupLocation('');
+      setRentalDescription('');
+      setRentalImage(null);
+      setRentalTags([]);
+      setRentalTagInput('');
+      setIsRentalModalOpen(false);
+      router.push('/rentals');
+    } catch (error) {
+      console.error('Error listing rental:', error);
+      alert('Failed to list rental. Please try again.');
+    } finally {
+      setIsRentalSubmitting(false);
     }
   };
 
@@ -506,10 +651,17 @@ export default function DashboardPage() {
               <Plus className="w-4 h-4" />
               Sell Services
             </Button>
-            <p className="text-sm text-gray-600 text-center md:ml-4">
-              Mark the item as sold once it's been sold.
-            </p>
+            <Button
+              onClick={() => setIsRentalModalOpen(true)}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white h-12 px-6 rounded-xl gap-2 whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4" />
+              List Rental
+            </Button>
           </div>
+          <p className="text-sm text-gray-600 text-center md:ml-4">
+              Mark the item as sold once it's been sold.
+            </p><br></br>
 
 
 
@@ -710,6 +862,270 @@ export default function DashboardPage() {
                           </>
                         ) : (
                           'List My Service'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Rentals Modal */}
+          {isRentalModalOpen && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+              <div className="bg-white rounded-2xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-bold text-gray-900">List Your Rental</h3>
+                    <button
+                      onClick={() => setIsRentalModalOpen(false)}
+                      className="p-2 hover:bg-gray-100 rounded-full"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleRentalSubmit} className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Rental Name
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., DSLR Camera, Bike"
+                        value={rentalName}
+                        onChange={(e) => setRentalName(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Category
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {rentalCategories.map((category) => (
+                          <button
+                            key={category.value}
+                            type="button"
+                            onClick={() => setRentalCategory(category.value)}
+                            className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
+                              rentalCategory === category.value
+                                ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {category.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {rentalCategory === 'other' && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Your Rental Type
+                        </label>
+                        <Input
+                          type="text"
+                          placeholder="Enter your rental type..."
+                          value={rentalCustomCategory}
+                          onChange={(e) => setRentalCustomCategory(e.target.value)}
+                          className="w-full"
+                          required
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Price Per Day
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                          ₹
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={rentalPricePerDay}
+                          onChange={(e) => setRentalPricePerDay(e.target.value)}
+                          className="pl-8 w-full"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Quantity Available
+                      </label>
+                      <Input
+                        type="number"
+                        min="1"
+                        placeholder="1"
+                        value={rentalQuantity}
+                        onChange={(e) => setRentalQuantity(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Security Deposit (Optional)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                          ₹
+                        </span>
+                        <Input
+                          type="number"
+                          placeholder="0"
+                          value={rentalDeposit}
+                          onChange={(e) => setRentalDeposit(e.target.value)}
+                          className="pl-8 w-full"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Availability
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          type="date"
+                          value={rentalAvailableFrom}
+                          onChange={(e) => setRentalAvailableFrom(e.target.value)}
+                          required
+                        />
+                        <Input
+                          type="date"
+                          value={rentalAvailableTo}
+                          onChange={(e) => setRentalAvailableTo(e.target.value)}
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Pickup/Meetup Location
+                      </label>
+                      <Input
+                        type="text"
+                        placeholder="e.g., Near campus gate"
+                        value={rentalPickupLocation}
+                        onChange={(e) => setRentalPickupLocation(e.target.value)}
+                        className="w-full"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Description
+                      </label>
+                      <textarea
+                        placeholder="Include condition, usage rules, and any extras..."
+                        value={rentalDescription}
+                        onChange={(e) => setRentalDescription(e.target.value)}
+                        className="w-full h-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500 resize-none"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Rental Image
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-amber-400 transition-colors">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleRentalImageUpload}
+                          className="hidden"
+                          id="rental-image"
+                        />
+                        <label htmlFor="rental-image" className="cursor-pointer">
+                          <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                          <p className="text-sm text-gray-600">
+                            {rentalImage ? rentalImage.name : 'Click to upload an image'}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            PNG, JPG up to 5MB
+                          </p>
+                        </label>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tags
+                      </label>
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {rentalTags.map((tag, index) => (
+                          <div
+                            key={index}
+                            className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-sm"
+                          >
+                            {tag}
+                            <button
+                              type="button"
+                              onClick={() => removeRentalTag(index)}
+                              className="ml-1 hover:text-amber-900"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          placeholder="Add a tag..."
+                          value={rentalTagInput}
+                          onChange={(e) => setRentalTagInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && rentalTagInput.trim()) {
+                              e.preventDefault();
+                              setRentalTags([...rentalTags, rentalTagInput.trim()]);
+                              setRentalTagInput('');
+                            }
+                          }}
+                          className="flex-1"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => {
+                            if (rentalTagInput.trim()) {
+                              setRentalTags([...rentalTags, rentalTagInput.trim()]);
+                              setRentalTagInput('');
+                            }
+                          }}
+                        >
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="pt-4">
+                      <Button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white py-3"
+                        disabled={isRentalSubmitting}
+                      >
+                        {isRentalSubmitting ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div>
+                            Listing Rental...
+                          </>
+                        ) : (
+                          'List My Rental'
                         )}
                       </Button>
                     </div>

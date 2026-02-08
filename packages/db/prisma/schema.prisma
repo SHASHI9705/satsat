@@ -34,6 +34,7 @@ model Item {
   category       String
   actualPrice    Float
   discountedPrice Float
+  quantity       Int      @default(1)
   userId         Int
   user           User     @relation(fields: [userId], references: [id])
   createdAt      DateTime @default(now())

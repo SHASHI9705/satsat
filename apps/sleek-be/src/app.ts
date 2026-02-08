@@ -3,6 +3,7 @@ import userRoutes from './routes/userRoutes';
 import corsMiddleware from './middleware/corsMiddleware';
 import itemRoutes from './routes/itemRoutes';
 import sellerRoutes from './routes/sellerRoutes';
+import adminRoutes from './routes/adminRoutes';
 import dotenv from 'dotenv';
 
 import path from 'path';
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api', userRoutes);
 app.use('/api/item', itemRoutes);
 app.use('/api/seller', sellerRoutes); // Register seller routes
+app.use('/api/admin', adminRoutes);
 
 // Error Handling Middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -40,7 +40,7 @@ if (!JWT_SECRET) {
 // Update the createItem function to upload files directly to S3
 export const createItem = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { name, category, actualPrice, discountedPrice, userId, description, tags, type } = req.body;
+        const { name, category, actualPrice, discountedPrice, userId, description, tags, type, quantity } = req.body;
 
         // Validate required fields
         const finalCategory = type === 'service' ? 'Tutoring & Services' : category;
@@ -91,6 +91,7 @@ export const createItem = async (req: Request, res: Response): Promise<void> => 
                 category: finalCategory,
                 actualPrice: parseFloat(actualPrice),
                 discountedPrice: parseFloat(discountedPrice),
+                quantity: quantity ? parseInt(quantity, 10) : 1,
                 userId: parseInt(userId, 10),
                 description, // Add description field
                 tags: parsedTags,
