@@ -14,7 +14,7 @@ export function HeroSection({
   specificItems = [
     {
       id: '93',
-      image: 'https://sleek9705.s3.ap-south-1.amazonaws.com/a00b9401-4c5d-4ec6-8c27-042e0935a494-1000108138.jpg',
+      image: 'https://sleekroad.s3.ap-south-1.amazonaws.com/a00b9401-4c5d-4ec6-8c27-042e0935a494-1000108138.jpg',
       title: 'Portronics Vader Pro Gaming Mouse',
       category: 'Electronics',
       price: 399,
@@ -22,7 +22,7 @@ export function HeroSection({
     },
     {
       id: '90',
-      image: 'https://sleek9705.s3.ap-south-1.amazonaws.com/c96ef3f7-6847-4e2f-8dec-ee81e0cc26db-1000108122.jpg',
+      image: 'https://sleekroad.s3.ap-south-1.amazonaws.com/c96ef3f7-6847-4e2f-8dec-ee81e0cc26db-1000108122.jpg',
       title: 'Boat Nirvana ION ANC 32db ',
       category: 'Electronics',
       price: 999,
@@ -30,7 +30,7 @@ export function HeroSection({
     },
     {
       id: '79',
-      image: 'https://sleek9705.s3.ap-south-1.amazonaws.com/2b5742fc-2904-4774-b44f-8cdd02e15a8e-1000080435.jpg',
+      image: 'https://sleekroad.s3.ap-south-1.amazonaws.com/2b5742fc-2904-4774-b44f-8cdd02e15a8e-1000080435.jpg',
       title: 'Ac Milan football jersey ',
       category: 'Fashion',
       price: 199,
@@ -38,7 +38,7 @@ export function HeroSection({
     },
     {
       id: '81',
-      image: 'https://sleek9705.s3.ap-south-1.amazonaws.com/53eeb25d-c16a-4441-8db5-d205a1a7ea89-1000080442.jpg',
+      image: 'https://sleekroad.s3.ap-south-1.amazonaws.com/53eeb25d-c16a-4441-8db5-d205a1a7ea89-1000080442.jpg',
       title: 'Khadlaj island Vanilla dunes EDP',
       category: 'Beauty & Personal Care',
       price: 2399,
@@ -46,7 +46,7 @@ export function HeroSection({
     },
     {
       id: '98',
-      image: 'https://sleek9705.s3.ap-south-1.amazonaws.com/92aadfec-6770-4d37-aead-9025c88efef4-Screenshot_20260130_210525_Amazon.jpg',
+      image: 'https://sleekroad.s3.ap-south-1.amazonaws.com/92aadfec-6770-4d37-aead-9025c88efef4-Screenshot_20260130_210525_Amazon.jpg',
       title: 'Gym set 20kg',
       category: 'Sports & Fitness',
       price: 999,
