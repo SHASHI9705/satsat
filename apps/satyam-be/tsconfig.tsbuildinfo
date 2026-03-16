@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/index.ts","./src/prismaclient.ts","./src/config/awsconfig.ts","./src/controllers/logincontroller.ts","./src/controllers/usercontroller.ts","./src/middleware/corsmiddleware.ts","./src/routes/userroutes.ts"],"version":"5.8.3"}

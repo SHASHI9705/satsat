@@ -7,58 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       Int     @id @default(autoincrement()) // Reverted back to Int
+model Login {
+  id       Int     @id @default(autoincrement())
+  phone    String  @unique 
   name     String
-  email    String   @unique
-  password String?
-  phone    String? // Made optional
-  address  String?
-  googleId String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  items    Item[] // Relation to the Item model
-  dashboardMetrics DashboardMetrics[] // Relation to the DashboardMetrics model
-  regnumber String? // Added field for registration number
+  otp      String?
+  verified Boolean @default(false)
+
+  userId   Int?    @unique
+  user     User?   @relation(fields: [userId], references: [id])
 }
 
-model TestTable {
-  id   Int    @id @default(autoincrement())
-  name String
+model User {
+  id              Int      @id @default(autoincrement())
+  name            String
+  fatherName      String
+  phone           String   @db.VarChar(10)
+  email           String   @unique
+  address         String
+  experience      String
+  positionApplied String
+  jobProfileLink  String?
+  passportPhoto   String?
+  resumePdf       String?
+  paid            Boolean  @default(false)
+  login           Login?
+  district        String
+  applicationId   String   @unique
 }
-
-model Item {
-  id             Int      @id @default(autoincrement())
-  name           String
-  images         String[] @db.VarChar(255) // Array of up to 3 image URLs
-  category       String
-  actualPrice    Float
-  discountedPrice Float
-  quantity       Int      @default(1)
-  userId         Int
-  user           User     @relation(fields: [userId], references: [id])
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  sold           Boolean  @default(false)
-  description    String? // Optional description field for the item
-  tags           String[] @default([])
-  dashboardMetricsId Int?
-  dashboardMetrics   DashboardMetrics? @relation(fields: [dashboardMetricsId], references: [id])
-}
-
-model DashboardMetrics {
-  id             Int      @id @default(autoincrement())
-  userId         Int      @unique
-  user           User     @relation(fields: [userId], references: [id])
-  activeListings Int      @default(0)
-  totalEarnings  Float    @default(0.0)
-  totalSales     Int      @default(0)
-  newListings    Int      @default(0)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  items          Item[]   // Relation to the Item model
-}
-
-// Ensure the User model exists and is linked to the Item model
-
 

@@ -1,7 +1,0 @@
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-    // Chat attachment storage rules removed — messaging disabled.
-    // Re-add a storage rule here if chat attachments are re-enabled later.
-  }
-}
