@@ -2,8 +2,53 @@
 
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { FaUserCircle } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaClipboardList, FaSignOutAlt } from "react-icons/fa";
 
 const Nav = () => {
+  const [user, setUser] = useState(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [showApplications, setShowApplications] = useState(false);
+  const [applications, setApplications] = useState([]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    }
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const fetchApplications = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user || !user.email) return;
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?email=${user.email}`
+      );
+      if (!response.ok) throw new Error("Failed to fetch applications");
+
+      const data = await response.json();
+      setApplications(data);
+      setShowApplications(true);
+    } catch (error) {
+      console.error("Error fetching applications:", error);
+    }
+  };
+
   return (
     <nav className="bg-white/80 backdrop-blur-md sticky top-4 z-50 
       w-[100%] max-w-7xl mx-auto 
@@ -41,9 +86,73 @@ const Nav = () => {
             >
               Apply Now <ChevronRight size={16} />
             </Link>
+            {user && user.email ? (
+              <div className="relative" ref={dropdownRef}>
+                <img
+                  src={user.photoURL || "/default-profile.png"}
+                  alt="Profile"
+                  className="w-10 h-10 rounded-full object-cover cursor-pointer border-black border"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                />
+                {dropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
+                    <button
+                      onClick={fetchApplications}
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <FaClipboardList /> My Applications
+                    </button>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("user");
+                        window.location.reload();
+                      }}
+                      className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-red-100"
+                    >
+                      <FaSignOutAlt /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/signin"
+                className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all"
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>
+
+      {showApplications && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+          <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col items-center">
+            <button
+              onClick={() => setShowApplications(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              ✕
+            </button>
+            <h2 className="text-2xl font-bold text-center mb-6">
+              {user?.name ? `${user.name}'s Applications` : 'My Applications'}
+            </h2>
+            {applications.length > 0 ? (
+              <ul className="space-y-4 w-full">
+                {applications.map((app) => (
+                  <li key={app.id} className="p-4 border rounded-lg shadow-sm bg-gray-50">
+                    <p className="text-lg font-semibold">Application ID: {app.applicationId}</p>
+                    <p className="text-sm text-gray-600">Status: {app.status}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-gray-500">No applications found.</p>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

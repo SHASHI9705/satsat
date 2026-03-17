@@ -56,37 +56,62 @@ const upload = multer({
 export const uploadMiddleware: RequestHandler = upload.fields([
   { name: 'passportPhoto', maxCount: 1 },
   { name: 'resumePdf', maxCount: 1 },
-  { name: 'salarySlip', maxCount: 1 },
+  { name: 'salarySlip', maxCount: 1 }, // Salary slip remains optional as it is not mandatory
 ]);
 
 // Create a new user
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const {
-      name,
-      fatherName,
-      phone,
-      email,
-      address,
-      experience,
-      positionApplied,
-      jobProfileLink,
-      district,
-    } = req.body;
+    console.log('Request body:', req.body);
 
-    if (
-      !name ||
-      !fatherName ||
-      !phone ||
-      !email ||
-      !address ||
-      !experience ||
-      !positionApplied ||
-      !district
-    ) {
-      res.status(400).json({ error: 'Missing required fields' });
+    const { name, fatherName, gender, district, phone, email, address, experience, positionApplied, jobProfileLink } = req.body;
+
+    if (!name.trim() || !fatherName.trim() || !gender?.trim() || !district?.trim() || !phone.trim() || !email.trim() || !address.trim() || !experience.trim() || !positionApplied.trim()) {
+      res.status(400).json({ error: 'Missing or empty required fields' });
       return;
     }
+
+    if (positionApplied === 'telecalling' && gender !== 'female') {
+      res.status(400).json({ error: 'Telecalling is available only for female candidates' });
+      return;
+    }
+
+    const isPaid = false; // Set `paid` to false explicitly
+
+    const passportPhoto = Array.isArray(req.files) ? undefined : req.files?.passportPhoto?.[0];
+    const resumePdf = Array.isArray(req.files) ? undefined : req.files?.resumePdf?.[0];
+    const salarySlip = Array.isArray(req.files) ? undefined : req.files?.salarySlip?.[0];
+
+    if (!passportPhoto || !resumePdf || (experience === 'experienced' && !salarySlip)) {
+      res.status(400).json({ error: 'Missing required files' });
+      return;
+    }
+
+    // Validate file types and sizes
+    const validateFile = (file: Express.Multer.File, allowedTypes: string[], maxSize: number) => {
+      if (!allowedTypes.includes(file.mimetype)) {
+        throw new Error(`Invalid file type: ${file.originalname}. Allowed types: ${allowedTypes.join(', ')}`);
+      }
+      if (file.size > maxSize) {
+        throw new Error(`File too large: ${file.originalname}. Max size: ${maxSize / (1024 * 1024)} MB`);
+      }
+    };
+
+    try {
+      validateFile(passportPhoto, ['image/jpeg', 'image/png'], 5 * 1024 * 1024); // 5 MB limit
+      validateFile(resumePdf, ['application/pdf'], 5 * 1024 * 1024); // 5 MB limit
+      if (salarySlip) {
+        validateFile(salarySlip, ['application/pdf', 'image/jpeg', 'image/png'], 5 * 1024 * 1024);
+      }
+    } catch (validationError) {
+      const errorMessage = validationError instanceof Error ? validationError.message : 'Unknown validation error';
+      res.status(400).json({ error: errorMessage });
+      return;
+    }
+
+    const passportPhotoUrl = await uploadToS3(passportPhoto, 'passport-photos');
+    const resumePdfUrl = await uploadToS3(resumePdf, 'resumes');
+    const salarySlipUrl = salarySlip ? await uploadToS3(salarySlip, 'salary-slips') : undefined;
 
     const applicationId = `APP-${Date.now()}`; // Generate unique application ID
 
@@ -94,15 +119,20 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
       data: {
         name,
         fatherName,
+        gender,
         phone,
         email,
         address,
         experience,
         positionApplied,
-        jobProfileLink,
         district,
+        jobProfileLink,
+        paid: isPaid,
+        passportPhoto: passportPhotoUrl,
+        resumePdf: resumePdfUrl,
+        salarySlip: salarySlipUrl,
         applicationId,
-        paid: false,
+        status: 'pending',
       },
     });
 
@@ -127,6 +157,7 @@ export const updateUser = async (req: Request<{ email: string }>, res: Response)
       jobProfileLink,
       district,
       paid,
+      status,
     } = req.body;
 
     const user = await getPrismaClient().user.update({
@@ -141,6 +172,7 @@ export const updateUser = async (req: Request<{ email: string }>, res: Response)
         jobProfileLink,
         district,
         paid,
+        status,
       },
     });
 

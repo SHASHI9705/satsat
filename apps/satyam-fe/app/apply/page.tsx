@@ -729,7 +729,7 @@ export default function Apply() {
                       className="mt-0.5 w-4 h-4 accent-blue-600 rounded" />
                     <span className="text-sm text-slate-600">
                       I confirm that all information and documents provided are accurate and genuine.
-                      I understand that providing false information may lead to disqualification.
+                      I understand that providing false information may lead to disqualification. Also aware of <Link href="/terms">Terms & Condition</Link>
                     </span>
                   </label>
                   <FieldError msg={errors.acceptTerms} />
