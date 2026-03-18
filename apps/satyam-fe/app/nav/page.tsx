@@ -82,9 +82,9 @@ const Nav = () => {
           <div className="flex items-center gap-4">
             <Link
               href="/apply"
-              className="bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+              className="hidden sm:block bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
             >
-              Apply Now <ChevronRight size={16} />
+              Apply Now 
             </Link>
             {user && user.email ? (
               <div className="relative" ref={dropdownRef}>

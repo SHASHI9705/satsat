@@ -105,7 +105,7 @@ export default function Welcome() {
                 <h3 className="font-semibold text-slate-800">Recruitment Note</h3>
                 <div className="mt-3 text-sm text-slate-600 max-h-40 overflow-auto">
                   <p>
-                    NOTE: Incentive as per policy and policy decided as per post and work. This policy may change monthly. Telecaller team incentive is per lead created. We will provide tab for call and data entry. All posts are as per number of tehsil in same district. We inform only selected candidates; unselected are not authorized for appeal. Final selection is interview-based. Interview dates decided after 15 May 2026. Interview location: same district. Number of posts can be changed as per requirements.
+                    NOTE: Incentive as per policy and policy decided as per post and work. This policy may change monthly. Telecaller team incentive is per lead created. We will provide tab for call and data entry. All posts are as per number of tehsil in same district. We inform only selected candidates; unselected are not authorized for appeal. Final selection is interview-based. Interview dates decided after 30 May 2026. Interview location: same district. Number of posts can be changed as per requirements.
                   </p>
                 </div>
               </div>
