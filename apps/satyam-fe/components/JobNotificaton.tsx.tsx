@@ -161,7 +161,7 @@ export default function JobNotification({ onAccept }: JobNotificationProps) {
                   <li>This is a private sector opportunity, not a government job</li>
                   <li>Final selection is interview-based</li>
                   <li>Incentives are as per company policy and may vary by position</li>
-                  <li>Interview dates will be announced after May 15, 2026</li>
+                  <li>Interview dates will be announced after May 30, 2026</li>
                   <li>Interview locations will be in the respective districts</li>
                   <li>Number of positions may be adjusted based on requirements</li>
                 </ul>
