@@ -87,7 +87,7 @@ const SatyamLandingPage: React.FC = () => {
     },
     { 
       id: "telecalling", 
-      label: "Telecalling (Female Only)", 
+      label: "Telecalling", 
       icon: <Headset size={20} />, 
       count: 502
     },
