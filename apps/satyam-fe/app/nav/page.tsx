@@ -81,7 +81,7 @@ const Nav = () => {
 
           <div className="flex items-center gap-4">
             <Link
-              href="/apply"
+              href={user ? "/apply" : "/signin"}
               className="hidden sm:block bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-2.5 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
             >
               Apply Now 
@@ -127,7 +127,7 @@ const Nav = () => {
       </div>
 
       {showApplications && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+        <div className="mt-24 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
           <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col items-center">
             <button
               onClick={() => setShowApplications(false)}

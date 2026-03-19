@@ -8,7 +8,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-slate-900 text-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid gap-10 md:grid-cols-4">
+        <div className="grid gap-10 grid-cols-1 md:grid-cols-3">
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <Image
@@ -46,24 +46,11 @@ const Footer: React.FC = () => {
                   About Us
                 </Link>
               </li>
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-300">
-              Legal
-            </h3>
-            <ul className="space-y-2 text-sm text-slate-400">
               <li>
                 <Link className="hover:text-white transition-colors" href="/terms">
                   Terms & Conditions
                 </Link>
               </li>
-              {/* <li>
-                <Link className="hover:text-white transition-colors" href="/">
-                  Disclaimer
-                </Link>
-              </li> */}
             </ul>
           </div>
 

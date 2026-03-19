@@ -189,6 +189,7 @@ const PositionsPage = () => {
 
   const totalJobs = featuredJobs.length;
   const activeCategoryData = jobCategories.find(c => c.id === activeCategory);
+  const user = JSON.parse(localStorage.getItem("user"));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
@@ -209,7 +210,7 @@ const PositionsPage = () => {
             </div>
             <div className="flex gap-3">
               <Link
-                href="/apply"
+                href={user ? "/apply" : "/signin"}
                 className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200"
               >
                 Apply Now
@@ -354,7 +355,7 @@ const PositionsPage = () => {
                   </div>
 
                   <Link
-                    href={`/apply?position=${job.id}`}
+                    href={user ? "/apply" : "/signin"}
                     className={`
                       w-full inline-flex items-center justify-center gap-2 
                       bg-blue-600 text-white font-medium py-2.5 rounded-lg 
@@ -394,7 +395,7 @@ const PositionsPage = () => {
               Join our team and build a rewarding career with opportunities for growth and success.
             </p>
             <Link
-              href="/apply"
+              href={user ? "/apply" : "/signin"}
               className="inline-flex items-center gap-2 bg-white text-blue-600 font-semibold px-8 py-4 rounded-lg hover:bg-blue-50 transition-colors shadow-lg"
             >
               Apply Now
