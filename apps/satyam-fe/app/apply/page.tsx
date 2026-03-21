@@ -269,6 +269,7 @@ export default function Apply() {
   const [phase, setPhase] = useState<"form" | "payment" | "success">("form");
   const [errors, setErrors] = useState<FieldErrors>({});
   const [appId] = useState(() => "APP" + Math.floor(10000 + Math.random() * 90000));
+  const [submitting, setSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<FormData>({
     name: "", fatherName: "", gender: "", phone: "", email: "",
@@ -348,18 +349,23 @@ export default function Apply() {
   };
 
   const handleSubmitApplication = async () => {
+    setSubmitting(true);
+
     // Ensure terms are accepted before submitting
     if (!formData.acceptTerms) {
       alert('Please agree to the Terms & Conditions before submitting the application.');
+      setSubmitting(false);
       return;
     }
     if (!isFormComplete()) {
       alert("Please fill in all required fields before submitting the application.");
+      setSubmitting(false);
       return;
     }
 
     if (!areFilesUploaded()) {
       alert("Please upload the required files before submitting the application.");
+      setSubmitting(false);
       return;
     }
 
@@ -382,6 +388,7 @@ export default function Apply() {
     } catch (validationError) {
       const errorMessage = validationError instanceof Error ? validationError.message : 'Invalid file upload.';
       alert(errorMessage);
+      setSubmitting(false);
       return;
     }
 
@@ -418,6 +425,8 @@ export default function Apply() {
     } catch (error) {
       console.error(error);
       alert('An error occurred while submitting your application.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -750,12 +759,21 @@ export default function Apply() {
                 ) : <div />}
 
                 <button type="button" onClick={currentStep < 3 ? advanceStep : handleSubmitApplication}
-                  disabled={currentStep === 3 ? !formData.acceptTerms : false}
+                  disabled={submitting || (currentStep === 3 ? !formData.acceptTerms : false)}
                   className="flex items-center gap-2 px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                   {currentStep < 3 ? (
                     <><span>Next Step</span><ChevronRight className="w-4 h-4" /></>
                   ) : (
-                    <><CheckCircle className="w-4 h-4" /><span>Submit Application</span></>
+                    <>
+                      {submitting ? (
+                        <>
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin inline-block mr-2" />
+                          <span>Submitting...</span>
+                        </>
+                      ) : (
+                        <><CheckCircle className="w-4 h-4" /><span>Submit Application</span></>
+                      )}
+                    </>
                   )}
                 </button>
 
