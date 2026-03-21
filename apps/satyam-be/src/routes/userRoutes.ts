@@ -8,6 +8,7 @@ import {
   updateUser,
   updateUserPaymentStatus,
   deleteUser,
+  updateApplicationStatus
 } from '../controllers/userController';
 import {
   handleOtpLogin,
@@ -36,6 +37,9 @@ router.put('/users/:email', (req, res) => {
   updateUser(req, res);
 });
 router.put('/users/:email/payment', updateUserPaymentStatus);
+router.put('/users/:email/status', (req, res) => {
+  updateApplicationStatus(req, res);
+});
 router.delete('/users/:email', (req, res) => {
   deleteUser(req, res);
 });

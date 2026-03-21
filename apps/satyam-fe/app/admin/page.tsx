@@ -10,6 +10,7 @@ import {
   Award, Calendar, CheckCircle, XCircle, Loader2,
   Menu, Bell, Settings, PieChart, TrendingUp
 } from 'lucide-react';
+import { Edit } from 'lucide-react';
 
 const AdminPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,6 +30,8 @@ const AdminPage = () => {
     unpaid: 0,
     recent: 0
   });
+  const [statusPopup, setStatusPopup] = useState({ visible: false, email: null });
+  const [newStatus, setNewStatus] = useState('');
 
   useEffect(() => {
     const savedName = localStorage.getItem("adminName");
@@ -227,6 +230,62 @@ const AdminPage = () => {
       </div>
     );
   }
+
+  const handleUpdateStatus = (email) => {
+    const newStatus = prompt("Enter the new status for the application:");
+    if (!newStatus) return;
+
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${email}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to update status');
+        }
+        return fetchUsers();
+      })
+      .catch((error) => {
+        console.error('Error updating status:', error);
+        alert('An error occurred while updating the status.');
+      });
+  };
+
+  const handleOpenStatusPopup = (email) => {
+    setStatusPopup({ visible: true, email });
+  };
+
+  const handleCloseStatusPopup = () => {
+    setStatusPopup({ visible: false, email: null });
+    setNewStatus('');
+  };
+
+  const handleSaveStatus = () => {
+    if (!newStatus) {
+      alert('Please select a status.');
+      return;
+    }
+
+    fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${statusPopup.email}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to update status');
+        }
+        return fetchUsers();
+      })
+      .catch((error) => {
+        console.error('Error updating status:', error);
+        alert('An error occurred while updating the status.');
+      })
+      .finally(() => {
+        handleCloseStatusPopup();
+      });
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -503,10 +562,15 @@ const AdminPage = () => {
                             </button>
                             <button
                               onClick={() => handleDeleteUser(user.email)}
-                              className="p-2 hover:bg-red-100 text-red-600 rounded-lg transition-colors"
-                              title="Delete User"
+                              className="text-red-500 hover:text-red-700 focus:outline-none"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={() => handleOpenStatusPopup(user.email)}
+                              className="text-blue-500 hover:text-blue-700 focus:outline-none ml-2"
+                            >
+                              <Edit className="w-5 h-5" />
                             </button>
                           </div>
                         </td>
@@ -535,7 +599,7 @@ const AdminPage = () => {
                 <h3 className="text-2xl font-bold text-white">User Details</h3>
                 <button
                   onClick={closePopup}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                  className="p-2 hover:bg-white/70 bg-white rounded-lg transition-colors"
                 >
                   <X className="w-5 h-5 text-white" />
                 </button>
@@ -573,27 +637,42 @@ const AdminPage = () => {
                   <p className="text-slate-700">{selectedUser.positionApplied}</p>
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-slate-400 uppercase">Payment Status</label>
+                  <label className="text-xs font-medium text-slate-400 uppercase mr-2">Payment Status</label>
                   <p className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${selectedUser.paid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {selectedUser.paid ? 'Paid' : 'Unpaid'}
                   </p>
                 </div>
+                <div className="mt-2">
+                  <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Job Profile
+                  </h4>
+                  <a
+                    href={selectedUser.jobProfileLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline break-all"
+                  >
+                    {selectedUser.jobProfileLink}
+                  </a>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-400 uppercase mr-2">Application Status</label>
+                  <p className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${selectedUser.status ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {selectedUser.status}
+                  </p>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-400 uppercase mr-2">Application ID</label>
+                  <p className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${selectedUser.applicationId ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                    {selectedUser.applicationId}
+                  </p>
+                </div>
+                
               </div>
 
-              <div className="mt-8">
-                <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Job Profile
-                </h4>
-                <a
-                  href={selectedUser.jobProfileLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline break-all"
-                >
-                  {selectedUser.jobProfileLink}
-                </a>
-              </div>
+              
+              
 
               <div className="mt-8 grid grid-cols-2 gap-6">
                 <div>
@@ -604,17 +683,6 @@ const AdminPage = () => {
                   <img
                     src={selectedUser.passportPhoto}
                     alt="Passport"
-                    className="w-full h-48 object-cover rounded-xl border border-slate-200"
-                  />
-                </div>
-                <div>
-                  {/* <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <ImageIcon className="w-4 h-4" />
-                    Signature
-                  </h4> */}
-                  <img
-                    src={selectedUser.signaturePhoto}
-                    alt="Signature"
                     className="w-full h-48 object-cover rounded-xl border border-slate-200"
                   />
                 </div>
@@ -632,6 +700,49 @@ const AdminPage = () => {
                   Download Resume
                 </a>
               </div>
+              <div className="mt-8">
+                <a
+                  href={selectedUser.salarySlip}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-green-600 text-white py-3 rounded-xl hover:bg-green-700 transition-colors"
+                  download
+                >
+                  <Download className="w-4 h-4" />
+                  Download Salary Slip
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {statusPopup.visible && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-80">
+            <h2 className="text-lg font-bold mb-4">Update Application Status</h2>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="w-full p-2 border rounded-lg mb-4"
+            >
+              <option value="">Select Status</option>
+              <option value="pending">Pending</option>
+              <option value="reviewing">Reviewing</option>
+              <option value="confirmed">Confirmed</option>
+            </select>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={handleCloseStatusPopup}
+                className="px-4 py-2 bg-gray-300 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveStatus}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Save
+              </button>
             </div>
           </div>
         </div>

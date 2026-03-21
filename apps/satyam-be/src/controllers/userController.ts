@@ -255,5 +255,28 @@ export const getUserByEmail = async (req: Request<{ email: string }>, res: Respo
   }
 };
 
+// Update application status by email
+export const updateApplicationStatus = async (req: Request<{ email: string }>, res: Response): Promise<void> => {
+  try {
+    const { email } = req.params;
+    const { status } = req.body;
+
+    if (!status) {
+      res.status(400).json({ error: 'Status is required' });
+      return;
+    }
+
+    const updatedApplication = await getPrismaClient().application.update({
+      where: { email },
+      data: { status },
+    });
+
+    res.status(200).json(updatedApplication);
+  } catch (error) {
+    console.error('Error updating application status:', error);
+    res.status(500).json({ error: 'Failed to update application status' });
+  }
+};
+
 
 
