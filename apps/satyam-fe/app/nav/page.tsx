@@ -34,10 +34,10 @@ const Nav = () => {
   const fetchApplications = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.email) return;
+      if (!user || !user.id) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?email=${user.email}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?userId=${user.id}`
       );
       if (!response.ok) throw new Error("Failed to fetch applications");
 
@@ -88,12 +88,21 @@ const Nav = () => {
             </Link>
             {user && user.email ? (
               <div className="relative" ref={dropdownRef}>
-                <img
-                  src={user.photoURL || "/default-profile.png"}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover cursor-pointer border-black border"
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                />
+                {user.photoURL ? (
+                  <img
+                    src={user.photoURL}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full object-cover cursor-pointer border-black border"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  />
+                ) : (
+                  <div
+                    className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-white cursor-pointer border-black border"
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                  >
+                    {user.name?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                )}
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                     <button
@@ -119,7 +128,7 @@ const Nav = () => {
                 href="/signin"
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all"
               >
-                Login
+                Sign In
               </Link>
             )}
           </div>

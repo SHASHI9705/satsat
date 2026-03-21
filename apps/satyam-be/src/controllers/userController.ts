@@ -8,6 +8,9 @@ declare global {
   namespace Express {
     interface Request {
       files?: { [fieldname: string]: Express.Multer.File[] } | Express.Multer.File[];
+      user?: {
+        id: string;
+      };
     }
   }
 }
@@ -59,7 +62,7 @@ export const uploadMiddleware: RequestHandler = upload.fields([
   { name: 'salarySlip', maxCount: 1 }, // Salary slip remains optional as it is not mandatory
 ]);
 
-// Create a new user
+// Create a new application
 export const createUser = async (req: Request, res: Response): Promise<void> => {
   try {
     console.log('Request body:', req.body);
@@ -115,7 +118,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
 
     const applicationId = `APP-${Date.now()}`; // Generate unique application ID
 
-    const user = await getPrismaClient().user.create({
+    const application = await getPrismaClient().application.create({
       data: {
         name,
         fatherName,
@@ -133,10 +136,15 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         salarySlip: salarySlipUrl,
         applicationId,
         status: 'pending',
+        user: {
+          connect: {
+            id: req.user?.id, // Ensure `req.user` is populated with the authenticated user's ID
+          },
+        },
       },
     });
 
-    res.status(201).json(user);
+    res.status(201).json(application);
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Failed to create user' });
@@ -160,7 +168,7 @@ export const updateUser = async (req: Request<{ email: string }>, res: Response)
       status,
     } = req.body;
 
-    const user = await getPrismaClient().user.update({
+    const application = await getPrismaClient().application.update({
       where: { email },
       data: {
         name,
@@ -176,7 +184,7 @@ export const updateUser = async (req: Request<{ email: string }>, res: Response)
       },
     });
 
-    res.status(200).json(user);
+    res.status(200).json(application);
   } catch (error) {
     console.error('Error updating user:', error);
     res.status(500).json({ error: 'Failed to update user' });
@@ -188,12 +196,12 @@ export const updateUserPaymentStatus = async (req: Request<{ email: string }>, r
   try {
     const { email } = req.params;
 
-    const user = await getPrismaClient().user.update({
+    const application = await getPrismaClient().application.update({
       where: { email },
       data: { paid: true },
     });
 
-    res.status(200).json(user);
+    res.status(200).json(application);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Failed to update payment status' });
@@ -204,7 +212,7 @@ export const updateUserPaymentStatus = async (req: Request<{ email: string }>, r
 export const deleteUser = async (req: Request<{ email: string }>, res: Response) => {
   try {
     const { email } = req.params;
-    await getPrismaClient().user.delete({
+    await getPrismaClient().application.delete({
       where: { email },
     });
 
@@ -218,8 +226,8 @@ export const deleteUser = async (req: Request<{ email: string }>, res: Response)
 // Get all users
 export const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
   try {
-    const users = await getPrismaClient().user.findMany();
-    res.status(200).json(users);
+    const applications = await getPrismaClient().application.findMany();
+    res.status(200).json(applications);
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Failed to fetch users' });
@@ -230,16 +238,16 @@ export const getAllUsers = async (_req: Request, res: Response): Promise<void> =
 export const getUserByEmail = async (req: Request<{ email: string }>, res: Response): Promise<void> => {
   try {
     const { email } = req.params;
-    const user = await getPrismaClient().user.findUnique({
+    const application = await getPrismaClient().application.findUnique({
       where: { email },
     });
 
-    if (!user) {
+    if (!application) {
       res.status(404).json({ error: 'User not found' });
       return;
     }
 
-    res.status(200).json(user);
+    res.status(200).json(application);
   } catch (error) {
     console.error('Error fetching user:', error);
     res.status(500).json({ error: 'Failed to fetch user' });

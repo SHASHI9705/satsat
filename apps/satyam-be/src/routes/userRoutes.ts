@@ -9,9 +9,9 @@ import {
   deleteUser,
 } from '../controllers/userController';
 import {
-  handleGoogleLogin
+  handleOtpLogin,
+  fetchApplications
 } from '../controllers/loginController';
-import { fetchApplications } from '../controllers/loginController';
 
 const router: Router  = Router();
 const upload = multer();
@@ -38,7 +38,7 @@ router.delete('/users/:email', (req, res) => {
   deleteUser(req, res);
 });
 
-router.post('/auth/google-login', handleGoogleLogin);
+router.post('/auth/otp-login', handleOtpLogin);
 router.get('/applications', fetchApplications);
 
 export default router;
