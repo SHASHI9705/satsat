@@ -2,6 +2,7 @@ import { Request, Response, RequestHandler } from 'express';
 import multer from 'multer';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getPrismaClient } from "../prismaClient";
+import authMiddleware from '../middleware/corsMiddleware';
 
 // Extend Express Request type to include files
 declare global {
@@ -138,7 +139,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
         status: 'pending',
         user: {
           connect: {
-            id: req.user?.id, // Ensure `req.user` is populated with the authenticated user's ID
+            id: req.user?.id, // Use only `id` to connect the user
           },
         },
       },
@@ -253,4 +254,6 @@ export const getUserByEmail = async (req: Request<{ email: string }>, res: Respo
     res.status(500).json({ error: 'Failed to fetch user' });
   }
 };
+
+
 

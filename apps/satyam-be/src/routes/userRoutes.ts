@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import authMiddleware from '../middleware/corsMiddleware';
 import {
   createUser,
   getAllUsers,
@@ -18,6 +19,7 @@ const upload = multer();
 
 router.post(
   '/users',
+  authMiddleware, // Added middleware to extract user ID from Authorization header
   upload.fields([
     { name: 'passportPhoto', maxCount: 1 },
     { name: 'resumePdf', maxCount: 1 },

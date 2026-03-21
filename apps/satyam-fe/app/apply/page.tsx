@@ -385,6 +385,14 @@ export default function Apply() {
       return;
     }
 
+    const user = JSON.parse(localStorage.getItem('user'));
+    const token = user?.id;
+
+    if (!token) {
+      alert('User not authenticated. Please log in.');
+      return;
+    }
+
     try {
       const formDataToSend = new FormData();
       formDataToSend.append('name', formData.name);
@@ -406,6 +414,9 @@ export default function Apply() {
 
       const response = await fetch(`${backendUrl}/api/users`, {
         method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
         body: formDataToSend,
       });
 
@@ -416,8 +427,8 @@ export default function Apply() {
       alert('Application submitted successfully!');
       setPhase('payment');
     } catch (error) {
-      console.error(error);
-      alert('An error occurred while submitting your application.');
+      console.error('Error submitting application:', error);
+      alert('An error occurred while submitting the application.');
     }
   };
 
