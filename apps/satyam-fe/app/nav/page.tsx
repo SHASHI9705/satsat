@@ -31,13 +31,30 @@ const Nav = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutsideApplications = (event) => {
+      if (
+        showApplications &&
+        !event.target.closest(".application-card") &&
+        !event.target.closest("button")
+      ) {
+        setShowApplications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideApplications);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideApplications);
+    };
+  }, [showApplications]);
+
   const fetchApplications = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
-      if (!user || !user.email) return;
+      if (!user || !user.id) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?email=${user.email}`
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?userId=${user.id}`
       );
       if (!response.ok) throw new Error("Failed to fetch applications");
 
@@ -86,14 +103,14 @@ const Nav = () => {
             >
               Apply Now 
             </Link>
-            {user && user.email ? (
+            {user ? (
               <div className="relative" ref={dropdownRef}>
-                <img
-                  src={user.photoURL || "/default-profile.png"}
-                  alt="Profile"
-                  className="w-10 h-10 rounded-full object-cover cursor-pointer border-black border"
+                <div
+                  className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-white cursor-pointer border-black border"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
-                />
+                >
+                  {user.firstname?.charAt(0).toUpperCase() || "U"}
+                </div>
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                     <button
@@ -119,7 +136,7 @@ const Nav = () => {
                 href="/signin"
                 className="bg-blue-500 text-white px-4 py-2 rounded-lg font-semibold text-sm shadow-lg hover:shadow-xl transition-all"
               >
-                Login
+                Sign In
               </Link>
             )}
           </div>
@@ -127,7 +144,7 @@ const Nav = () => {
       </div>
 
       {showApplications && (
-        <div className="mt-24 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+        <div className="mt-32 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
           <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col items-center">
             <button
               onClick={() => setShowApplications(false)}
@@ -136,7 +153,7 @@ const Nav = () => {
               ✕
             </button>
             <h2 className="text-2xl font-bold text-center mb-6">
-              {user?.name ? `${user.name}'s Applications` : 'My Applications'}
+              {user?.firstname ? `${user.firstname}'s Applications` : 'My Applications'}
             </h2>
             {applications.length > 0 ? (
               <ul className="space-y-4 w-full">

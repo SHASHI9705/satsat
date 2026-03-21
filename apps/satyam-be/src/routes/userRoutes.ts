@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import multer from 'multer';
+import authMiddleware from '../middleware/corsMiddleware';
 import {
   createUser,
   getAllUsers,
@@ -9,15 +10,16 @@ import {
   deleteUser,
 } from '../controllers/userController';
 import {
-  handleGoogleLogin
+  handleOtpLogin,
+  fetchApplications
 } from '../controllers/loginController';
-import { fetchApplications } from '../controllers/loginController';
 
 const router: Router  = Router();
 const upload = multer();
 
 router.post(
   '/users',
+  authMiddleware, // Added middleware to extract user ID from Authorization header
   upload.fields([
     { name: 'passportPhoto', maxCount: 1 },
     { name: 'resumePdf', maxCount: 1 },
@@ -38,7 +40,7 @@ router.delete('/users/:email', (req, res) => {
   deleteUser(req, res);
 });
 
-router.post('/auth/google-login', handleGoogleLogin);
+router.post('/auth/otp-login', handleOtpLogin);
 router.get('/applications', fetchApplications);
 
 export default router;

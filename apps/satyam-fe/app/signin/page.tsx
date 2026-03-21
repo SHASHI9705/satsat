@@ -42,22 +42,13 @@ const LoginPage: React.FC = () => {
 
   const handleUserAuthentication = async (user: any) => {
     try {
-      const trimmedFirstName = firstName.trim();
-      const trimmedLastName = lastName.trim();
-      const fullName = `${trimmedFirstName} ${trimmedLastName}`.trim();
-
       const payload: any = {
-        name: fullName || user.displayName || user.phoneNumber || "User",
-        photoURL: user.photoURL || null,
+        firstname: firstName.trim(),
+        lastname: lastName.trim(),
+        phone: user.phoneNumber,
       };
 
-      if (trimmedFirstName) payload.firstName = trimmedFirstName;
-      if (trimmedLastName) payload.lastName = trimmedLastName;
-
-      if (user.email) payload.email = user.email;
-      if (user.phoneNumber) payload.phone = user.phoneNumber;
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/google-login`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/otp-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -65,30 +56,25 @@ const LoginPage: React.FC = () => {
       });
 
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || `HTTP error! status: ${res.status}`);
       }
 
-      if (!data.user) {
+      if (!data.user || !data.user.id) {
         throw new Error("No user data received from backend");
       }
 
-      // Store user data
+      // Store userId and other user data
       localStorage.setItem("user", JSON.stringify(data.user));
-      
-      // Store token if needed
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
 
       showNotification("Welcome back! Redirecting...", 'success');
-      
+
       // Redirect after success
       setTimeout(() => {
-        router.push("/dashboard");
+        router.push("/");
       }, 1500);
-      
+
     } catch (error: any) {
       console.error("Backend authentication error:", error);
       showNotification(error.message, 'error');

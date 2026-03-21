@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Building2,
@@ -43,6 +43,14 @@ interface FeaturedJob {
 const PositionsPage = () => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [hoveredJob, setHoveredJob] = useState<string | null>(null);
+  const [storedData, setStoredData] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const data = localStorage.getItem("someKey"); // Replace "someKey" with the actual key
+      setStoredData(data);
+    }
+  }, []);
 
   const jobCategories: JobCategory[] = [
     { 
@@ -189,7 +197,7 @@ const PositionsPage = () => {
 
   const totalJobs = featuredJobs.length;
   const activeCategoryData = jobCategories.find(c => c.id === activeCategory);
-  const user = JSON.parse(localStorage.getItem("user"));
+  const user = JSON.parse(storedData || "{}");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">

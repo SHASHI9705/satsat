@@ -7,18 +7,18 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Login {
+model User {
   id        String   @id @default(cuid())
-  email     String   @unique
+  firstname String
+  lastname  String
+  phone     String   @unique
   createdAt DateTime @default(now())
-  name      String?  // Added to store the user's name
-  photoURL  String?  // Added to store the user's profile photo URL
-  user  User?  @relation(fields: [userId], references: [id])
-  userId Int?  @unique
+  applications Application[]
 }
 
-model User {
+model Application {
   id              Int      @id @default(autoincrement())
+  applicationId   String   @unique
   name            String
   fatherName      String
   phone           String   @db.VarChar(10)
@@ -31,11 +31,11 @@ model User {
   resumePdf       String?
   paid            Boolean  @default(false)
   district        String
-  applicationId   String   @unique
   status          String   @default("pending")
   salarySlip      String?  // Added field to store the URL of the salary slip
   gender          String   // Added field to store the user's gender
 
-  login           Login?
+  userId         String
+  user           User      @relation(fields: [userId], references: [id])
 }
 
