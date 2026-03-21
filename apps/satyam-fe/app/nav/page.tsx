@@ -31,6 +31,23 @@ const Nav = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutsideApplications = (event) => {
+      if (
+        showApplications &&
+        !event.target.closest(".application-card") &&
+        !event.target.closest("button")
+      ) {
+        setShowApplications(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideApplications);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideApplications);
+    };
+  }, [showApplications]);
+
   const fetchApplications = async () => {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
@@ -127,7 +144,7 @@ const Nav = () => {
       </div>
 
       {showApplications && (
-        <div className="mt-24 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
+        <div className="mt-32 fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-20">
           <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-lg relative flex flex-col items-center">
             <button
               onClick={() => setShowApplications(false)}
