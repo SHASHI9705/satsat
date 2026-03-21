@@ -86,23 +86,14 @@ const Nav = () => {
             >
               Apply Now 
             </Link>
-            {user && user.email ? (
+            {user ? (
               <div className="relative" ref={dropdownRef}>
-                {user.photoURL ? (
-                  <img
-                    src={user.photoURL}
-                    alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover cursor-pointer border-black border"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  />
-                ) : (
-                  <div
-                    className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-white cursor-pointer border-black border"
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                  >
-                    {user.name?.charAt(0).toUpperCase() || "U"}
-                  </div>
-                )}
+                <div
+                  className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-white cursor-pointer border-black border"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  {user.firstname?.charAt(0).toUpperCase() || "U"}
+                </div>
                 {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10">
                     <button
@@ -145,7 +136,7 @@ const Nav = () => {
               ✕
             </button>
             <h2 className="text-2xl font-bold text-center mb-6">
-              {user?.name ? `${user.name}'s Applications` : 'My Applications'}
+              {user?.firstname ? `${user.firstname}'s Applications` : 'My Applications'}
             </h2>
             {applications.length > 0 ? (
               <ul className="space-y-4 w-full">
