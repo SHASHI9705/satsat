@@ -42,20 +42,11 @@ const LoginPage: React.FC = () => {
 
   const handleUserAuthentication = async (user: any) => {
     try {
-      const trimmedFirstName = firstName.trim();
-      const trimmedLastName = lastName.trim();
-
-      // Construct fullName from firstName and lastName
-      const fullName = `${trimmedFirstName} ${trimmedLastName}`.trim();
-
       const payload: any = {
-        name: fullName || user.displayName || user.phoneNumber || "User",
-        photoURL: user.photoURL || null,
+        firstname: firstName.trim(),
+        lastname: lastName.trim(),
+        phone: user.phoneNumber,
       };
-
-      if (trimmedFirstName) payload.firstName = trimmedFirstName;
-      if (trimmedLastName) payload.lastName = trimmedLastName;
-      if (user.phoneNumber) payload.phone = user.phoneNumber;
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/otp-login`, {
         method: "POST",
