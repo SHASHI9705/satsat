@@ -348,6 +348,11 @@ export default function Apply() {
   };
 
   const handleSubmitApplication = async () => {
+    // Ensure terms are accepted before submitting
+    if (!formData.acceptTerms) {
+      alert('Please agree to the Terms & Conditions before submitting the application.');
+      return;
+    }
     if (!isFormComplete()) {
       alert("Please fill in all required fields before submitting the application.");
       return;
@@ -728,8 +733,7 @@ export default function Apply() {
                       checked={formData.acceptTerms} onChange={handleInput}
                       className="mt-0.5 w-4 h-4 accent-blue-600 rounded" />
                     <span className="text-sm text-slate-600">
-                      I confirm that all information and documents provided are accurate and genuine.
-                      I understand that providing false information may lead to disqualification. Also aware of <Link href="/terms">Terms & Condition</Link>
+                      I agree to the <Link href="/terms" className="text-blue-600 underline">Terms &amp; Conditions</Link> and confirm that all information and documents provided are accurate and genuine. I understand that providing false information may lead to disqualification.
                     </span>
                   </label>
                   <FieldError msg={errors.acceptTerms} />
@@ -745,12 +749,13 @@ export default function Apply() {
                   </button>
                 ) : <div />}
 
-                <button type="button" onClick={advanceStep}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm">
+                <button type="button" onClick={currentStep < 3 ? advanceStep : handleSubmitApplication}
+                  disabled={currentStep === 3 ? !formData.acceptTerms : false}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-blue-700 hover:bg-blue-800 text-white text-sm font-semibold rounded-xl transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                   {currentStep < 3 ? (
                     <><span>Next Step</span><ChevronRight className="w-4 h-4" /></>
                   ) : (
-                    <><CheckCircle className="w-4 h-4" /><span onClick={handleSubmitApplication}>Submit Application</span></>
+                    <><CheckCircle className="w-4 h-4" /><span>Submit Application</span></>
                   )}
                 </button>
 

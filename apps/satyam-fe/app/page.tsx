@@ -11,8 +11,10 @@ export default function Page() {
 
   useEffect(() => {
     const seen = localStorage.getItem("jobNoticeSeen");
+    const user = localStorage.getItem("user");
 
-    if (!seen) {
+    // Only show the job notification to signed-in users who haven't seen it yet
+    if (!seen && user) {
       setShowNotice(true);
     }
   }, []);
