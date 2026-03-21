@@ -3,9 +3,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { FcGoogle } from "react-icons/fc";
-import { MdSecurity, MdError, MdCheckCircle, MdPhone, MdClose } from "react-icons/md";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signInWithPhoneNumber, RecaptchaVerifier, PhoneAuthProvider } from "firebase/auth";
+import { MdError, MdCheckCircle, MdClose } from "react-icons/md";
+import { getAuth, signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
 import { app } from "../../lib/firebase";
 
 type NotificationType = {
@@ -15,15 +14,14 @@ type NotificationType = {
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
-  const [googleLoading, setGoogleLoading] = useState(false);
   const [notification, setNotification] = useState<NotificationType | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("+91");
   const [otp, setOtp] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<any | null>(null);
-  const [showPhoneLogin, setShowPhoneLogin] = useState(false);
   const recaptchaRef = useRef<any>(null);
   const auth = getAuth(app);
 
@@ -35,32 +33,6 @@ const LoginPage: React.FC = () => {
     }
   }, [router]);
 
-  // Detect mobile for better sign-in method
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  // Handle redirect result for mobile
-  useEffect(() => {
-    const handleRedirectResult = async () => {
-      try {
-        const result = await getRedirectResult(auth);
-        if (result) {
-          await handleUserAuthentication(result.user);
-        }
-      } catch (error: any) {
-        showNotification(error.message || "Authentication failed", 'error');
-      }
-    };
-    
-    handleRedirectResult();
-  }, [auth]);
-
   const showNotification = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     setNotification({ message, type });
     if (type !== 'success') {
@@ -70,11 +42,17 @@ const LoginPage: React.FC = () => {
 
   const handleUserAuthentication = async (user: any) => {
     try {
-      // Support both Google and Phone users
+      const trimmedFirstName = firstName.trim();
+      const trimmedLastName = lastName.trim();
+      const fullName = `${trimmedFirstName} ${trimmedLastName}`.trim();
+
       const payload: any = {
-        name: user.displayName || user.email?.split('@')[0] || user.phoneNumber || "User",
+        name: fullName || user.displayName || user.phoneNumber || "User",
         photoURL: user.photoURL || null,
       };
+
+      if (trimmedFirstName) payload.firstName = trimmedFirstName;
+      if (trimmedLastName) payload.lastName = trimmedLastName;
 
       if (user.email) payload.email = user.email;
       if (user.phoneNumber) payload.phone = user.phoneNumber;
@@ -172,6 +150,11 @@ const LoginPage: React.FC = () => {
 
   const sendOtp = async () => {
     try {
+      if (!firstName.trim() || !lastName.trim()) {
+        showNotification('Please enter first name and last name', 'error');
+        return;
+      }
+
       if (!validatePhoneNumber(phone)) return;
       
       setSendingOtp(true);
@@ -245,60 +228,6 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    try {
-      setGoogleLoading(true);
-      setNotification(null);
-      
-      const provider = new GoogleAuthProvider();
-      
-      // Set custom parameters
-      provider.setCustomParameters({
-        prompt: 'select_account'
-      });
-
-      // Use redirect for mobile, popup for desktop
-      if (isMobile) {
-        await signInWithRedirect(auth, provider);
-        return;
-      }
-
-      const result = await signInWithPopup(auth, provider);
-      
-      if (!result.user.email) {
-        throw new Error("Email not available from Google");
-      }
-
-      await handleUserAuthentication(result.user);
-      
-    } catch (err: any) {
-      console.error("Google sign-in error:", err);
-      
-      let errorMessage = "Google sign in failed";
-      
-      switch (err.code) {
-        case 'auth/popup-closed-by-user':
-          errorMessage = "Sign-in cancelled";
-          break;
-        case 'auth/network-request-failed':
-          errorMessage = "Network error. Please check your connection.";
-          break;
-        case 'auth/account-exists-with-different-credential':
-          errorMessage = "An account already exists with the same email but different sign-in method.";
-          break;
-        case 'auth/popup-blocked':
-          errorMessage = "Popup was blocked by your browser. Please allow popups for this site.";
-          break;
-        default:
-          errorMessage = err?.message || errorMessage;
-      }
-      
-      showNotification(errorMessage, 'error');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
-
   return (
     <div className="relative min-h-screen flex items-center justify-center p-6 overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800">
       {/* Background Image with Parallax Effect */}
@@ -333,20 +262,17 @@ const LoginPage: React.FC = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-full -mr-16 -mt-16" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400/20 to-purple-400/20 rounded-full -ml-12 -mb-12" />
           
-          {/* Close button for phone login */}
-          {showPhoneLogin && (
-            <button
-              onClick={() => {
-                setShowPhoneLogin(false);
-                setConfirmationResult(null);
-                setPhone("");
-                setOtp("");
-              }}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-slate-100 transition-colors"
-            >
-              <MdClose size={20} className="text-slate-500" />
-            </button>
-          )}
+          <button
+            onClick={() => {
+              setConfirmationResult(null);
+              setPhone("+91");
+              setOtp("");
+            }}
+            className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-slate-100 transition-colors"
+            aria-label="Reset OTP form"
+          >
+            <MdClose size={20} className="text-slate-500" />
+          </button>
           
           {/* Logo and Brand */}
           <div className="flex items-center gap-4 mb-8 relative">
@@ -385,9 +311,7 @@ const LoginPage: React.FC = () => {
             </h1>
             
             <p className="text-sm text-slate-600 mb-4">
-              {showPhoneLogin 
-                ? "Sign in with your phone number"
-                : "Sign in to access your financial recruitment dashboard"}
+              Sign in with your mobile number and OTP
             </p>
             
             {/* <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-100">
@@ -398,49 +322,36 @@ const LoginPage: React.FC = () => {
             </div> */}
           </div>
 
-          {!showPhoneLogin ? (
-            <>
-              {/* Google Sign In Button */}
-              <button
-                onClick={handleGoogleSignIn}
-                disabled={googleLoading}
-                className="w-full h-14 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 text-slate-900 font-semibold text-sm flex items-center justify-center gap-3 hover:opacity-90 transition-all hover:shadow-lg hover:shadow-orange-200 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform" />
-                {googleLoading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
-                    <span>Signing in...</span>
-                  </>
-                ) : (
-                  <>
-                    <FcGoogle size={20} />
-                    <span>Continue with Google</span>
-                  </>
-                )}
-              </button>
-
-              {/* Divider */}
-              <div className="relative my-6">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-slate-200"></div>
+          <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Enter first name"
+                    disabled={sendingOtp || verifyingOtp}
+                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
+                  />
                 </div>
-                <div className="relative flex justify-center text-xs">
-                  <span className="px-3 bg-white text-slate-500">OR</span>
+                <div>
+                  <label className="text-sm font-medium text-slate-700 mb-2 block">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Enter last name"
+                    disabled={sendingOtp || verifyingOtp}
+                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
+                  />
                 </div>
               </div>
 
-              {/* Phone Login Button */}
-              <button
-                onClick={() => setShowPhoneLogin(true)}
-                className="w-full h-14 rounded-xl bg-white border-2 border-slate-200 text-slate-700 font-semibold text-sm flex items-center justify-center gap-3 hover:bg-slate-50 transition-all hover:border-slate-300"
-              >
-                <MdPhone size={20} className="text-slate-500" />
-                <span>Continue with Phone</span>
-              </button>
-            </>
-          ) : (
-            <>
               {/* Phone Number Input */}
               <div className="mb-4">
                 <label className="text-sm font-medium text-slate-700 mb-2 block">
@@ -502,20 +413,7 @@ const LoginPage: React.FC = () => {
                   </button>
                 </div>
               )}
-
-              <button
-                onClick={() => {
-                  setShowPhoneLogin(false);
-                  setConfirmationResult(null);
-                  setPhone("");
-                  setOtp("");
-                }}
-                className="w-full mt-4 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-              >
-                ← Back to other options
-              </button>
-            </>
-          )}
+          </>
 
           {/* reCAPTCHA Container - Invisible */}
           <div id="recaptcha-container" className="hidden" />

@@ -248,7 +248,18 @@ const SatyamLandingPage: React.FC = () => {
     { icon: <Star />, value: '4.5/5', label: 'User Rating' }
   ];
   
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [clientUser, setClientUser] = useState<any>(null);
+
+  // Read localStorage only on the client to avoid server-side errors
+  React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem("user");
+      setClientUser(raw ? JSON.parse(raw) : null);
+    } catch (e) {
+      setClientUser(null);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen -mt-20 bg-slate-50 font-sans antialiased">
@@ -307,7 +318,7 @@ const SatyamLandingPage: React.FC = () => {
                     />
                   </div>
                   <Link
-                    href={user ? "/apply" : "/signin"}
+                    href={clientUser ? "/apply" : "/signin"}
                     className="relative z-40 bg-gradient-to-r from-yellow-400 to-orange-400 text-slate-900 font-semibold px-8 py-3 rounded-lg hover:shadow-lg hover:shadow-yellow-500/25 transition-all duration-300 text-center inline-flex items-center justify-center gap-2 group"
                   >
                     Apply Now
@@ -393,7 +404,7 @@ const SatyamLandingPage: React.FC = () => {
           {jobCategories.map((category) => (
             <Link
               key={category.id}
-              href={user ? "/apply" : "/signin"}
+              href={clientUser ? "/apply" : "/signin"}
               className={`p-6 flex items-center gap-6 rounded-xl border-2 transition-all duration-300 group ${
                 activeCategory === category.id 
                   ? "border-slate-400 bg-slate-50 shadow-lg" 
@@ -633,7 +644,7 @@ const SatyamLandingPage: React.FC = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 
-              href={user ? "/apply" : "/signin"}
+              href={clientUser ? "/apply" : "/signin"}
               className="bg-slate-900 text-white px-8 py-4 rounded-xl font-semibold hover:bg-slate-800 transition-all duration-300 hover:shadow-xl inline-flex items-center gap-10 group"
             >
               Apply Now     
