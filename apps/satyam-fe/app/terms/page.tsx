@@ -46,7 +46,7 @@ const TermsPage = () => {
     },
     {
       title: "10. Expense Reimbursement",
-      content: "The Company will not reimburse or bear any official or personal expenses incurred by the candidate during the 12-month off-roll period."
+      content: "Official expenses incurred for company-related work will be borne by the company. Personal expenses will not be reimbursed."
     },
     {
       title: "11. Binding Declaration",
