@@ -179,6 +179,10 @@ const AdminPage = () => {
       if (filter === "all") return true;
       if (filter === "paid") return user.paid;
       if (filter === "unpaid") return !user.paid;
+      if (filter === "male") return user.gender === "male";
+      if (filter === "female") return user.gender === "female";
+      if (filter === "other") return user.gender === "other";
+      return true;
     })
     .filter((user) => 
       user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -456,6 +460,9 @@ const AdminPage = () => {
                     <option value="all">All Users</option>
                     <option value="paid">Paid Users</option>
                     <option value="unpaid">Unpaid Users</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
                   </select>
                   
                   <button
@@ -477,6 +484,7 @@ const AdminPage = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">User</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contact</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Position</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Gender</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Payment Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                   </tr>
@@ -484,7 +492,7 @@ const AdminPage = () => {
                 <tbody className="divide-y divide-slate-200">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center">
+                      <td colSpan={6} className="px-6 py-12 text-center">
                         <Loader2 className="w-8 h-8 animate-spin text-blue-600 mx-auto" />
                       </td>
                     </tr>
@@ -521,6 +529,11 @@ const AdminPage = () => {
                             <Briefcase className="w-4 h-4 text-slate-400" />
                             <span className="text-sm text-slate-600">{user.positionApplied || 'N/A'}</span>
                           </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full text-xs font-medium capitalize">
+                            {user.gender || 'N/A'}
+                          </span>
                         </td>
                         <td className="px-6 py-4">
                           {user.paid ? (
@@ -578,7 +591,7 @@ const AdminPage = () => {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                      <td colSpan={6} className="px-6 py-12 text-center text-slate-500">
                         No users found
                       </td>
                     </tr>
@@ -623,6 +636,10 @@ const AdminPage = () => {
                 <div>
                   <label className="text-xs font-medium text-slate-400 uppercase">Phone</label>
                   <p className="text-slate-700">{selectedUser.phone}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-slate-400 uppercase">Gender</label>
+                  <p className="text-slate-700 capitalize">{selectedUser.gender || 'N/A'}</p>
                 </div>
                 <div>
                   <label className="text-xs font-medium text-slate-400 uppercase">Address</label>
