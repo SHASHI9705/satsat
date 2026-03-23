@@ -15,8 +15,7 @@ type NotificationType = {
 const LoginPage: React.FC = () => {
   const router = useRouter();
   const [notification, setNotification] = useState<NotificationType | null>(null);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [name, setName] = useState("");
   const [phone, setPhone] = useState("+91");
   const [otp, setOtp] = useState("");
   const [sendingOtp, setSendingOtp] = useState(false);
@@ -42,9 +41,14 @@ const LoginPage: React.FC = () => {
 
   const handleUserAuthentication = async (user: any) => {
     try {
+      const trimmedName = name.trim();
+      const nameParts = trimmedName.split(/\s+/).filter(Boolean);
+      const firstname = nameParts[0] || trimmedName;
+      const lastname = nameParts.slice(1).join(" ") || "NA";
+
       const payload: any = {
-        firstname: firstName.trim(),
-        lastname: lastName.trim(),
+        firstname,
+        lastname,
         phone: user.phoneNumber,
       };
 
@@ -136,8 +140,8 @@ const LoginPage: React.FC = () => {
 
   const sendOtp = async () => {
     try {
-      if (!firstName.trim() || !lastName.trim()) {
-        showNotification('Please enter first name and last name', 'error');
+      if (!name.trim()) {
+        showNotification('Please enter your name', 'error');
         return;
       }
 
@@ -202,6 +206,8 @@ const LoginPage: React.FC = () => {
       let errorMessage = "OTP verification failed";
       if (err.code === 'auth/invalid-verification-code') {
         errorMessage = "Invalid OTP code";
+      } else if (err.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid credentials";
       } else if (err.code === 'auth/expired-action-code') {
         errorMessage = "OTP has expired. Please request a new one.";
       } else {
@@ -309,33 +315,18 @@ const LoginPage: React.FC = () => {
           </div>
 
           <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                <div>
-                  <label className="text-sm font-medium text-slate-700 mb-2 block">
-                    First Name
-                  </label>
-                  <input
-                    type="text"
-                    value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Enter first name"
-                    disabled={sendingOtp || verifyingOtp}
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-slate-700 mb-2 block">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Enter last name"
-                    disabled={sendingOtp || verifyingOtp}
-                    className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
-                  />
-                </div>
+              <div className="mb-4">
+                <label className="text-sm font-medium text-slate-700 mb-2 block">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter your name"
+                  disabled={sendingOtp || verifyingOtp}
+                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent disabled:bg-slate-50 disabled:cursor-not-allowed"
+                />
               </div>
 
               {/* Phone Number Input */}
@@ -410,10 +401,7 @@ const LoginPage: React.FC = () => {
             <a href="/terms" className="text-orange-500 hover:underline font-medium">
               Terms of Service
             </a>{' '}
-            and{' '}
-            <a href="/privacy" className="text-orange-500 hover:underline font-medium">
-              Privacy Policy
-            </a>
+            .
           </p>
         </div>
       </div>
