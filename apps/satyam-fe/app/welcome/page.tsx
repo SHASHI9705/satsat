@@ -79,6 +79,9 @@ export default function Welcome() {
               <div className="rounded-xl bg-white p-4 text-slate-800">
                 <h3 className="font-semibold">Support</h3>
                 <p className="mt-1 text-sm text-slate-600">Contact us for help with your account or applications.</p>
+                <Link href="/chat" className="mt-3 inline-flex rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700">
+                  Contact Support
+                </Link>
               </div>
             </div>
 

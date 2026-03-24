@@ -3,6 +3,9 @@
 import React, { useState, useEffect } from "react";
 import NextImage from "next/image";
 import Link from 'next/link';
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../lib/firebase";
+import { DEFAULT_ADMIN_UID, subscribeToUnreadCount } from "../../lib/chat";
 import { 
   Home, Users, LogOut, Download, Search, Filter, 
   Eye, Trash2, X, ChevronDown, UserCircle, DollarSign, Image as ImageIcon,
@@ -32,6 +35,28 @@ const AdminPage = () => {
   });
   const [statusPopup, setStatusPopup] = useState({ visible: false, email: null });
   const [newStatus, setNewStatus] = useState('');
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let unsubscribeChats: (() => void) | undefined;
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (unsubscribeChats) {
+        unsubscribeChats();
+      }
+
+      const adminUid = firebaseUser?.uid || DEFAULT_ADMIN_UID;
+      unsubscribeChats = subscribeToUnreadCount(
+        adminUid,
+        (count) => setChatUnreadCount(count),
+        () => setChatUnreadCount(0)
+      );
+    });
+
+    return () => {
+      if (unsubscribeChats) unsubscribeChats();
+      unsubscribeAuth();
+    };
+  }, []);
 
   useEffect(() => {
     const savedName = localStorage.getItem("adminName");
@@ -347,10 +372,14 @@ const AdminPage = () => {
             </button>
             
             <div className="flex items-center gap-4">
-              <button className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative">
+              <Link href="/admin/chats" className="p-2 hover:bg-slate-100 rounded-lg transition-colors relative block">
                 <Bell className="w-5 h-5 text-slate-600" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+                {chatUnreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-5 rounded-full bg-red-500 px-1.5 text-center text-[10px] font-bold text-white">
+                    {chatUnreadCount > 99 ? '99+' : chatUnreadCount}
+                  </span>
+                )}
+              </Link>
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-200">
                   <NextImage src="/logo.png" alt="Satyam logo" width={28} height={28} />
