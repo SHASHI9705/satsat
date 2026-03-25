@@ -86,7 +86,7 @@ export const createUser = async (req: Request, res: Response): Promise<void> => 
     const resumePdf = Array.isArray(req.files) ? undefined : req.files?.resumePdf?.[0];
     const salarySlip = Array.isArray(req.files) ? undefined : req.files?.salarySlip?.[0];
 
-    if (!passportPhoto || !resumePdf || (experience === 'experienced' && !salarySlip)) {
+    if (!passportPhoto || !resumePdf) {
       res.status(400).json({ error: 'Missing required files' });
       return;
     }
