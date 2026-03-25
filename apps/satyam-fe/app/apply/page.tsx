@@ -143,9 +143,6 @@ function validateStep(step: number, formData: FormData, files: FilesState): Fiel
   if (step === 3) {
     if (!files.photo)            errors.photo       = "Passport photo is required.";
     if (!files.resume)           errors.resume      = "Resume/CV is required.";
-    if (formData.experience === "experienced" && !files.salarySlip) {
-      errors.salarySlip = "Last company salary slip is required for experienced candidates.";
-    }
     if (!formData.acceptTerms)   errors.acceptTerms = "You must confirm that all information is accurate.";
   }
   return errors;
@@ -338,13 +335,11 @@ export default function Apply() {
 
   const isFormComplete = () => {
     const requiredFields = ["name", "fatherName", "gender", "phone", "email", "address", "district", "experience", "positionApplied", "passportPhoto", "resumePdf"];
-    if (formData.experience === "experienced") requiredFields.push("salarySlip");
     return requiredFields.every(field => formData[field]);
   };
 
   const areFilesUploaded = () => {
     const requiredFiles = ["photo", "resume"];
-    if (formData.experience === "experienced") requiredFiles.push("salarySlip");
     return requiredFiles.every(field => files[field]);
   };
 
@@ -696,7 +691,7 @@ export default function Apply() {
 
                     {formData.experience === "experienced" && (
                       <p className="text-xs text-indigo-700 -mt-3">
-                        Experienced applicants must upload their last company salary slip in the documents step.
+                        Experienced applicants can optionally upload their last company salary slip in the documents step.
                       </p>
                     )}
 
@@ -801,7 +796,7 @@ export default function Apply() {
                   {[
                     { label: "Personal Info",       done: !!(formData.name && formData.email && formData.phone) },
                     { label: "Professional Details", done: !!(formData.experience && formData.positionApplied) },
-                    { label: "Documents",            done: formData.experience === "experienced" ? !!(files.photo && files.resume && files.salarySlip) : !!(files.photo && files.resume) },
+                    { label: "Documents",            done: !!(files.photo && files.resume) },
                   ].map(item => (
                     <li key={item.label} className="flex items-center justify-between text-sm">
                       <span className="text-slate-600">{item.label}</span>
