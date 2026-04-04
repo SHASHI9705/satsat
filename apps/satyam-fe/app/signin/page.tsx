@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { MdError, MdCheckCircle, MdClose } from "react-icons/md";
@@ -254,17 +255,13 @@ const LoginPage: React.FC = () => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-yellow-400/20 to-orange-400/20 rounded-full -mr-16 -mt-16" />
           <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-400/20 to-purple-400/20 rounded-full -ml-12 -mb-12" />
           
-          <button
-            onClick={() => {
-              setConfirmationResult(null);
-              setPhone("+91");
-              setOtp("");
-            }}
+          <Link
+            href="/"
             className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-slate-100 transition-colors"
             aria-label="Reset OTP form"
           >
             <MdClose size={20} className="text-slate-500" />
-          </button>
+          </Link>
           
           {/* Logo and Brand */}
           <div className="flex items-center gap-4 mb-8 relative">
