@@ -8,12 +8,14 @@ import {
   updateUser,
   updateUserPaymentStatus,
   deleteUser,
-  updateApplicationStatus
+  updateApplicationStatus,
+  updateApplicationPaymentStatus
 } from '../controllers/userController';
 import {
   handleOtpLogin,
   fetchApplications
 } from '../controllers/loginController';
+import { checkUserPaymentStatus } from '../controllers/userController';
 
 const router: Router  = Router();
 const upload = multer();
@@ -40,11 +42,17 @@ router.put('/users/:email/payment', updateUserPaymentStatus);
 router.put('/users/:email/status', (req, res) => {
   updateApplicationStatus(req, res);
 });
+router.put('/applications/:id/pay', (req, res) => {
+  updateApplicationPaymentStatus(req, res);
+});
 router.delete('/users/:email', (req, res) => {
   deleteUser(req, res);
 });
 
 router.post('/auth/otp-login', handleOtpLogin);
 router.get('/applications', fetchApplications);
+router.get('/users/:phone/payment-status', (req, res) => {
+  checkUserPaymentStatus(req, res);
+});
 
 export default router;

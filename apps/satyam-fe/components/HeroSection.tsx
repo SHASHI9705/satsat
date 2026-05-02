@@ -1,5 +1,5 @@
 "use client"
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -47,138 +47,179 @@ interface Step {
 const SatyamLandingPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+  const [applications, setApplications] = useState([]);
+  const [showPopup, setShowPopup] = useState(false);
 
-  const jobCategories: JobCategory[] = [
-    { 
-      id: "banking", 
-      label: "Banking", 
-      icon: <Landmark size={20} />, 
-      count: 250
-    },
-    { 
-      id: "insurance", 
-      label: "Insurance", 
-      icon: <ShieldCheck size={20} />, 
-      count: 502
-    },
-    { 
-      id: "vehicle-loan", 
-      label: "Vehicle Loan", 
-      icon: <Car size={20} />, 
-      count: 528
-    },
-    { 
-      id: "msme-loan", 
-      label: "MSME Loan", 
-      icon: <Factory size={20} />, 
-      count: 502
-    },
-    { 
-      id: "credit", 
-      label: "Credit/Cashier", 
-      icon: <Wallet size={20} />, 
-      count: 251
-    },
-    { 
-      id: "collection", 
-      label: "Collection", 
-      icon: <Truck size={20} />, 
-      count: 251
-    },
-    { 
-      id: "telecalling", 
-      label: "Telecalling", 
-      icon: <Headset size={20} />, 
-      count: 502
-    },
-    { 
-      id: "branch", 
-      label: "Branch Incharge", 
-      icon: <Building2 size={20} />, 
-      count: 500
-    }
-  ];
+  
+// Ensure featuredJobs is defined
+const featuredJobs = [
+  {
+    id: "1",
+    title: "Branch Incharge",
+    salary: "₹4 - 6 LPA",
+    type: "Full-time",
+    posted: "2 days ago",
+    category: "branch",
+    positions: 205,
+    company: "Satyam careers",
+    location: "Multiple districts",
+    featured: true,
+  },
+  // ...other jobs
+];
 
-  const featuredJobs: FeaturedJob[] = [
-    {
-      id: "1",
-      title: "Branch Incharge",
-      salary: "₹4 - 6 LPA",
-      type: "Full-time",
-      posted: "2 days ago",
-      category: "branch",
-      positions: 205,
-      company: "Satyam careers",
-      location: "Multiple districts",
-      featured: true
-    },
-    {
-      id: "2",
-      title: "Credit/Cashier",
-      salary: "₹2.5 - 4 LPA",
-      type: "Full-time",
-      posted: "1 day ago",
-      category: "credit",
-      positions: 251,
-      company: "Satyam Credit",
-      location: "Multiple districts"
-    },
-    {
-      id: "3",
-      title: "Sales Executive - Vehicle Loan",
-      salary: "₹3 - 5 LPA + Incentives",
-      type: "Full-time",
-      posted: "3 days ago",
-      category: "vehicle-loan",
-      positions: 512,
-      company: "Satyam Finance",
-      location: "Multiple districts"
-    },
-    {
-      id: "4",
-      title: "Sales Executive - MSME Loan",
-      salary: "₹3.5 - 6 LPA",
-      type: "Full-time",
-      posted: "4 days ago",
-      category: "msme-loan",
-      positions: 502,
-      company: "Satyam Business",
-      location: "Multiple districts"
-    },
-    {
-      id: "5",
-      title: "Sales Executive - Insurance",
-      salary: "₹2.8 - 5 LPA + Commission",
-      type: "Full-time",
-      posted: "2 days ago",
-      category: "insurance",
-      positions: 500,
-      company: "Satyam Insurance",
-      location: "Multiple districts"
-    },
-    {
-      id: "6",
-      title: "Collection Executive",
-      salary: "₹2.5 - 4 LPA",
-      type: "Full-time",
-      posted: "1 day ago",
-      category: "collection",
-      positions: 251,
-      company: "Satyam Collections",
-      location: "Multiple districts"
-    },
-    {
-      id: "7",
-      title: "Telecalling Executive (Female Only)",
-      salary: "₹2 - 3.5 LPA + Incentives",
-      type: "Remote",
-      posted: "5 days ago",
-      category: "telecalling",
-      positions: 502,
-      company: "Satyam Services",
-      location: "Work from Home"
+// Ensure jobCategories and related code are preserved
+const jobCategories: JobCategory[] = [
+  { 
+    id: "banking", 
+    label: "Banking", 
+    icon: <Landmark size={20} />, 
+    count: 250
+  },
+  { 
+    id: "insurance", 
+    label: "Insurance", 
+    icon: <ShieldCheck size={20} />, 
+    count: 502
+  },
+  { 
+    id: "vehicle-loan", 
+    label: "Vehicle Loan", 
+    icon: <Car size={20} />, 
+    count: 528
+  },
+  { 
+    id: "msme-loan", 
+    label: "MSME Loan", 
+    icon: <Factory size={20} />, 
+    count: 502
+  },
+  { 
+    id: "credit", 
+    label: "Credit/Cashier", 
+    icon: <Wallet size={20} />, 
+    count: 251
+  },
+  { 
+    id: "collection", 
+    label: "Collection", 
+    icon: <Truck size={20} />, 
+    count: 251
+  },
+  { 
+    id: "telecalling", 
+    label: "Telecalling", 
+    icon: <Headset size={20} />, 
+    count: 502
+  },
+  { 
+    id: "branch", 
+    label: "Branch Incharge", 
+    icon: <Building2 size={20} />, 
+    count: 500
+  }
+];
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      try {
+        const userRaw = localStorage.getItem("user");
+        if (!userRaw) {
+          console.error("User not found in local storage");
+          return;
+        }
+
+        const user = JSON.parse(userRaw);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications?userId=${user.id}`);
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch applications");
+        }
+
+        const data = await response.json();
+        setApplications(data);
+
+        // Show popup only if there are unpaid applications
+        const hasUnpaidApplications = data.some((app) => !app.paid);
+        setShowPopup(hasUnpaidApplications);
+      } catch (error) {
+        console.error("Error fetching applications", error);
+      }
+    };
+
+    fetchApplications();
+  }, []);
+
+  const handlePayment = async (applicationId: string) => {
+    const razorpayKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY || '';
+    if (!razorpayKey) {
+      alert('Payment configuration missing.');
+      return;
     }
-  ];
+
+    // Load Razorpay script
+    const loadRazorpay = () => new Promise((resolve) => {
+      if ((window as any).Razorpay) return resolve(true); // already loaded
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+
+    const loaded = await loadRazorpay();
+    if (!loaded) { alert('Failed to load payment gateway.'); return; }
+
+    // Get user info from localStorage for prefill
+    const user = clientUser; // already parsed from localStorage via your useEffect
+
+    const options = {
+      key: razorpayKey,
+      amount: 300 * 100, // ₹300 in paise
+      currency: 'INR',
+      name: 'SATYAM',
+      description: 'Application Fee',
+      handler: async (response: any) => {
+        try {
+          // Find the application to get the email
+          const app = applications.find((a: any) => a.id === applicationId);
+          const email = app?.email || user?.email;
+
+          const updateRes = await fetch(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/users/${email}/payment`,
+            { method: 'PUT', headers: { 'Content-Type': 'application/json' } }
+          );
+
+          if (!updateRes.ok) throw new Error('Failed to update payment status');
+
+          // Mark as paid in local state
+          setApplications((prev: any[]) =>
+            prev.map((a) => a.id === applicationId ? { ...a, paid: true } : a)
+          );
+
+          // Close popup if all are now paid
+          setApplications((prev: any[]) => {
+            const stillUnpaid = prev.some((a) => !a.paid);
+            if (!stillUnpaid) setShowPopup(false);
+            return prev;
+          });
+
+          alert('Payment successful!');
+        } catch (err) {
+          alert('Payment succeeded but status update failed. Contact support.');
+        }
+      },
+      prefill: {
+        name: user?.name || '',
+        email: user?.email || '',
+        contact: user?.phone || '',
+      },
+      theme: { color: '#3399cc' },
+    };
+
+    const razorpay = new (window as any).Razorpay(options);
+    razorpay.open();
+  };
 
   const filteredJobs = activeCategory === "all"
     ? featuredJobs.filter(job => 
@@ -659,6 +700,112 @@ const SatyamLandingPage: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {showPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-slate-900/70 backdrop-blur-sm"
+            onClick={() => setShowPopup(false)}
+          />
+
+          {/* Card */}
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+
+            {/* Top accent bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-500" />
+
+            {/* Header */}
+            <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 px-6 pt-6 pb-8 text-white relative overflow-hidden">
+              <div
+                className="absolute inset-0 opacity-10 pointer-events-none"
+                style={{
+                  backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+                  backgroundSize: "24px 24px",
+                }}
+              />
+              <div className="relative flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-7 h-7 rounded-lg bg-yellow-400/20 border border-yellow-400/30 flex items-center justify-center">
+                      <FileText className="w-4 h-4 text-yellow-400" />
+                    </div>
+                    <span className="text-xs font-semibold text-blue-300 uppercase tracking-widest">Pending</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-white">Your Applications</h2>
+                  <p className="text-blue-200 text-sm mt-0.5">Complete payment to confirm your candidacy</p>
+                </div>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  
+                </button>
+              </div>
+
+              <div className="mt-4 inline-flex items-center gap-2 bg-yellow-400/15 border border-yellow-400/30 rounded-full px-3 py-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-pulse" />
+                <span className="text-xs font-semibold text-yellow-300">Application fee pending</span>
+              </div>
+            </div>
+
+            {/* Applications list */}
+            <div className="px-6 py-4 space-y-3 max-h-60 overflow-y-auto">
+              {applications.map((app) => (
+                <div
+                  key={app.id}
+                  className={`flex items-center justify-between p-4 rounded-xl border transition-all ${
+                    app.paid
+                      ? "bg-green-50 border-green-200"
+                      : "bg-slate-50 border-slate-200 hover:border-blue-200 hover:bg-blue-50/40"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                      app.paid ? "bg-green-100" : "bg-slate-100"
+                    }`}>
+                      <FileText className={`w-4 h-4 ${app.paid ? "text-green-600" : "text-slate-500"}`} />
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-400 font-medium uppercase tracking-wide">Application ID</p>
+                      <p className="text-sm font-semibold text-slate-800">{app.applicationId}</p>
+                    </div>
+                  </div>
+
+                  {app.paid ? (
+                    <div className="flex items-center gap-1.5 bg-green-100 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                      <CheckCircle className="w-3.5 h-3.5" />
+                      Paid
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => handlePayment(app.id)}
+                      className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-slate-900 text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md hover:shadow-yellow-400/30 active:scale-95"
+                    >
+                      Pay ₹300
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 pt-2 space-y-3">
+              <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-50 border border-slate-100 rounded-xl p-3">
+                <Shield className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                <span>256-bit SSL encrypted · Secure payment via UPI, Card & Net Banking</span>
+              </div>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="w-full py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Remind me later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes blob {

@@ -278,5 +278,51 @@ export const updateApplicationStatus = async (req: Request<{ email: string }>, r
   }
 };
 
+// Update application payment status
+export const updateApplicationPaymentStatus = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      res.status(400).json({ error: 'Application ID is required' });
+      return;
+    }
+
+    const prisma = getPrismaClient();
+
+    const application = await prisma.application.update({
+      where: { id: parseInt(id, 10) }, // Convert id to number
+      data: { paid: true }, // Corrected property name
+    });
+
+    res.status(200).json({ message: 'Payment status updated', application });
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+// Check user payment status
+export const checkUserPaymentStatus = async (req: Request, res: Response) => {
+  const { phone } = req.params;
+  const prisma = getPrismaClient();
+
+  try {
+    const applications = await prisma.application.findMany({
+      where: { phone },
+      select: { paid: true },
+    });
+
+    if (applications.length === 0) {
+      return res.status(404).json({ message: 'No applications found for this user' });
+    }
+
+    const isPaid = applications.every(app => app.paid);
+    res.status(200).json({ isPaid });
+  } catch (error) {
+    res.status(500).json({ message: 'Error checking payment status', error });
+  }
+};
+
 
 
