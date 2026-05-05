@@ -175,7 +175,7 @@ const jobCategories: JobCategory[] = [
 
     const options = {
       key: razorpayKey,
-      amount: 300 * 100, // ₹300 in paise
+      amount: 200 * 100, // ₹300 in paise
       currency: 'INR',
       name: 'SATYAM',
       description: 'Application Fee',
@@ -782,7 +782,7 @@ const jobCategories: JobCategory[] = [
                       onClick={() => handlePayment(app.id)}
                       className="flex items-center gap-1.5 bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-slate-900 text-xs font-bold px-4 py-2 rounded-lg transition-all shadow-sm hover:shadow-md hover:shadow-yellow-400/30 active:scale-95"
                     >
-                      Pay ₹300
+                      Pay ₹200
                       <ChevronRight className="w-3.5 h-3.5" />
                     </button>
                   )}

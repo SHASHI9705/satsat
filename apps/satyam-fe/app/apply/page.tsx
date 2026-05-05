@@ -105,7 +105,7 @@ const PAYMENT_METHODS = [
   { id: "netbanking", label: "Net Banking",         description: "All major banks supported",        Icon: Banknote },
 ];
 
-const BASE_FEE = 300;
+const BASE_FEE = 200;
 const GST_RATE = 0;
 const GST_AMT  = +(BASE_FEE * GST_RATE).toFixed(2);
 const TOTAL    = +(BASE_FEE + GST_AMT).toFixed(2);
